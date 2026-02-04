@@ -1,0 +1,297 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/master01-01-01.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-01-01-01">
+      <section class="container-left-menu menu-color01">
+        <div class="title">店舗管理</div>
+        <nav>
+          <a href="#" class="is-active"><span>店舗一覧</span></a>
+          <a href="#"><span>店舗登録</span></a>
+          <a href="#"><span>営業状況閲覧</span></a>
+          <a href="#"><span>営業状況設定</span></a>
+        </nav>
+      </section>
+      <div class="main-contents menu-color01">
+        <div class="block_inner">
+          <h2>写真フォルダ</h2>
+          <article class="block_01">
+            <h3>とうふ吉祥</h3>
+            <dl>
+              <div>
+                <dt>フォルダ</dt>
+                <dd>
+                  <form name="addFolder" class="box_add-folder">
+                    <h4>新規フォルダ名</h4>
+                    <input type="text" name="addFolderName" />
+                    <input type="hidden" name="mode" value="addFolder" />
+                    <input type="hidden" name="type" value="n" />
+                    <input type="hidden" name="intSKey" value="3" />
+                    <input type="hidden" name="sKey" value="skey02_203230" />
+                    <button
+                      type="button"
+                      class="btn_submit"
+                      onclick="addFolders(this, 'addFolder')"
+                    >
+                      登録
+                    </button>
+                  </form>
+                </dd>
+              </div>
+              <div>
+                <dt>写真追加</dt>
+                <dd>
+                  <form
+                    name="addPhoto"
+                    method="post"
+                    class="box_add-photo"
+                    enctype="multipart/form-data"
+                  >
+                    <div class="wrap_01">
+                      <h4>格納フォルダ</h4>
+                      <div class="select-folder-name" data-selectbox>
+                        <button
+                          type="button"
+                          class="selectbox__head"
+                          aria-expanded="false"
+                        >
+                          <input
+                            type="hidden"
+                            name="select-folder"
+                            value=""
+                            data-selectbox-hidden
+                          />
+                          <span class="selectbox__value" data-selectbox-value
+                            >選択してください</span
+                          >
+                        </button>
+                        <div class="list-wrapper">
+                          <ul class="selectbox__panel">
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-folder"
+                                value="1"
+                                id="folder01"
+                              />
+                              <label for="folder01">フォルダ01</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-folder"
+                                value="2"
+                                id="folder02"
+                              />
+                              <label for="folder02">フォルダ02</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-folder"
+                                value="3"
+                                id="folder03"
+                              />
+                              <label for="folder03">フォルダ03</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-folder"
+                                value="4"
+                                id="folder04"
+                              />
+                              <label for="folder04">フォルダ04 </label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-folder"
+                                value="5"
+                                id="folder05"
+                              />
+                              <label for="folder05">フォルダ05 </label>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="wrap_02">
+                      <input
+                        type="file"
+                        name="photo"
+                        id="fileElem"
+                        accept="image/*"
+                        style="display: none"
+                      />
+                      <button type="button" class="btn_select" id="fileSelect">
+                        写真を選択
+                      </button>
+                      <ul id="fileList">
+                        <li>追加する写真、画像を選択して下さい。</li>
+                      </ul>
+                    </div>
+                    <div class="wrap_02">
+                      <div class="check-details" id="preview-container">
+                        <div class="image">
+                          <input
+                            type="file"
+                            name="photo"
+                            id="fileElem"
+                            accept="image/*"
+                            style="display: none"
+                          />
+                          <picture>
+                            <source
+                              srcset="../assets/images/_dummy/shop_18111728.jpg"
+                              id="preview-source"
+                            />
+                            <img
+                              src="../assets/images/_dummy/shop_18111728.jpg"
+                              alt=""
+                              id="preview-image"
+                            />
+                          </picture>
+                        </div>
+                        <div class="wrap_btn">
+                          <div class="item_reload">
+                            <button type="button" id="fileSelect"></button>
+                          </div>
+                          <div class="item_delate">
+                            <button type="button"></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="wrap_03">
+                      <h4>画像ファイル名</h4>
+                      <input type="text" name="intPhotoName" />
+                    </div>
+                    <div class="wrap_04">
+                      <ul>
+                        <li>
+                          ※縦横サイズがオーバーしている場合は、適正サイズで自動でリサイズされます。
+                        </li>
+                        <li>※ファイル形式はJPEG形式のみです。</li>
+                        <li>※ファイル容量は5MB以内です。</li>
+                      </ul>
+                      <input type="hidden" name="mode" value="checkPhoto" />
+                      <input type="hidden" name="type" value="n" />
+                      <input type="hidden" name="intSKey" value="2" />
+                      <input type="hidden" name="sKey" value="skey02_204613" />
+                      <button type="button" class="btn_submit">確認</button>
+                    </div>
+                  </form>
+                </dd>
+              </div>
+            </dl>
+          </article>
+          <article class="block_02">
+            <section class="inner_left">
+              <h4>フォルダ名</h4>
+              <nav>
+                <button type="button">
+                  <h5>フォルダ01</h5>
+                  <span>5</span>
+                </button>
+              </nav>
+            </section>
+            <section class="inner_right">
+              <form class="box_head">
+                <h4>フォルダ01</h4>
+                <a href="#" class="item_edit"></a>
+                <a href="#" class="item_delate"></a>
+              </form>
+              <ul>
+                <li>
+                  <form>
+                    <div class="item_image">
+                      <picture>
+                        <source
+                          srcset="../assets/images/_dummy/shop_18111728.jpg"
+                        />
+                        <img
+                          src="../assets/images/_dummy/shop_18111728.jpg"
+                          alt="店舗外装"
+                        />
+                      </picture>
+                    </div>
+                    <div class="title">店舗外装</div>
+                    <a href="#" class="item_edit"></a>
+                    <a href="#" class="item_delate"></a>
+                  </form>
+                </li>
+                <li>
+                  <form>
+                    <div class="item_image">
+                      <picture>
+                        <source
+                          srcset="../assets/images/_dummy/shop_18111728.jpg"
+                        />
+                        <img
+                          src="../assets/images/_dummy/shop_18111728.jpg"
+                          alt="かつ丼"
+                        />
+                      </picture>
+                    </div>
+                    <div class="title">かつ丼</div>
+                    <a href="#" class="item_edit"></a>
+                    <a href="#" class="item_delate"></a>
+                  </form>
+                </li>
+                <li>
+                  <form>
+                    <div class="item_image">
+                      <picture>
+                        <source
+                          srcset="../assets/images/_dummy/shop_18111728.jpg"
+                        />
+                        <img
+                          src="../assets/images/_dummy/shop_18111728.jpg"
+                          alt="かつ丼"
+                        />
+                      </picture>
+                    </div>
+                    <div class="title">ちゃんぽん</div>
+                    <a href="#" class="item_edit"></a>
+                    <a href="#" class="item_delate"></a>
+                  </form>
+                </li>
+              </ul>
+            </section>
+          </article>
+          <a href="#" class="link_page-back_bottom">戻る</a>
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>

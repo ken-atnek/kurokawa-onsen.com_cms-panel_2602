@@ -1,0 +1,101 @@
+/*==========================================================
+ログインページ
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+.contents-log-in {
+    padding: 5em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+
+    article {
+        max-width: 60rem;
+        flex: 1;
+        border-radius: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4em 0;
+        .item-logo {
+            width: 20rem;
+            aspect-ratio: 1;
+            @include flex-center(column);
+            color: #fff;
+            font-size: inherit;
+            background-color: var(--cp-color);
+            span {
+                font-size: FZ(36);
+                font-weight: 700;
+                line-height: 1.6em;
+            }
+        }
+        .box-log-in {
+            position: relative;
+            font-size: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em 0;
+            width: 100%;
+            max-width: 36rem;
+            h2 {
+                font-size: FZ(18);
+                font-weight: 600;
+            }
+            .title {
+                font-size: FZ(14);
+                font-weight: 600;
+                margin-top: 1em;
+            }
+            button {
+                @include main-button("confirm");
+                width: 24rem;
+                height: 4rem;
+                align-self: center;
+                margin-top: 2em;
+            }
+        }
+        // ログイン画面
+        .box-log-in {
+            // display: none;
+            .link-pw {
+                color: $confirm-blue;
+                font-size: FZ(14);
+                font-weight: 300;
+                align-self: center;
+                margin-top: 1em;
+            }
+            .text-caution {
+                position: relative;
+                font-size: FZ(12);
+                color: $caution-red;
+                font-weight: 600;
+                margin-top: 2rem;
+                align-self: center;
+                padding-left: 2em;
+                &::before {
+                    content: "";
+                    position: absolute;
+                    top: 50%;
+                    translate: 0 -50%;
+                    left: 0;
+                    width: 19px;
+                    @include svg-icon-caution("DF3D3D");
+                }
+            }
+        }
+    }
+    &.cp-master {
+        --cp-color: #903838;
+    }
+    &.cp-client {
+        --cp-color: #386f6f;
+    }
+}

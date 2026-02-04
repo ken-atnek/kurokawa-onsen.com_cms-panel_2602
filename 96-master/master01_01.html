@@ -1,0 +1,345 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/master01-01.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-01-01">
+      <section class="container-left-menu menu-color01">
+        <div class="title">店舗管理</div>
+        <nav>
+          <a href="#" class="is-active"><span>店舗一覧</span></a>
+          <a href="#"><span>店舗登録</span></a>
+          <a href="#"><span>営業状況閲覧</span></a>
+          <a href="#"><span>営業状況設定</span></a>
+        </nav>
+      </section>
+      <div class="main-contents menu-color01">
+        <div class="block_inner">
+          <h2>店舗一覧</h2>
+          <form name="searchForm" class="head_search_setting">
+            <h3>検索条件設定</h3>
+            <dl>
+              <div class="box_shop">
+                <dt>店名</dt>
+                <dd>
+                  <div class="select-shop-name" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="select-shop-name"
+                        value=""
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="1"
+                            id="shop01"
+                          />
+                          <label for="shop01">すみよし食堂</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="2"
+                            id="shop02"
+                          />
+                          <label for="shop02">とうふ吉祥</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="3"
+                            id="shop03"
+                          />
+                          <label for="shop03">寺子屋本舗</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="4"
+                            id="shop04"
+                          />
+                          <label for="shop04">やまたけ </label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="5"
+                            id="shop05"
+                          />
+                          <label for="shop05">白玉っ子 </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </dd>
+              </div>
+              <div class="box_setting">
+                <dt>公開設定</dt>
+                <dd>
+                  <div>
+                    <input type="radio" name="displayFlg" value="0" /><label
+                      for="displayFlg_01"
+                      >非公開</label
+                    >
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      name="displayFlg"
+                      value="1"
+                      checked=""
+                    /><label for="displayFlg_02">公開</label>
+                  </div>
+                </dd>
+              </div>
+            </dl>
+            <div class="box-btn">
+              <button type="button" class="item-reset">リセット</button>
+              <button type="button" class="item-search">条件で検索</button>
+            </div>
+          </form>
+          <article class="inner_search-list">
+            <ul>
+              <li>
+                <div>ID</div>
+                <div>店舗情報</div>
+                <div>写真</div>
+                <div>基本情報</div>
+                <div>紹介</div>
+                <div>おすすめ<i>商品</i></div>
+                <div><span>予約受付</span><span>設定変更</span></div>
+                <div>サイト<i>確認</i></div>
+              </li>
+              <li>
+                <div class="id">02</div>
+                <div class="wrap_shop-info">
+                  <div class="name">すみよし食堂</div>
+                  <div class="tel">
+                    <span>0967-44-0657</span>
+                  </div>
+                  <div class="fax">
+                    <span>0967-44-0657</span>
+                  </div>
+                </div>
+                <div class="item_photo">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_status">
+                  <!-- NOTE ↑公開中→[is-active] / 非公開→[is-inactive] -->
+                  <div class="status is-active">
+                    <span></span>
+                  </div>
+                  <div class="btn">
+                    <button type="button">非公開へ</button>
+                  </div>
+                </div>
+                <div class="item_site">
+                  <a href="#"></a>
+                </div>
+              </li>
+              <li>
+                <div class="id">03</div>
+                <div class="wrap_shop-info">
+                  <div class="name">とうふ吉祥</div>
+                  <div class="tel">
+                    <span>0967-44-0659</span>
+                  </div>
+                  <div class="fax">
+                    <span>0967-44-0680</span>
+                  </div>
+                </div>
+                <div class="item_photo">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_status">
+                  <!-- NOTE ↑公開中→[is-active] / 非公開→[is-inactive] -->
+                  <div class="status is-active">
+                    <span></span>
+                  </div>
+                  <div class="btn">
+                    <button type="button">非公開へ</button>
+                  </div>
+                </div>
+                <div class="item_site">
+                  <a href="#" target="_blank"></a>
+                </div>
+              </li>
+              <li>
+                <div class="id">04</div>
+                <div class="wrap_shop-info">
+                  <div class="name">寺子屋本舗</div>
+                  <div class="tel">
+                    <span>0967-44-0412</span>
+                  </div>
+                  <div class="fax">
+                    <span>0967-44-0412</span>
+                  </div>
+                </div>
+                <div class="item_photo">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_status">
+                  <!-- NOTE ↑公開中→[is-active] / 非公開→[is-inactive] -->
+                  <div class="status is-active">
+                    <span></span>
+                  </div>
+                  <div class="btn">
+                    <button type="button">非公開へ</button>
+                  </div>
+                </div>
+                <div class="item_site">
+                  <a href="#"></a>
+                </div>
+              </li>
+              <li>
+                <div class="id">07</div>
+                <div class="wrap_shop-info">
+                  <div class="name">やまたけ</div>
+                  <div class="tel">
+                    <span>0967-44-0930</span>
+                  </div>
+                  <div class="fax">
+                    <span>0967-44-0930</span>
+                  </div>
+                </div>
+                <div class="item_photo">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_status">
+                  <!-- NOTE ↑公開中→[is-active] / 非公開→[is-inactive] -->
+                  <div class="status is-active">
+                    <span></span>
+                  </div>
+                  <div class="btn">
+                    <button type="button">非公開へ</button>
+                  </div>
+                </div>
+                <div class="item_site">
+                  <a href="#"></a>
+                </div>
+              </li>
+              <li>
+                <div class="id">09</div>
+                <div class="wrap_shop-info">
+                  <div class="name">白玉っ子</div>
+                  <div class="tel">
+                    <span>0967-48-8228</span>
+                  </div>
+                  <div class="fax">
+                    <span>0967-48-8228</span>
+                  </div>
+                </div>
+                <div class="item_photo">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_edit">
+                  <a href="#"></a>
+                </div>
+                <div class="item_status">
+                  <!-- NOTE ↑公開中→[is-active] / 非公開→[is-inactive] -->
+                  <div class="status is-active">
+                    <span></span>
+                  </div>
+                  <div class="btn">
+                    <button type="button">非公開へ</button>
+                  </div>
+                </div>
+                <div class="item_site">
+                  <a href="#"></a>
+                </div>
+              </li>
+            </ul>
+          </article>
+          <a href="./grp02_01.php" class="link_page-back_bottom">戻る</a>
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>
