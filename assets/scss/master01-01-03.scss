@@ -9,12 +9,6 @@
 @use "./mixin_decoration" as *;
 @use "./mixin_layout" as *;
 
-@mixin dt-top {
-    dt {
-        align-self: start;
-        padding-top: 0.3em;
-    }
-}
 /*=========================================
 戻る・TOPボタン
 -----------------------------------------*/
@@ -30,7 +24,6 @@
 .inner-01-01-03 {
     form {
         @include layoutContentsWhiteBlock;
-        // @include layoutSystemInfo;
         align-items: center;
         padding: 0 0 5em;
         z-index: 3;
@@ -71,37 +64,6 @@
                         dd {
                             .check-details {
                                 @include image-check-details;
-                            }
-                        }
-                    }
-                    &.box_slide-image {
-                        @include dt-top;
-                        dd {
-                            & > ul {
-                                font-size: 1em;
-                                display: grid;
-                                grid-template-columns: repeat(3, 1fr);
-                                gap: 1.4em 1.4em;
-                                & > li {
-                                    font-size: 1em;
-                                    background-color: #fafafa;
-                                    display: grid;
-                                    min-height: 10rem;
-                                    place-items: center;
-                                    @include border-image;
-                                    --borderColor: #c7c7c7;
-                                    --borderSize: 12px;
-                                    --borderWidth: 6px;
-                                    &:hover {
-                                        --borderColor: #335d95;
-                                    }
-                                    & > button {
-                                        @include main-button(reset);
-                                        width: 100%;
-                                        max-width: 14rem;
-                                        height: 2.5em;
-                                    }
-                                }
                             }
                         }
                     }
