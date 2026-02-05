@@ -754,52 +754,52 @@
 /*=========================================
 枠線装飾
 -----------------------------------------*/
-// @mixin borderImage {
-//     background-image:
-//         repeating-linear-gradient(
-//             0deg,
-//             var(--borderColor),
-//             var(--borderColor) var(--borderWidth),
-//             transparent var(--borderWidth),
-//             transparent var(--borderSize),
-//             var(--borderColor) var(--borderSize)
-//         ),
-//         repeating-linear-gradient(
-//             90deg,
-//             var(--borderColor),
-//             var(--borderColor) var(--borderWidth),
-//             transparent var(--borderWidth),
-//             transparent var(--borderSize),
-//             var(--borderColor) var(--borderSize)
-//         ),
-//         repeating-linear-gradient(
-//             180deg,
-//             var(--borderColor),
-//             var(--borderColor) var(--borderWidth),
-//             transparent var(--borderWidth),
-//             transparent var(--borderSize),
-//             var(--borderColor) var(--borderSize)
-//         ),
-//         repeating-linear-gradient(
-//             270deg,
-//             var(--borderColor),
-//             var(--borderColor) var(--borderWidth),
-//             transparent var(--borderWidth),
-//             transparent var(--borderSize),
-//             var(--borderColor) var(--borderSize)
-//         );
-//     background-size:
-//         1px 100%,
-//         100% 1px,
-//         1px 100%,
-//         100% 1px;
-//     background-position:
-//         0 0,
-//         0 0,
-//         100% 0,
-//         0 100%;
-//     background-repeat: no-repeat;
-// }
+@mixin border-image {
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            var(--borderColor),
+            var(--borderColor) var(--borderWidth),
+            transparent var(--borderWidth),
+            transparent var(--borderSize),
+            var(--borderColor) var(--borderSize)
+        ),
+        repeating-linear-gradient(
+            90deg,
+            var(--borderColor),
+            var(--borderColor) var(--borderWidth),
+            transparent var(--borderWidth),
+            transparent var(--borderSize),
+            var(--borderColor) var(--borderSize)
+        ),
+        repeating-linear-gradient(
+            180deg,
+            var(--borderColor),
+            var(--borderColor) var(--borderWidth),
+            transparent var(--borderWidth),
+            transparent var(--borderSize),
+            var(--borderColor) var(--borderSize)
+        ),
+        repeating-linear-gradient(
+            270deg,
+            var(--borderColor),
+            var(--borderColor) var(--borderWidth),
+            transparent var(--borderWidth),
+            transparent var(--borderSize),
+            var(--borderColor) var(--borderSize)
+        );
+    background-size:
+        1px 100%,
+        100% 1px,
+        1px 100%,
+        100% 1px;
+    background-position:
+        0 0,
+        0 0,
+        100% 0,
+        0 100%;
+    background-repeat: no-repeat;
+}
 /*=========================================
 画像セレクト部分
 -----------------------------------------*/
@@ -997,6 +997,15 @@
             background-color: rgba(#65aec4, 0.8);
         }
     }
+    .btn-return {
+        color: rgba($base-black, 1);
+        border: 1px solid rgba($base-black, 1);
+        @include hover {
+            color: rgba($base-black, 0.8);
+            background-color: rgba(#f0f0f0, 0.8);
+            border-color: rgba($base-black, 0.8);
+        }
+    }
     &:has(> :is(button, a):only-child) {
         grid-template-columns: 1fr;
     }
@@ -1004,5 +1013,68 @@
             :has(> :is(button, a):nth-child(3))
         ) {
         grid-template-columns: repeat(2, auto);
+    }
+}
+/*========================================= 
+   画像変更・削除
+-----------------------------------------*/
+@mixin image-check-details {
+    width: stretch;
+    font-size: 1em;
+    display: flex;
+    gap: 0 0.5em;
+    .wrap_btn {
+        position: relative;
+        font-size: 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3em 0;
+        align-self: flex-end;
+        width: 4rem;
+        & > div {
+            position: relative;
+            width: 4rem;
+            button {
+                aspect-ratio: 1;
+                position: relative;
+                width: 100%;
+                &::before,
+                &::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                }
+                &::before {
+                    border-radius: 50%;
+                    background-color: rgba($hover-bg-blue, 0);
+                    transition: 0.2s ease-out;
+                }
+                &::after {
+                    margin: auto;
+                    width: 1.8rem;
+                }
+                &:hover {
+                    &::before {
+                        background-color: rgba($hover-bg-blue, 1);
+                    }
+                }
+            }
+        }
+        .item_reload {
+            button {
+                &::after {
+                    @include svg-iconReload("646464");
+                    width: 70%;
+                }
+            }
+        }
+        .item_delate {
+            button {
+                &::after {
+                    @include svg-iconTrash("646464");
+                    width: 50%;
+                }
+            }
+        }
     }
 }

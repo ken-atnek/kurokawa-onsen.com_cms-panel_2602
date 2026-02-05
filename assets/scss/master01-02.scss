@@ -9,12 +9,12 @@
 @use "./mixin_decoration" as *;
 @use "./mixin_layout" as *;
 
-@mixin dt-top {
-    dt {
-        align-self: start;
-        padding-top: 0.3em;
-    }
-}
+// @mixin dt-top {
+//     dt {
+//         align-self: start;
+//         padding-top: 0.3em;
+//     }
+// }
 /*=========================================
 戻る・TOPボタン
 -----------------------------------------*/
@@ -40,60 +40,8 @@
             width: 100%;
         }
         & > article {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 86rem;
+            @include base-form-article;
             & > dl {
-                width: 100%;
-                font-size: inherit;
-                display: grid;
-                gap: 1.5em 0;
-                margin-top: 3em;
-                grid-template-columns: 10em 1fr;
-
-                & > div {
-                    font-size: inherit;
-                    display: grid;
-                    grid-template-columns: subgrid;
-                    gap: 0 2em;
-                    align-items: center;
-                    grid-column: span 2;
-
-                    & > dt {
-                        font-size: FZ(16);
-                        font-weight: 700;
-                        position: relative;
-                        span {
-                            position: absolute;
-                            left: 0;
-                            top: 100%;
-                            font-weight: 400;
-                            width: max-content;
-                        }
-                        &:has(span) {
-                            translate: 0 -0.5em;
-                        }
-                        &.required {
-                            &::after {
-                                content: "※";
-                                color: #c40000;
-                                font-size: 1.2rem;
-                                margin-left: 0.3em;
-                                display: inline-block;
-                                translate: 0 -0.1em;
-                            }
-                        }
-                    }
-                    & > dd {
-                        font-size: inherit;
-                        width: 100%;
-                        input[type="text"] {
-                            height: 4rem;
-                            font-size: FZ(16);
-                        }
-                    }
-                }
                 //========/ 店舗情報========
                 &.block_01 {
                     // 公開設定・予約受付・メアド公開
