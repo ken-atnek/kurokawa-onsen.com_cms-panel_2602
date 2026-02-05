@@ -1,0 +1,106 @@
+@use "./svg" as *;
+/*==========================================================
+	管理画面用
+==========================================================*/
+// MAX-WIDTH宣言
+$M-width: 1366;
+$PcMaxWidth: calc($M-width * 1px);
+$sectionWidth: 1206px;
+// フォントサイズ(mx1000)
+$max-font: 16;
+$min-font: 12;
+$sp-width: 375;
+// 可変フォントサイズ計算
+$tilt: calc(($max-font - $min-font) / ($M-width - $sp-width));
+$slice: calc($min-font - ($tilt * $sp-width));
+$base-vw: calc($tilt * 100);
+// 指定フォント関数
+@function FZ($size) {
+    @if $size <=$min-font {
+        @return $min-font * 1px;
+    } @else {
+        @return max(12px, ($size / $max-font) * 1em);
+    }
+}
+/*==========  サイズ設定 END  =============================*/
+// カラー設定
+$base-white: #f8f8f8;
+$base-black: #000000;
+$font-black: #1a1818;
+$border-gray: #c7c7c7;
+// $main-orange: #f29400;
+$confirm-blue: #335d95;
+$hover-blue: #335d95;
+$hover-bg-blue: #e6edf7;
+$caution-red: #df3d3d;
+$cp-master-color: #903838;
+$cp-client-color: #386f6f;
+$menu-color01: #ede9d9;
+$menu-color02: #d6cfc3;
+
+/* =================================
+ *  サイズ変数
+ * ------------------------------ */
+// $radius8: 0.5em;
+// $radius10: 0.625em;
+// $radius14: 0.875em;
+// $radius20: 1.25em;
+// $radius24: 1.5em;
+// $radius40: 2.5em;
+// $radius80: 5em;
+// @mixin top-radius($radius: $radius14) {
+//     border-top-left-radius: $radius;
+//     border-top-right-radius: $radius;
+// }
+// @mixin bottom-radius($radius: $radius14) {
+//     border-bottom-left-radius: $radius;
+//     border-bottom-right-radius: $radius;
+// }
+
+/*==========================================================
+	レスポンシブ設定
+==========================================================*/
+$tbw: 1194px;
+$tb: 834px;
+$spw: 928px;
+$sp: 480px;
+// PCサイズのみ
+@mixin pc {
+    @media (min-width: ($sp)) {
+        @content;
+    }
+}
+// タブレットサイズ横
+@mixin tbw {
+    @media (max-width: ($tbw)) and (orientation: landscape) {
+        @content;
+    }
+}
+// タブレットサイズ縦PAGE_URL_TEST
+@mixin tb {
+    @media (max-width: ($tb)) and (orientation: portrait) {
+        @content;
+    }
+}
+// スマホサイズ横
+@mixin spw {
+    @media (max-width: ($spw)) and (orientation: landscape) {
+        @content;
+    }
+}
+// スマホサイズ縦
+@mixin sp {
+    @media (max-width: ($sp)) and (orientation: portrait) {
+        @content;
+    }
+}
+/*==========================================================
+	ホバー処理
+==========================================================*/
+@mixin hover {
+    @media (hover: hover) {
+        &:where(:any-link, :enabled, summary):hover {
+            @content;
+        }
+    }
+}

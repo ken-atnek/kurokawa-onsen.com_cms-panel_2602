@@ -1,0 +1,398 @@
+/*==========================================================
+店舗一覧
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+.link_page-back_bottom {
+    @include linkPageBack_bottom;
+}
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+/*=========================================
+写真フォルダ
+-----------------------------------------*/
+.inner-01-01-01 {
+    article {
+        flex-grow: unset;
+        h3 {
+            @include decorationHeadH3;
+        }
+    }
+    .block_01 {
+        @include layoutContentsWhiteBlock;
+        border-bottom-right-radius: unset;
+        border-bottom-left-radius: unset;
+        & > dl {
+            position: relative;
+            font-size: inherit;
+            width: stretch;
+            display: grid;
+            grid-template-columns: auto auto 1fr auto;
+            flex: 1;
+            & > div {
+                position: relative;
+                font-size: inherit;
+                grid-column: span 4;
+                display: grid;
+                grid-template-columns: subgrid;
+                border-top: 1px solid $border-gray;
+                &:nth-of-type(2) {
+                    & > dt {
+                        place-items: start center;
+                        padding-top: 1.4em;
+                    }
+                }
+                &.is-mode-edit {
+                    background-color: $border-gray;
+                }
+                & > dt {
+                    font-size: FZ(16);
+                    display: grid;
+                    place-items: center;
+                    border-right: 1px solid $border-gray;
+                    padding-inline: 1.2em;
+                }
+                & > dd {
+                    font-size: inherit;
+                    grid-column: span 3;
+                    display: inherit;
+                    grid-template-columns: inherit;
+                    & > form {
+                        font-size: inherit;
+                        grid-column: inherit;
+                        display: grid;
+                        align-items: center;
+                        padding: 0.8em 1em;
+                        gap: 1em 0.8em;
+                        grid-template-columns: subgrid;
+                        h4 {
+                            font-size: FZ(16);
+                            display: grid;
+                            place-items: center start;
+                        }
+                        input[type="text"] {
+                            font-size: FZ(16);
+                            height: 2.5em;
+                        }
+                        .btn_submit {
+                            @include main-button("confirm");
+                            width: 10em;
+                            height: 2.5em;
+                        }
+                        &.box_add-photo {
+                            & > div {
+                                font-size: inherit;
+                                display: grid;
+                                grid-column: inherit;
+                                grid-template-columns: subgrid;
+                                align-items: center;
+                                &.wrap_01 {
+                                    .select-folder-name {
+                                        width: 100%;
+                                        grid-column: span 2;
+                                        @include select-list-box(
+                                            $height: 4.8rem,
+                                            $position: "left",
+                                            $list-height: 3.4rem
+                                        );
+                                    }
+                                }
+                                &.wrap_02 {
+                                    display: flex;
+                                    gap: 0 1em;
+                                    .check-details {
+                                        width: stretch;
+                                        font-size: 1em;
+                                        display: flex;
+                                        gap: 0 0.5em;
+                                        .wrap_btn {
+                                            position: relative;
+                                            font-size: 1em;
+                                            display: flex;
+                                            flex-direction: column;
+                                            gap: 0.3em 0;
+                                            align-self: flex-end;
+                                            width: 4rem;
+                                            & > div {
+                                                position: relative;
+                                                width: 4rem;
+                                                button {
+                                                    aspect-ratio: 1;
+                                                    position: relative;
+                                                    width: 100%;
+                                                    &::before,
+                                                    &::after {
+                                                        content: "";
+                                                        position: absolute;
+                                                        inset: 0;
+                                                    }
+                                                    &::before {
+                                                        border-radius: 50%;
+                                                        background-color: rgba(
+                                                            $hover-bg-blue,
+                                                            0
+                                                        );
+                                                        transition: 0.2s
+                                                            ease-out;
+                                                    }
+                                                    &::after {
+                                                        margin: auto;
+                                                        width: 1.8rem;
+                                                    }
+                                                    &:hover {
+                                                        &::before {
+                                                            background-color: rgba(
+                                                                $hover-bg-blue,
+                                                                1
+                                                            );
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            .item_reload {
+                                                button {
+                                                    &::after {
+                                                        @include svg-iconReload(
+                                                            "646464"
+                                                        );
+                                                        width: 70%;
+                                                    }
+                                                }
+                                            }
+                                            .item_delate {
+                                                button {
+                                                    &::after {
+                                                        @include svg-iconTrash(
+                                                            "646464"
+                                                        );
+                                                        width: 50%;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .btn_select {
+                                        // @include btnWhite;
+                                        width: 100%;
+                                        max-width: 14rem;
+                                        height: 2.5em;
+                                        @include main-button("reset");
+                                    }
+                                    & > ul {
+                                        font-size: inherit;
+                                        display: flex;
+                                        flex-wrap: wrap;
+                                        gap: 0.5em 1em;
+                                        & > li {
+                                            font-size: FZ(16);
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 0 0.5em;
+                                            .btn_close {
+                                                position: relative;
+                                                display: grid;
+                                                place-items: center;
+                                                width: 2rem;
+                                                aspect-ratio: 1;
+                                                border: 1px solid $font-black;
+                                                border-radius: 50%;
+                                                &::before,
+                                                &::after {
+                                                    content: "";
+                                                    position: absolute;
+                                                    inset: 0;
+                                                    margin: auto;
+                                                    width: 0.8rem;
+                                                    height: 1px;
+                                                    background-color: $font-black;
+                                                }
+                                                &::before {
+                                                    rotate: 45deg;
+                                                }
+                                                &::after {
+                                                    rotate: -45deg;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                &.wrap_03 {
+                                    input[type="text"] {
+                                        grid-column: span 2;
+                                    }
+                                }
+                                &.wrap_04 {
+                                    & > ul {
+                                        grid-column: span 2;
+                                        font-size: inherit;
+                                        display: flex;
+                                        flex-direction: column;
+                                        li {
+                                            font-size: FZ(14);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .block_02 {
+        @include layoutContentsWhiteBlock;
+        flex-direction: row;
+        section {
+            display: flex;
+            flex-direction: column;
+        }
+        .inner_left {
+            border-right: 1px solid #c7c7c7;
+            max-width: 27rem;
+            max-height: 90vh;
+            max-height: 90dvh;
+            overflow-y: scroll;
+            h4 {
+                font-size: FZ(16);
+                font-weight: 700;
+                padding: 1em;
+            }
+            & > nav {
+                position: relative;
+                font-size: inherit;
+                display: grid;
+                grid-template-columns: 1fr auto;
+                padding-bottom: 2em;
+                border-top: 1px solid #c7c7c7;
+                & > button {
+                    border-bottom: 1px solid #c7c7c7;
+                    grid-column: span 2;
+                    display: grid;
+                    grid-template-columns: subgrid;
+                    font-size: inherit;
+                    padding: 0.8em;
+                    transition: 0.3s ease-out;
+                    &:nth-of-type(2n) {
+                        background-color: #fafafa;
+                    }
+                    &:hover {
+                        background-color: $hover-blue;
+                        h5 {
+                            color: #fff;
+                        }
+                        span {
+                            background-color: $base-white;
+                            color: $hover-blue;
+                            font-weight: 700;
+                        }
+                    }
+                    h5 {
+                        font-size: FZ(14);
+                        font-weight: 700;
+                        text-align: left;
+                        line-height: 1.6em;
+                    }
+                    span {
+                        background-color: $base-black;
+                        transition: 0.3s ease-out;
+                        color: #fff;
+                        display: grid;
+                        place-items: center;
+                        width: 3rem;
+                        height: 2rem;
+                        font-size: FZ(12);
+                        border-radius: 4px;
+                        align-self: start;
+                    }
+                }
+            }
+        }
+        .inner_right {
+            padding: 1em 1.4em 3em;
+            flex: 1;
+            max-height: 90vh;
+            max-height: 90dvh;
+            overflow-y: scroll;
+            .item_edit {
+                @include decorationIcon("icon_edit");
+            }
+            .item_delate {
+                @include decorationIcon("icon_delate");
+            }
+            .box_head {
+                display: flex;
+                justify-content: space-between;
+                font-size: inherit;
+                gap: 0 0.5em;
+                padding: 0.5em;
+                h4 {
+                    font-size: FZ(20);
+                    font-weight: 700;
+                    margin-right: auto;
+                }
+                .item_edit,
+                .item_delate {
+                    &:hover {
+                        &::before {
+                            background-color: rgba(#edf1f8, 1);
+                        }
+                    }
+                }
+            }
+            & > ul {
+                width: stretch;
+                position: relative;
+                display: grid;
+                grid-template-columns: auto 1fr auto auto;
+                font-size: inherit;
+                border-top: 1px solid #c7c7c7;
+                & > li {
+                    grid-column: span 4;
+                    display: grid;
+                    font-size: inherit;
+                    grid-template-columns: subgrid;
+                    border-bottom: 1px solid #c7c7c7;
+                    padding: 0.5em;
+                    transition: 0.3s ease-out;
+                    &:nth-of-type(2n) {
+                        background-color: #fafafa;
+                    }
+                    &:hover {
+                        background-color: #edf1f8;
+                    }
+                    & > form {
+                        font-size: inherit;
+                        grid-column: span 4;
+                        display: inherit;
+                        grid-template-columns: inherit;
+                        align-items: center;
+                        gap: 0 0.5em;
+                        font-size: inherit;
+                        .title {
+                            font-size: FZ(14);
+                            line-height: 1.4em;
+                            letter-spacing: 0.04em;
+                        }
+                        .item_image {
+                            width: 6.4rem;
+                            img {
+                                aspect-ratio: 1.34;
+                                object-fit: cover;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

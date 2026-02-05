@@ -1,0 +1,265 @@
+/*==========================================================
+店舗一覧
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+.link_page-back_bottom {
+    @include linkPageBack_bottom;
+}
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+/*=========================================
+店舗一覧
+-----------------------------------------*/
+.inner-01-01 {
+    .head_search_setting {
+        @include layoutContentsWhiteBlock;
+        border-bottom-left-radius: unset;
+        border-bottom-right-radius: unset;
+        z-index: 3;
+        flex-grow: unset;
+        h3 {
+            @include decorationHeadH3;
+        }
+        dl {
+            position: relative;
+            font-size: inherit;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            border-top: 1px solid #c7c7c7;
+            & > div {
+                font-size: inherit;
+                grid-column: span 2;
+                display: grid;
+                grid-template-columns: subgrid;
+                padding: 0.6em clamp(1rem, 1.6em, 3.6rem);
+                align-items: center;
+                border-bottom: 1px solid #c7c7c7;
+                gap: 0 2em;
+            }
+
+            dt {
+                font-size: FZ(14);
+                display: flex;
+                flex-direction: column;
+            }
+            dd {
+                position: relative;
+                font-size: 1em;
+                display: flex;
+            }
+            .box_shop {
+                dd {
+                    .select-shop-name {
+                        width: 100%;
+                        @include select-list-box(
+                            $height: 4.8rem,
+                            $position: "left",
+                            $list-height: 3.4rem
+                        );
+                    }
+                }
+            }
+            .box_setting {
+                dd {
+                    display: flex;
+                    align-items: center;
+                    gap: 0 1em;
+                    padding-block: 0.3em;
+                    & > div {
+                        position: relative;
+                        font-size: 1em;
+                        @include radioCheck;
+                        margin-right: 1em;
+                        label {
+                            font-size: FZ(14);
+                            padding-left: 2.2em;
+                        }
+                    }
+                }
+            }
+        }
+        .box-btn {
+            position: relative;
+            display: flex;
+            gap: 0 1em;
+            font-size: inherit;
+            padding-block: 1rem;
+            align-self: flex-end;
+            align-items: center;
+            padding-right: 2.4rem;
+            button {
+                font-size: FZ(14);
+            }
+            .item-reset {
+                width: 8.8rem;
+                @include main-button("reset");
+                height: 3.2rem;
+            }
+            .item-search {
+                @include main-button("confirm");
+                width: 24rem;
+                height: 4rem;
+            }
+        }
+    }
+    .inner_search-list {
+        @include layoutContentsWhiteBlock;
+        border-top: unset;
+        border-top-left-radius: unset;
+        border-top-right-radius: unset;
+        & > ul {
+            @include layout-table-list(
+                auto 1fr auto auto auto auto auto auto,
+                8
+            );
+            padding-bottom: 2.5em;
+            & > li {
+                &:first-of-type {
+                    & > div {
+                        min-height: 5rem;
+                        &:has(span) {
+                            padding-inline: unset;
+                        }
+                    }
+                }
+                .id {
+                    font-size: FZ(14);
+                    padding-inline: 1.4em;
+                    display: grid;
+                    place-items: center;
+                }
+                .wrap_shop-info {
+                    font-size: 1em;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0 0.8em;
+                    padding: 1em;
+                }
+                .name {
+                    font-size: FZ(14);
+                    font-weight: 700;
+                    width: stretch;
+                }
+                .tel,
+                .fax {
+                    font-size: 1em;
+                    display: flex;
+                    span {
+                        font-size: FZ(14);
+                        display: flex;
+                    }
+                }
+                .tel {
+                    span {
+                        &::before {
+                            content: "TEL：";
+                        }
+                    }
+                }
+                .fax {
+                    span {
+                        &::before {
+                            content: "FAX：";
+                        }
+                    }
+                }
+                .item_check,
+                .item_edit,
+                .item_photo,
+                .item_site {
+                    padding-inline: 1.4em;
+                    display: grid;
+                    place-items: center;
+                }
+                .item_check {
+                    a {
+                        @include decorationIcon("icon_check");
+                    }
+                }
+                .item_edit {
+                    a {
+                        @include decorationIcon("icon_edit");
+                    }
+                }
+                .item_photo {
+                    a {
+                        @include decorationIcon("icon_photo");
+                    }
+                }
+                .item_site {
+                    a {
+                        @include decorationIcon("icon_site");
+                    }
+                }
+                .item_status {
+                    display: grid;
+                    grid-template-rows: 1fr 1fr;
+                    & > div {
+                        font-size: 1em;
+                        display: grid;
+                        place-items: center;
+                        padding: 0.5em;
+                        &:first-of-type {
+                            border-bottom: 1px solid $border-gray;
+                        }
+                        &.status {
+                            span {
+                                display: grid;
+                                place-items: center;
+                                width: stretch;
+                                font-size: FZ(12);
+                                height: 2em;
+                                color: #fff;
+                            }
+                            &.is-active {
+                                span {
+                                    background-color: $hover-blue;
+                                    &::before {
+                                        content: "公開中";
+                                    }
+                                }
+                            }
+                            &.is-inactive {
+                                span {
+                                    &::before {
+                                        content: "非公開";
+                                        color: #b9b9b9;
+                                    }
+                                }
+                            }
+                        }
+                        &.btn {
+                            button {
+                                font-size: FZ(12);
+                                display: grid;
+                                place-items: center;
+                                border: 1px solid $font-black;
+                                border-radius: 100vmax;
+                                height: 2em;
+                                width: stretch;
+                                padding-inline: 0.8em;
+                                transition: 0.3s ease-out;
+                                @include hover {
+                                    color: rgba($font-black, 0.8);
+                                    background-color: rgba(#fff, 1);
+                                    border-color: rgba($font-black, 0.8);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
