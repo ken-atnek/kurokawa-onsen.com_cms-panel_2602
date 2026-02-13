@@ -655,257 +655,6 @@
         }
     }
 }
-/*================================
- ステータスボックス(JS併用版)
---------------------------------*/
-// @mixin select-status-box($height: 4.4rem, $position: left, $list-height: 3rem) {
-//     position: relative;
-//     font-size: inherit;
-//     .selectbox__head {
-//         transition: 0.3s ease-out;
-//         position: relative;
-//         width: 100%;
-//         height: $height;
-//         display: flex;
-//         align-items: center;
-//         justify-content: space-between;
-//         border-radius: 8px;
-//         cursor: pointer;
-//         user-select: none;
-//         color: #fff;
-//         &::after {
-//             content: "";
-//             position: absolute;
-//             top: 50%;
-//             translate: 0 -50%;
-//             right: 0.8em;
-//             width: 0.7em;
-//             @include svg-icon-arrow-bottom("403726");
-//             transition: 0.2s cubic-bezier(0.4, 0.25, 0.3, 1);
-//         }
-//         &:hover {
-//             i {
-//                 border-color: $hover-blue;
-//             }
-//         }
-//         &:active {
-//             i {
-//                 background-color: $hover-bg-blue;
-//             }
-//         }
-//         .selectbox__value {
-//             flex: 1;
-//             font-size: FZ(14);
-//             display: flex;
-//             align-self: stretch;
-//             border-radius: 8px 0 0 8px;
-//             align-items: center;
-//             justify-content: center;
-//             border-top: 1px solid $border-gray;
-//             border-left: 1px solid $border-gray;
-//             border-bottom: 1px solid $border-gray;
-//             @if $position == "center" {
-//                 text-align: center;
-//             } @else {
-//                 text-align: left;
-//             }
-//         }
-//         i {
-//             display: block;
-//             align-self: stretch;
-//             width: 38px;
-//             background-color: #fff;
-//             border-radius: 0 8px 8px 0;
-//             border: 1px solid $border-gray;
-//             transition: 0.3s ease-out;
-//         }
-//     }
-//     .list-wrapper {
-//         position: absolute;
-//         left: 0;
-//         right: 0;
-//         font-size: inherit;
-//         top: calc(100% + 0.4rem);
-//         z-index: 10;
-//         display: grid;
-//         width: 100%;
-//         grid-template-rows: 0fr;
-//         grid-template-columns: 1fr;
-//         transition: grid-template-rows 0.2s ease-out;
-//         overflow: hidden;
-//         @include drop-shadow;
-//         border-radius: 6px;
-//         .selectbox__panel {
-//             font-size: inherit;
-//             position: relative;
-//             margin: 0;
-//             background: #fff;
-//             border-radius: 8px;
-//             overflow: hidden;
-//             min-height: 0;
-//             border-radius: 6px;
-//             width: 100%;
-//             li {
-//                 width: 100%;
-//                 position: relative;
-//                 font-size: inherit;
-//                 input[type="radio"] {
-//                     position: absolute;
-//                     inset: 0;
-//                     pointer-events: none;
-//                 }
-//                 label {
-//                     position: relative;
-//                     width: 100%;
-//                     z-index: 1;
-//                     height: $list-height;
-//                     cursor: pointer;
-//                     font-size: FZ(14);
-//                     padding-left: 1.4em;
-//                     display: flex;
-//                     align-items: center;
-//                     justify-content: center;
-//                     color: #fff;
-//                     transition: 0.3s ease-out;
-//                     @if $position == "center" {
-//                         padding-right: 1.4em;
-//                     } @else {
-//                         padding-left: 1.4em;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     &.is-selected {
-//         .selectbox__head {
-//             &::after {
-//                 rotate: 90deg;
-//             }
-//         }
-//         &.is-open {
-//             .selectbox__head {
-//                 &::after {
-//                     rotate: 0deg;
-//                 }
-//             }
-//         }
-//         &:hover {
-//             .selectbox__head {
-//                 &::after {
-//                     rotate: 0deg;
-//                 }
-//             }
-//         }
-//     }
-//     &.is-open {
-//         .list-wrapper {
-//             grid-template-rows: 1fr;
-//             .selectbox__panel {
-//                 overflow: auto;
-//                 border-color: $hover-blue;
-//             }
-//         }
-//     }
-// }
-
-/*================================
- 応募状況ステータス(JS併用版)
---------------------------------*/
-// @mixin apply-status-box {
-//     width: 120px;
-//     @include select-status-box(
-//         $height: 3.6rem,
-//         $position: "center",
-//         $list-height: 3.6rem
-//     );
-//     .selectbox__head {
-//         i {
-//             width: 36px;
-//         }
-//         // 登録中
-//         &.status-registered {
-//             .selectbox__value {
-//                 background-color: #76a1c6;
-//             }
-//         }
-//         // 応募中
-//         &.status-applied {
-//             .selectbox__value {
-//                 background-color: #81bb7c;
-//             }
-//         }
-//         // 面接中
-//         &.status-interview {
-//             .selectbox__value {
-//                 background-color: #b87d7a;
-//             }
-//         }
-//         // 採用
-//         &.status-hired {
-//             .selectbox__value {
-//                 background-color: #9e84bb;
-//             }
-//         }
-//         // 不採用
-//         &.status-rejected {
-//             .selectbox__value {
-//                 background-color: #b1a776;
-//             }
-//         }
-//         // 連絡待ち
-//         &.status-unresponsive {
-//             .selectbox__value {
-//                 background-color: #9c9c9c;
-//             }
-//         }
-//     }
-//     .list-wrapper {
-//         .selectbox__panel {
-//             li {
-//                 label {
-//                     transition: 0.3s ease-out;
-//                     // 登録中
-//                     &.status-registered {
-//                         --status-color: #76a1c6;
-//                     }
-//                     // 応募中
-//                     &.status-applied {
-//                         --status-color: #81bb7c;
-//                     }
-//                     // 面接中
-//                     &.status-interview {
-//                         --status-color: #b87d7a;
-//                     }
-//                     // 採用
-//                     &.status-hired {
-//                         --status-color: #9e84bb;
-//                     }
-//                     // 不採用
-//                     &.status-rejected {
-//                         --status-color: #b1a776;
-//                     }
-//                     // 連絡待ち
-//                     &.status-unresponsive {
-//                         --status-color: #9c9c9c;
-//                     }
-//                     &::before {
-//                         content: "";
-//                         position: absolute;
-//                         inset: 0;
-//                         background-color: var(--status-color);
-//                         z-index: -1;
-//                         transition: 0.3s ease-out;
-//                     }
-//                     &:hover {
-//                         &::before {
-//                             filter: brightness(0.9);
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
 
 /*================================
  トグルスイッチ
@@ -1005,52 +754,52 @@
 /*=========================================
 枠線装飾
 -----------------------------------------*/
-// @mixin borderImage {
-//     background-image:
-//         repeating-linear-gradient(
-//             0deg,
-//             var(--borderColor),
-//             var(--borderColor) var(--borderWidth),
-//             transparent var(--borderWidth),
-//             transparent var(--borderSize),
-//             var(--borderColor) var(--borderSize)
-//         ),
-//         repeating-linear-gradient(
-//             90deg,
-//             var(--borderColor),
-//             var(--borderColor) var(--borderWidth),
-//             transparent var(--borderWidth),
-//             transparent var(--borderSize),
-//             var(--borderColor) var(--borderSize)
-//         ),
-//         repeating-linear-gradient(
-//             180deg,
-//             var(--borderColor),
-//             var(--borderColor) var(--borderWidth),
-//             transparent var(--borderWidth),
-//             transparent var(--borderSize),
-//             var(--borderColor) var(--borderSize)
-//         ),
-//         repeating-linear-gradient(
-//             270deg,
-//             var(--borderColor),
-//             var(--borderColor) var(--borderWidth),
-//             transparent var(--borderWidth),
-//             transparent var(--borderSize),
-//             var(--borderColor) var(--borderSize)
-//         );
-//     background-size:
-//         1px 100%,
-//         100% 1px,
-//         1px 100%,
-//         100% 1px;
-//     background-position:
-//         0 0,
-//         0 0,
-//         100% 0,
-//         0 100%;
-//     background-repeat: no-repeat;
-// }
+@mixin border-image {
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            var(--borderColor),
+            var(--borderColor) var(--borderWidth),
+            transparent var(--borderWidth),
+            transparent var(--borderSize),
+            var(--borderColor) var(--borderSize)
+        ),
+        repeating-linear-gradient(
+            90deg,
+            var(--borderColor),
+            var(--borderColor) var(--borderWidth),
+            transparent var(--borderWidth),
+            transparent var(--borderSize),
+            var(--borderColor) var(--borderSize)
+        ),
+        repeating-linear-gradient(
+            180deg,
+            var(--borderColor),
+            var(--borderColor) var(--borderWidth),
+            transparent var(--borderWidth),
+            transparent var(--borderSize),
+            var(--borderColor) var(--borderSize)
+        ),
+        repeating-linear-gradient(
+            270deg,
+            var(--borderColor),
+            var(--borderColor) var(--borderWidth),
+            transparent var(--borderWidth),
+            transparent var(--borderSize),
+            var(--borderColor) var(--borderSize)
+        );
+    background-size:
+        1px 100%,
+        100% 1px,
+        1px 100%,
+        100% 1px;
+    background-position:
+        0 0,
+        0 0,
+        100% 0,
+        0 100%;
+    background-repeat: no-repeat;
+}
 /*=========================================
 画像セレクト部分
 -----------------------------------------*/
@@ -1223,3 +972,109 @@
 //         }
 //     }
 // }
+/*========================================= 
+   下部登録・修正ボタン
+-----------------------------------------*/
+@mixin box-btn {
+    position: relative;
+    font-size: inherit;
+    display: grid;
+    justify-content: center;
+    gap: 0 2em;
+    a,
+    button {
+        width: 24rem;
+        height: 4rem;
+        border-radius: 0.4rem;
+        @include flex-center;
+        transition: 0.3s ease-out;
+    }
+    .btn-submit {
+        color: rgba(#fff, 1);
+        background-color: rgba(#65aec4, 1);
+        @include hover {
+            color: rgba(#fff, 0.8);
+            background-color: rgba(#65aec4, 0.8);
+        }
+    }
+    .btn-return {
+        color: rgba($base-black, 1);
+        border: 1px solid rgba($base-black, 1);
+        @include hover {
+            color: rgba($base-black, 0.8);
+            background-color: rgba(#f0f0f0, 0.8);
+            border-color: rgba($base-black, 0.8);
+        }
+    }
+    &:has(> :is(button, a):only-child) {
+        grid-template-columns: 1fr;
+    }
+    &:has(> :is(button, a):nth-child(2)):not(
+            :has(> :is(button, a):nth-child(3))
+        ) {
+        grid-template-columns: repeat(2, auto);
+    }
+}
+/*========================================= 
+   画像変更・削除
+-----------------------------------------*/
+@mixin image-check-details {
+    width: stretch;
+    font-size: 1em;
+    display: flex;
+    gap: 0 0.5em;
+    .wrap_btn {
+        position: relative;
+        font-size: 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3em 0;
+        align-self: flex-end;
+        width: 4rem;
+        & > div {
+            position: relative;
+            width: 4rem;
+            button {
+                aspect-ratio: 1;
+                position: relative;
+                width: 100%;
+                &::before,
+                &::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                }
+                &::before {
+                    border-radius: 50%;
+                    background-color: rgba($hover-bg-blue, 0);
+                    transition: 0.2s ease-out;
+                }
+                &::after {
+                    margin: auto;
+                    width: 1.8rem;
+                }
+                &:hover {
+                    &::before {
+                        background-color: rgba($hover-bg-blue, 1);
+                    }
+                }
+            }
+        }
+        .item_reload {
+            button {
+                &::after {
+                    @include svg-iconReload("646464");
+                    width: 70%;
+                }
+            }
+        }
+        .item_delate {
+            button {
+                &::after {
+                    @include svg-iconTrash("646464");
+                    width: 50%;
+                }
+            }
+        }
+    }
+}

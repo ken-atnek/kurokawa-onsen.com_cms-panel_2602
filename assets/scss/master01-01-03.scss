@@ -1,0 +1,77 @@
+/*==========================================================
+店舗登録
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+// .link_page-back_bottom {
+//     @include linkPageBack_bottom;
+// }
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+/*=========================================
+オススメ商品
+-----------------------------------------*/
+.inner-01-01-03 {
+    form {
+        @include layoutContentsWhiteBlock;
+        align-items: center;
+        padding: 0 0 5em;
+        z-index: 3;
+        .head_title {
+            background-color: #e6e6e6;
+            border-top-left-radius: 1.2rem;
+            border-top-right-radius: 1.2rem;
+            font-size: FZ(20);
+            font-weight: 700;
+            width: stretch;
+            height: 3.2em;
+            display: flex;
+            align-items: center;
+            padding-left: 1em;
+        }
+        h3 {
+            border-bottom: 1px solid #646464;
+            padding-bottom: 0.8em;
+            width: 100%;
+            margin-top: 2em;
+        }
+        & > article {
+            @include base-form-article;
+            margin-bottom: 4em;
+            margin-inline: 2em;
+            & > dl {
+                grid-template-columns: 10em 1fr;
+                & > div {
+                    textarea {
+                        font-size: FZ(16);
+                        min-height: 6lh;
+                    }
+                    &.box_comment {
+                        @include dt-top;
+                    }
+                    &.box_image {
+                        @include dt-top;
+                        dd {
+                            .check-details {
+                                @include image-check-details;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .box-btn {
+            @include box-btn;
+        }
+    }
+}

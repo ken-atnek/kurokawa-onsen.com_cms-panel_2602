@@ -105,7 +105,7 @@ input[type="text"],
 input[type="password"],
 input[type="email"] {
     flex-grow: 1;
-    // width: 100%;
+    width: 100%;
     font-size: 1.6rem;
     padding-inline: 0.8em;
     height: 4rem;
@@ -137,7 +137,7 @@ input[type="text"],
 input[type="password"],
 input[type="email"],
 textarea {
-    background-color: #fff;
+    background-color: #fafafa;
     // min-height: 11lh;
     field-sizing: content;
     padding-block: 0.8em;

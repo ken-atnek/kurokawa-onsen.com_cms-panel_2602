@@ -111,78 +111,9 @@
                                     display: flex;
                                     gap: 0 1em;
                                     .check-details {
-                                        width: stretch;
-                                        font-size: 1em;
-                                        display: flex;
-                                        gap: 0 0.5em;
-                                        .wrap_btn {
-                                            position: relative;
-                                            font-size: 1em;
-                                            display: flex;
-                                            flex-direction: column;
-                                            gap: 0.3em 0;
-                                            align-self: flex-end;
-                                            width: 4rem;
-                                            & > div {
-                                                position: relative;
-                                                width: 4rem;
-                                                button {
-                                                    aspect-ratio: 1;
-                                                    position: relative;
-                                                    width: 100%;
-                                                    &::before,
-                                                    &::after {
-                                                        content: "";
-                                                        position: absolute;
-                                                        inset: 0;
-                                                    }
-                                                    &::before {
-                                                        border-radius: 50%;
-                                                        background-color: rgba(
-                                                            $hover-bg-blue,
-                                                            0
-                                                        );
-                                                        transition: 0.2s
-                                                            ease-out;
-                                                    }
-                                                    &::after {
-                                                        margin: auto;
-                                                        width: 1.8rem;
-                                                    }
-                                                    &:hover {
-                                                        &::before {
-                                                            background-color: rgba(
-                                                                $hover-bg-blue,
-                                                                1
-                                                            );
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            .item_reload {
-                                                button {
-                                                    &::after {
-                                                        @include svg-iconReload(
-                                                            "646464"
-                                                        );
-                                                        width: 70%;
-                                                    }
-                                                }
-                                            }
-                                            .item_delate {
-                                                button {
-                                                    &::after {
-                                                        @include svg-iconTrash(
-                                                            "646464"
-                                                        );
-                                                        width: 50%;
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        @include image-check-details;
                                     }
                                     .btn_select {
-                                        // @include btnWhite;
                                         width: 100%;
                                         max-width: 14rem;
                                         height: 2.5em;

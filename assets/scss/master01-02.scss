@@ -1,0 +1,132 @@
+/*==========================================================
+店舗登録
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+// .link_page-back_bottom {
+//     @include linkPageBack_bottom;
+// }
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+/*=========================================
+店舗登録
+-----------------------------------------*/
+.inner-01-02 {
+    form {
+        @include layoutContentsWhiteBlock;
+        align-items: center;
+        padding: 3em 1em 5em;
+        z-index: 3;
+        gap: 5em 0;
+        h3 {
+            border-bottom: 1px solid #646464;
+            padding-bottom: 0.8em;
+            width: 100%;
+        }
+        & > article {
+            @include base-form-article;
+            & > dl {
+                //========/ 店舗情報========
+                &.block_01 {
+                    // 公開設定・予約受付・メアド公開
+                    .box_setting {
+                        dd {
+                            display: flex;
+                            align-items: center;
+                            gap: 0 1em;
+                            & > div {
+                                position: relative;
+                                font-size: 1em;
+                                @include radioCheck;
+                                margin-right: 1em;
+                                label {
+                                    font-size: FZ(16);
+                                    padding-left: 1.8em;
+                                }
+                            }
+                        }
+                    }
+                    // 住所
+                    .box_add {
+                        @include dt-top;
+                        dd {
+                            display: grid;
+                            grid-template-columns: auto 1fr;
+                            align-items: center;
+                            gap: 0.8em 2em;
+                            & > div {
+                                font-size: FZ(16);
+                            }
+                            input[type="text"] {
+                                &.add_01 {
+                                    width: 10em;
+                                }
+                                &.add_02 {
+                                    width: 22em;
+                                }
+                                &.add_03 {
+                                    width: 22em;
+                                    grid-column-start: 2;
+                                }
+                                &.add_04 {
+                                    grid-column-start: 2;
+                                }
+                            }
+                        }
+                    }
+                    // 電話・FAX
+                    .box_tel,
+                    .box_fax {
+                        dd {
+                            input[type="text"] {
+                                width: 16em;
+                            }
+                        }
+                    }
+                    // 営業時間・定休日
+                    .box_textarea {
+                        @include dt-top();
+                        dd {
+                            textarea {
+                                font-size: FZ(16);
+                                min-height: 3lh;
+                            }
+                        }
+                    }
+                }
+                //========/ ログイン情報 ========
+                &.block_02 {
+                    // ID/PW
+                    .box_login {
+                        dd {
+                            display: flex;
+                            align-items: center;
+                            input {
+                                width: 14em;
+                                flex-grow: unset;
+                            }
+                            a {
+                                color: $hover-blue;
+                                font-size: FZ(12);
+                                margin-left: 1em;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .box-btn {
+            @include box-btn;
+        }
+    }
+}
