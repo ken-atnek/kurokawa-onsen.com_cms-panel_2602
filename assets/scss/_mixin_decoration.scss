@@ -1019,7 +1019,7 @@
    画像変更・削除
 -----------------------------------------*/
 @mixin image-check-details {
-    width: stretch;
+    width: 100%;
     font-size: 1em;
     display: flex;
     gap: 0 0.5em;
