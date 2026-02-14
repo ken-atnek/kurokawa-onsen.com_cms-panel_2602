@@ -103,18 +103,19 @@ select,
 textarea,
 input[type="text"],
 input[type="password"],
+input[type="number"],
 input[type="email"] {
     flex-grow: 1;
     width: 100%;
     font-size: 1.6rem;
     padding-inline: 0.8em;
-    height: 4rem;
     display: flex;
     align-items: center;
     border-radius: 0.6rem;
     letter-spacing: 0.04em;
     border: 1px solid #c7c7c7;
     transition: 0.2s ease-out;
+    background-color: #fafafa;
     &::placeholder {
         color: #a8a8a8;
     }
@@ -135,12 +136,15 @@ input[type="date"] {
 }
 input[type="text"],
 input[type="password"],
-input[type="email"],
-textarea {
+input[type="number"],
+input[type="email"] {
     background-color: #fafafa;
-    // min-height: 11lh;
-    field-sizing: content;
+    height: 4rem;
     padding-block: 0.8em;
+}
+textarea {
+    padding-block: 0.8em;
+    field-sizing: content;
 }
 svg {
     fill: transparent;
