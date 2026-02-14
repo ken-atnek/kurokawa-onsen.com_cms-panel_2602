@@ -56,6 +56,15 @@
                             }
                         }
                     }
+                    .box_name {
+                        @include dt-top;
+                        dd {
+                            textarea {
+                                font-size: FZ(16);
+                                min-height: 3.2lh;
+                            }
+                        }
+                    }
                     // 住所
                     .box_add {
                         @include dt-top;
@@ -93,13 +102,129 @@
                             }
                         }
                     }
-                    // 営業時間・定休日
+                    // 営業時間
+                    .box_hour {
+                        @include dt-top;
+                        dd {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 1rem 0;
+                            .wrap-hour {
+                                display: flex;
+                                align-items: center;
+                                font-size: inherit;
+                                gap: 0 1rem;
+                                h4 {
+                                    font-size: FZ(12);
+                                    font-weight: 600;
+                                    align-self: center;
+                                    margin-right: 0.3rem;
+                                }
+                                .inner-hour {
+                                    font-size: inherit;
+                                    display: flex;
+                                    gap: 0 0.3rem;
+                                    .select-hour {
+                                        width: 4.5rem;
+                                        @include select-list-box(
+                                            $height: 4rem,
+                                            $position: "left",
+                                            $list-height: 2.8rem
+                                        );
+                                        .selectbox__head {
+                                            padding-inline: 0.8em;
+                                            &::after {
+                                                right: 0.3rem;
+                                            }
+                                        }
+                                        .list-wrapper {
+                                            .selectbox__panel {
+                                                li {
+                                                    label {
+                                                        justify-content: flex-end;
+                                                        padding-right: 1em;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    p {
+                                        font-size: FZ(14);
+                                        display: inline-block;
+                                        align-self: center;
+                                    }
+                                }
+                                input[type="text"] {
+                                    width: 50%;
+                                }
+                            }
+                        }
+                    }
+                    // 定休日
                     .box_textarea {
                         @include dt-top();
                         dd {
                             textarea {
                                 font-size: FZ(16);
                                 min-height: 3lh;
+                            }
+                        }
+                    }
+                    // 店休日システム
+                    .box_close-week-day {
+                        dd {
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 0 0.5em;
+                            z-index: +1;
+                            & > div {
+                                position: relative;
+                                font-size: inherit;
+                                input[type="checkbox"] {
+                                    position: absolute;
+                                    inset: 0;
+                                    z-index: +2;
+                                    &.read-only {
+                                        pointer-events: none;
+                                    }
+                                }
+                                label {
+                                    position: relative;
+                                    font-size: FZ(16);
+                                    display: grid;
+                                    place-items: center;
+                                    z-index: +1;
+                                    width: 2.6em;
+                                    aspect-ratio: 1;
+                                    color: $hover-blue;
+                                    &::before {
+                                        content: "";
+                                        position: absolute;
+                                        inset: 0;
+                                        margin: auto;
+                                        width: 100%;
+                                        aspect-ratio: 1;
+                                        border-radius: 50%;
+                                        border: 1px solid #b9b9b9;
+                                        background-color: $hover-bg-blue;
+                                        transition: 0.1s ease-out;
+                                        z-index: -1;
+                                    }
+                                }
+                                input[type="checkbox"]:checked + label {
+                                    color: #aeaeae;
+                                    &::before {
+                                        background-color: #737373;
+                                    }
+                                }
+                                &:hover {
+                                    label {
+                                        &::before {
+                                            border-color: $hover-blue;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
