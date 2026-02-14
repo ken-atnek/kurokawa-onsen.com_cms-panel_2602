@@ -88,16 +88,10 @@
                     </div>
                   </dd>
                 </div>
-                <div style="margin-top: 1rem">
+                <div style="margin-top: 1rem" class="box_name">
                   <dt class="required">店舗名</dt>
                   <dd>
-                    <input
-                      type="text"
-                      name="form02"
-                      value="すみよし食堂"
-                      class="required-item"
-                      required=""
-                    />
+                    <textarea>すみよし食堂</textarea>
                   </dd>
                 </div>
                 <div>
@@ -113,7 +107,7 @@
                   </dd>
                 </div>
                 <div>
-                  <dt class="required">店舗名<span>(英語)</span></dt>
+                  <dt class="required">店舗名(英語)<span>(半角英数)</span></dt>
                   <dd>
                     <input
                       type="text"
@@ -169,7 +163,7 @@
                   </dd>
                 </div>
                 <div class="box_fax">
-                  <dt class="required">FAX番号</dt>
+                  <dt>FAX番号</dt>
                   <dd>
                     <input type="text" name="form05" value="0967440657" />
                   </dd>
@@ -218,15 +212,801 @@
                     <div></div>
                   </dd>
                 </div>
-                <div class="box_textarea">
+                <div class="box_hour">
                   <dt class="required">営業時間</dt>
                   <dd>
-                    <textarea name="form09">11：00～18：00 (17:30OS)</textarea>
+                    <div class="wrap-hour">
+                      <div class="inner-hour">
+                        <h4>OPEN</h4>
+                        <div class="select-hour" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-open-hour01"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour01"
+                                  value="6"
+                                  id="hour06"
+                                />
+                                <label for="hour06">6</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour01"
+                                  value="7"
+                                  id="hour07"
+                                />
+                                <label for="hour07">7</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour01"
+                                  value="8"
+                                  id="hour08"
+                                />
+                                <label for="hour08">8</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour01"
+                                  value="9"
+                                  id="hour09"
+                                />
+                                <label for="hour09">9</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour01"
+                                  value="10"
+                                  id="hour10"
+                                />
+                                <label for="hour10">10</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour01"
+                                  value="11"
+                                  id="hour11"
+                                />
+                                <label for="hour11">11</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour01"
+                                  value="12"
+                                  id="hour12"
+                                />
+                                <label for="hour12">12</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour01"
+                                  value="13"
+                                  id="hour13"
+                                />
+                                <label for="hour13">13</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <p>時</p>
+                        <div class="select-hour" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-open-min01"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min01"
+                                  value="00"
+                                  id="min00"
+                                />
+                                <label for="min00">00</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min01"
+                                  value="15"
+                                  id="min15"
+                                />
+                                <label for="min15">15</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min01"
+                                  value="30"
+                                  id="min30"
+                                />
+                                <label for="min30">30</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min01"
+                                  value="45"
+                                  id="min45"
+                                />
+                                <label for="min45">45</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <p>分</p>
+                      </div>
+                      <div class="inner-hour">
+                        <h4>CLOSE</h4>
+                        <div class="select-hour" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-open-hour02"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="11"
+                                  id="hour11"
+                                />
+                                <label for="hour11_close">11</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="12"
+                                  id="hour12_close"
+                                />
+                                <label for="hour12_close">12</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="13"
+                                  id="hour13_close"
+                                />
+                                <label for="hour13_close">13</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="14"
+                                  id="hour14_close"
+                                />
+                                <label for="hour14_close">14</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="15"
+                                  id="hour15_close"
+                                />
+                                <label for="hour15_close">15</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="16"
+                                  id="hour16_close"
+                                />
+                                <label for="hour16_close">16</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="17"
+                                  id="hour17_close"
+                                />
+                                <label for="hour17_close">17</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="18"
+                                  id="hour18_close"
+                                />
+                                <label for="hour18_close">18</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="19"
+                                  id="hour19_close"
+                                />
+                                <label for="hour19_close">19</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="20"
+                                  id="hour20_close"
+                                />
+                                <label for="hour20_close">20</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="21"
+                                  id="hour21_close"
+                                />
+                                <label for="hour21_close">21</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="22"
+                                  id="hour22_close"
+                                />
+                                <label for="hour22_close">22</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="23"
+                                  id="hour23_close"
+                                />
+                                <label for="hour23_close">23</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="24"
+                                  id="hour24_close"
+                                />
+                                <label for="hour24_close">24</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <p>時</p>
+                        <div class="select-hour" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-open-min02"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min02"
+                                  value="00"
+                                  id="min00_close"
+                                />
+                                <label for="min00_close">00</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min02"
+                                  value="15"
+                                  id="min15_close"
+                                />
+                                <label for="min15_close">15</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min02"
+                                  value="30"
+                                  id="min30_close"
+                                />
+                                <label for="min30_close">30</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min02"
+                                  value="45"
+                                  id="min45_close"
+                                />
+                                <label for="min45_close">45</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <p>分</p>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="備考（ラストオーダー等）"
+                      />
+                    </div>
+                    <div class="wrap-hour">
+                      <div class="inner-hour">
+                        <h4>OPEN</h4>
+                        <div class="select-hour" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-open-hour03"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour03"
+                                  value="6"
+                                  id="hour06_03"
+                                />
+                                <label for="hour06_03">6</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour03"
+                                  value="7"
+                                  id="hour07_03"
+                                />
+                                <label for="hour07_03">7</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour03"
+                                  value="8"
+                                  id="hour08_03"
+                                />
+                                <label for="hour08_03">8</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour03"
+                                  value="9"
+                                  id="hour09_03"
+                                />
+                                <label for="hour09_03">9</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour03"
+                                  value="10"
+                                  id="hour10_03"
+                                />
+                                <label for="hour10_03">10</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour03"
+                                  value="11"
+                                  id="hour11_03"
+                                />
+                                <label for="hour11_03">11</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour03"
+                                  value="12"
+                                  id="hour12_03"
+                                />
+                                <label for="hour12_03">12</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour03"
+                                  value="13"
+                                  id="hour13_03"
+                                />
+                                <label for="hour13_03">13</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <p>時</p>
+                        <div class="select-hour" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-open-min03"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min03"
+                                  value="00"
+                                  id="min00"
+                                />
+                                <label for="min00">00</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min03"
+                                  value="15"
+                                  id="min15"
+                                />
+                                <label for="min15">15</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min03"
+                                  value="30"
+                                  id="min30"
+                                />
+                                <label for="min30">30</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min03"
+                                  value="45"
+                                  id="min45"
+                                />
+                                <label for="min45">45</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <p>分</p>
+                      </div>
+                      <div class="inner-hour">
+                        <h4>CLOSE</h4>
+                        <div class="select-hour" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-open-hour02"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="11"
+                                  id="hour11"
+                                />
+                                <label for="hour11_close">11</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="12"
+                                  id="hour12_close"
+                                />
+                                <label for="hour12_close">12</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="13"
+                                  id="hour13_close"
+                                />
+                                <label for="hour13_close">13</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="14"
+                                  id="hour14_close"
+                                />
+                                <label for="hour14_close">14</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="15"
+                                  id="hour15_close"
+                                />
+                                <label for="hour15_close">15</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="16"
+                                  id="hour16_close"
+                                />
+                                <label for="hour16_close">16</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="17"
+                                  id="hour17_close"
+                                />
+                                <label for="hour17_close">17</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="18"
+                                  id="hour18_close"
+                                />
+                                <label for="hour18_close">18</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="19"
+                                  id="hour19_close"
+                                />
+                                <label for="hour19_close">19</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="20"
+                                  id="hour20_close"
+                                />
+                                <label for="hour20_close">20</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="21"
+                                  id="hour21_close"
+                                />
+                                <label for="hour21_close">21</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="22"
+                                  id="hour22_close"
+                                />
+                                <label for="hour22_close">22</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="23"
+                                  id="hour23_close"
+                                />
+                                <label for="hour23_close">23</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-hour02"
+                                  value="24"
+                                  id="hour24_close"
+                                />
+                                <label for="hour24_close">24</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <p>時</p>
+                        <div class="select-hour" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-open-min02"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min02"
+                                  value="00"
+                                  id="min00_close"
+                                />
+                                <label for="min00_close">00</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min02"
+                                  value="15"
+                                  id="min15_close"
+                                />
+                                <label for="min15_close">15</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min02"
+                                  value="30"
+                                  id="min30_close"
+                                />
+                                <label for="min30_close">30</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-open-min02"
+                                  value="45"
+                                  id="min45_close"
+                                />
+                                <label for="min45_close">45</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                        <p>分</p>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="備考（ラストオーダー等）"
+                      />
+                    </div>
                   </dd>
                 </div>
                 <div class="box_textarea">
-                  <dt class="required">定休日</dt>
+                  <dt class="required">店休日<span>(表示用)</span></dt>
                   <dd><textarea name="form10">不定休</textarea></dd>
+                </div>
+                <div class="box_close-week-day">
+                  <dt>店休日<span>(システム用)</span></dt>
+                  <dd>
+                    <div>
+                      <input type="checkbox" name="form11_0" value="1" /><label
+                        for="form11_01"
+                        >日</label
+                      >
+                    </div>
+                    <div>
+                      <input type="checkbox" name="form11_1" value="2" /><label
+                        for="form11_02"
+                        >月</label
+                      >
+                    </div>
+                    <div>
+                      <input type="checkbox" name="form11_2" value="3" /><label
+                        for="form11_03"
+                        >火</label
+                      >
+                    </div>
+                    <div>
+                      <input type="checkbox" name="form11_3" value="4" /><label
+                        for="form11_04"
+                        >水</label
+                      >
+                    </div>
+                    <div>
+                      <input type="checkbox" name="form11_4" value="5" /><label
+                        for="form11_05"
+                        >木</label
+                      >
+                    </div>
+                    <div>
+                      <input type="checkbox" name="form11_5" value="6" /><label
+                        for="form11_06"
+                        >金</label
+                      >
+                    </div>
+                    <div>
+                      <input type="checkbox" name="form11_6" value="7" /><label
+                        for="form11_07"
+                        >土</label
+                      >
+                    </div>
+                  </dd>
                 </div>
               </dl>
             </article>
