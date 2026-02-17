@@ -1034,6 +1034,26 @@
         </div>
       </div>
     </main>
+    <!-- NOTE 修正画面用 is-active付与でモーダル表示 -->
+    <article class="modal-alert is-active" id="modalBlock">
+      <div class="inner-modal">
+        <div class="box-title">
+          <p>店舗基本情報</p>
+          <button
+            type="button"
+            onclick="closeModal()"
+            class="btn-top-close"
+          ></button>
+        </div>
+        <div class="box-details">
+          <p>基本情報情報を修正します。よろしいですか？</p>
+          <div class="box-btn">
+            <button type="button" class="btn-cancel">キャンセル</button>
+            <button type="button" class="btn-confirm">はい</button>
+          </div>
+        </div>
+      </div>
+    </article>
     <script src="../assets/js/common.js" defer></script>
   </body>
 </html>

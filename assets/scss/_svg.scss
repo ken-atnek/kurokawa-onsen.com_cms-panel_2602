@@ -68,5 +68,5 @@
 // 下V字アイコン
 @mixin svg-icon-arrow-bottom($color, $w: 8, $h: 5) {
     @include svg-bg-base($w, $h);
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0#{$w} #{$h}" fill="%23#{$color}"><path d="M7.15983 0.526429L3.57806 4.10449L0 0.526429L0.526513 -8.39464e-05L3.57806 3.05147L6.62961 -8.42131e-05L7.15613 0.526429L7.15983 0.526429Z"/></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{$w} #{$h}" fill="%23#{$color}"><path d="M7.15983 0.526429L3.57806 4.10449L0 0.526429L0.526513 -8.39464e-05L3.57806 3.05147L6.62961 -8.42131e-05L7.15613 0.526429L7.15983 0.526429Z"/></svg>');
 }

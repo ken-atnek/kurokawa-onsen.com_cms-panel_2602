@@ -497,90 +497,115 @@ header {
 /*==========================================================
     モーダルウィンドウ
 ==========================================================*/
-// .modal-article,
-// .modal-alert {
-//     display: none;
-//     z-index: 100000;
-//     &.is-active {
-//         display: block;
-//         position: fixed !important;
-//         top: 0;
-//         left: 0;
-//         width: 100%;
-//         height: 100%;
-//         height: 100dvh;
-//         @include flex-center;
-//         padding: 2rem;
-//         .inner-modal {
-//             width: 100%;
-//             display: flex;
-//             flex-direction: column;
-//             background-color: #fff;
-//             border-radius: $radius20;
-//             @include drop-shadow;
-//             font-size: inherit;
-//             max-height: 90vh;
-//             overflow-y: auto;
-//             .box-title {
-//                 padding: 2.7rem;
-//                 display: flex;
-//                 justify-content: space-between;
-//                 font-size: inherit;
-//                 border-bottom: 1px solid $border-gray;
-//                 width: 100%;
-//                 p {
-//                     font-size: FZ(20);
-//                     font-weight: 600;
-//                 }
-//                 .btn-top-close {
-//                     position: relative;
-//                     @include btn-close;
-//                 }
-//             }
-//         }
-//     }
-// }
-// 黒背景記事用
+.modal-select-image,
+.modal-alert {
+    display: none;
+    z-index: 100000;
+    &.is-active {
+        display: block;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        @include flex-center;
+        padding: 2rem;
+        .inner-modal {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            border-radius: $radius20;
+            @include drop-shadow;
+            font-size: inherit;
+            max-height: 90vh;
+            overflow-y: auto;
+            .box-title {
+                padding: 2.7rem;
+                display: flex;
+                justify-content: space-between;
+                font-size: inherit;
+                border-bottom: 1px solid $border-gray;
+                width: 100%;
+                p {
+                    font-size: FZ(20);
+                    font-weight: 600;
+                }
+                .btn-top-close {
+                    position: relative;
+                    @include btn-close;
+                }
+            }
+        }
+    }
+}
 
 // アラート用
-// .modal-alert {
-//     &.bg-orange {
-//         background-color: rgba($main-orange, 0.4);
-//     }
-//     &.bg-black {
-//         background-color: rgba($font-black, 0.4);
-//     }
-//     &.is-active {
-//         .inner-modal {
-//             max-width: 64rem;
-//             .box-details {
-//                 font-size: inherit;
-//                 display: flex;
-//                 flex-direction: column;
-//                 align-items: center;
-//                 padding: 4rem 2rem;
-//                 p {
-//                     font-size: FZ(16);
-//                     font-weight: 300;
-//                 }
-//                 .box-btn {
-//                     position: relative;
-//                     font-size: inherit;
-//                     display: flex;
-//                     gap: 0 2.4rem;
-//                     margin-top: 4rem;
-//                     button {
-//                         width: 16rem;
-//                         height: 4rem;
-//                         &.btn-cancel {
-//                             @include main-button("cancel");
-//                         }
-//                         &.btn-confirm {
-//                             @include main-button("confirm");
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
+.modal-alert {
+    &.is-active {
+        background-color: rgba($font-black, 0.4);
+        .inner-modal {
+            max-width: 64rem;
+            .box-details {
+                font-size: inherit;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 4rem 2rem;
+                p {
+                    font-size: FZ(16);
+                    font-weight: 300;
+                }
+                .box-btn {
+                    position: relative;
+                    font-size: inherit;
+                    display: flex;
+                    gap: 0 2.4rem;
+                    margin-top: 4rem;
+                    button {
+                        width: 16rem;
+                        height: 4rem;
+                        &.btn-cancel {
+                            @include main-button("cancel");
+                        }
+                        &.btn-confirm {
+                            @include main-button("confirm");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+//画像選択用
+.modal-select-image {
+    font-size: inherit;
+    &.is-active {
+        background-color: rgba($font-black, 0.4);
+        .inner-modal {
+            max-width: 96rem;
+            font-size: inherit;
+            .inner-select-image {
+                font-size: inherit;
+                padding: 2em;
+                .block_select-image {
+                    @include layoutContentsWhiteBlock;
+                    flex-direction: row;
+                    font-size: inherit;
+                    margin: unset;
+                    section {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .inner_left {
+                        @include select-image-block-left;
+                    }
+                    .inner_right {
+                        @include select-image-block-right;
+                    }
+                }
+            }
+        }
+    }
+}
