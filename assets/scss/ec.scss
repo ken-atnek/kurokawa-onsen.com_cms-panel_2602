@@ -209,6 +209,8 @@ main {
                     font-size: 1.2rem;
                     font-weight: 600;
                     bottom: calc(100% + 2em);
+                    text-align: center;
+                    width: max-content;
                 }
                 &::before {
                     content: "";
