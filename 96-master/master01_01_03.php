@@ -1,8 +1,8 @@
 <?php
 /*
- * [96-master/master01_01_02.php]
+ * [96-master/master01_01_03.php]
  *  - 管理画面 -
- *  店舗紹介登録／編集
+ *  おすすめ商品登録／編集
  *
  * [初版]
  *  2026.2.18
@@ -20,8 +20,8 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/master/start_processing.php';
 #***** ★ DBテーブル読み書きファイル：インクルード ★ *****#
 #店舗情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shops.php';
-#店舗紹介情報
-require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shop_details.php';
+#おすすめ商品情報
+require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shop_items.php';
 #フォルダ情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_folders.php';
 #写真情報
@@ -31,7 +31,7 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_photos.php';
 # SESSIONチェック
 #----------------#
 #セッションキー
-$pagePrefix = 'mKey01-01-02_';
+$pagePrefix = 'mKey01-01-03_';
 #このページのユニークなセッションキーを生成
 $noUpDateKey = $pagePrefix . bin2hex(random_bytes(8));
 $_SESSION['sKey'] = $noUpDateKey;
@@ -61,12 +61,12 @@ if ($shopId === null || !is_numeric($shopId) || (int)$shopId <= 0) {
   header("Location: ./master01_01.php");
   exit;
 }
-#店舗IDがあれば店舗紹介情報取得
+#店舗IDがあればおすすめ商品情報取得
 if ($shopId !== null) {
   #店舗情報
   $shopData = getShops_FindById($shopId);
-  #店舗紹介情報
-  $shopDetailsData = getShopDetailsData($shopId);
+  #おすすめ商品情報
+  $shopItemsData = getShopItemsData($shopId);
 } else {
   #店舗情報
   $shopData = array(
@@ -75,31 +75,13 @@ if ($shopId !== null) {
   );
 }
 #新規／編集
-$method = 'edit';
-if (empty($shopDetailsData) || $shopDetailsData === null) {
-  #紹介情報が無ければ新規登録モード
-  $method = 'new';
-  #店舗紹介情報
-  $shopDetailsData = array(
-    'intro_body' => '',
-    'intro_body_en' => '',
-    'main_image_path' => '',
-    'image_path_1' => '',
-    'image_title_1' => '',
-    'image_path_2' => '',
-    'image_title_2' => '',
-    'image_path_3' => '',
-    'image_title_3' => '',
-    'map_url' => '',
-    'map_link_url' => '',
-  );
-}
+$method = hasRecommendedItems($shopId) ? 'edit' : 'new';
 
 #================#
 # メニュータイトル
 #----------------#
 #メニュータイトル
-$menuTitle = "店舗紹介情報入力";
+$menuTitle = "おすすめ商品情報入力";
 if (!isset($shopData) || empty($shopData)) {
   #店舗データが無い場合は不正アクセス：トップページへリダイレクト
   header("Location: ./master01_01.php");
@@ -128,7 +110,7 @@ print <<<HTML
     <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon/apple-touch-icon.png">
     <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
-    <link rel="stylesheet" href="../assets/css/master01-01-02.css">
+    <link rel="stylesheet" href="../assets/css/master01-01-03.css">
   </head>
 
   <body>
@@ -136,7 +118,7 @@ print <<<HTML
 HTML;
 @include './inc_header.php';
 print <<<HTML
-    <main class="inner-01-01-02">
+    <main class="inner-01-01-03">
       <section class="container-left-menu menu-color01">
         <div class="title">店舗管理</div>
         <nav>
@@ -146,21 +128,42 @@ print <<<HTML
       </section>
       <div class="main-contents menu-color01">
         <div class="block_inner">
-          <h2>店舗情報</h2>
-          <form name="inputForm">
+          <h2>店舗情報(オススメ商品)</h2>
+          <form name="inputForm" class="inputForm">
             <div class="head_title">{$menuTitle}</div>
+
+HTML;
+for ($slot = 1; $slot <= $recommendedItemMax; $slot++) {
+  $titleNo = str_pad((string)$slot, 2, '0', STR_PAD_LEFT);
+  $item = $shopItemsData['recommended'][$slot];
+
+  $itemImagePathRaw = (string)($item['image_path'] ?? '');
+  $itemImagePathEsc = htmlspecialchars($itemImagePathRaw, ENT_QUOTES, 'UTF-8');
+  $itemTitleEsc = htmlspecialchars((string)($item['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+  $itemDescriptionEsc = htmlspecialchars((string)($item['description'] ?? ''), ENT_QUOTES, 'UTF-8');
+  $itemPriceEsc = htmlspecialchars((string)($item['price_yen'] ?? ''), ENT_QUOTES, 'UTF-8');
+  print <<<HTML
             <article>
+              <input type="hidden" name="image_path{$slot}" value="{$itemImagePathEsc}">
+              <h3>おすすめ商品{$titleNo}</h3>
               <dl>
-                <div class="box_comment">
-                  <dt class="required">紹介文章</dt>
+                <div>
+                  <dt class="required">商品タイトル</dt>
                   <dd>
-                    <textarea name="form01" class="required-item" required>{$shopDetailsData['intro_body']}</textarea>
+                    <input type="text" name="item[recommended][$slot][title]" value="{$itemTitleEsc}">
+                  </dd>
+                </div>
+                <div class="box_price">
+                  <dt>価格(税込)</dt>
+                  <dd>
+                    <input type="number" name="item[recommended][$slot][price]" value="{$itemPriceEsc}" inputmode="numeric" min="0" step="10">
+                    <span>円</span>
                   </dd>
                 </div>
                 <div class="box_comment">
-                  <dt class="required">紹介文章（英語）</dt>
+                  <dt class="required">商品説明</dt>
                   <dd>
-                    <textarea name="form01_01" class="required-item" required>{$shopDetailsData['intro_body_en']}</textarea>
+                    <textarea name="item[recommended][$slot][description]">{$itemDescriptionEsc}</textarea>
                   </dd>
                 </div>
                 <div class="box_image">
@@ -168,25 +171,26 @@ print <<<HTML
                   <dd>
 
 HTML;
-$mainImage = "";
-if ($shopDetailsData['main_image_path'] != "") {
-  #画像サムネイル
-  $mainImage = DOMAIN_NAME_PREVIEW . $shopDetailsData['main_image_path'];
-} else {
-  #NG画像
-  $mainImage =  "../assets/images/no-image.webp";
-}
-#JS用エスケープ
-$jsTargetImage = json_encode('main_image_path', $jsonHex);
-$jsSelectAction = json_encode('selectFileModal', $jsonHex);
-$jsSelectType = json_encode('main', $jsonHex);
-$jsDeleteAction = json_encode('deleteFile', $jsonHex);
-print <<<HTML
+  $mainImage = "";
+  if ($item['image_path'] != "") {
+    #画像サムネイル
+    $mainImage = DOMAIN_NAME_PREVIEW . $item['image_path'];
+  } else {
+    #NG画像
+    $mainImage =  "../assets/images/no-image.webp";
+  }
+  $mainImageEsc = htmlspecialchars((string)$mainImage, ENT_QUOTES, 'UTF-8');
+  #JS用エスケープ
+  $jsTargetImage = json_encode('image_path' . $slot, $jsonHex);
+  $jsSelectAction = json_encode('selectFileModal', $jsonHex);
+  $jsSelectType = json_encode('main', $jsonHex);
+  $jsDeleteAction = json_encode('deleteFile', $jsonHex);
+  print <<<HTML
                     <div class="check-details">
                       <div class="image">
                         <picture>
-                          <source srcset="{$mainImage}" id="ps_main_image_path">
-                          <img src="{$mainImage}" id="pi_main_image_path" alt="メイン画像">
+                          <source srcset="{$mainImageEsc}" id="ps_image_path{$slot}">
+                          <img src="{$mainImageEsc}" id="pi_image_path{$slot}" alt="メイン画像">
                         </picture>
                       </div>
                       <div class="wrap_btn">
@@ -200,94 +204,23 @@ print <<<HTML
                     </div>
                   </dd>
                 </div>
-                <div class="box_slide-image">
-                  <dt class="required">写真</dt>
-                  <dd>
-                    <ul>
-
-HTML;
-#写真1～3のループ生成
-for ($i = 1; $i <= 3; $i++) {
-  #JS用エスケープ
-  $jsTargetImage = json_encode('image_path_' . $i, $jsonHex);
-  $jsSelectAction = json_encode('selectFileModal', $jsonHex);
-  $jsSelectType = json_encode('image', $jsonHex);
-  $jsDeleteAction = json_encode('deleteFile', $jsonHex);
-  #画像パスの取得
-  $imagePathKey = 'image_path_' . $i;
-  $imageTitleKey = 'image_title_' . $i;
-  $imagePath = "";
-  if ($shopDetailsData[$imagePathKey] != "") {
-    #画像サムネイル
-    $imagePath = DOMAIN_NAME_PREVIEW . $shopDetailsData[$imagePathKey];
-    print <<<HTML
-                      <li id="select_image_{$imagePathKey}">
-                        <div class="check-details">
-                          <div class="image">
-                            <picture>
-                              <source srcset="{$imagePath}" id="ps_{$imagePathKey}">
-                              <img src="{$imagePath}" id="pi_{$imagePathKey}" alt="写真{$i}">
-                            </picture>
-                          </div>
-                          <div class="wrap_btn">
-                            <div class="item_reload">
-                              <button type="button" onclick='selectFileModal(this,{$jsSelectAction},{$jsSelectType},{$jsTargetImage},{$jsShopId},{$jsNoUpDateKey});'></button>
-                            </div>
-                            <div class="item_delate">
-                              <button type="button" onclick='deleteFile(this,{$jsDeleteAction},{$jsSelectType},{$jsTargetImage},{$jsShopId},{$jsNoUpDateKey});'></button>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-
-HTML;
-  } else {
-    #NG画像
-    $imagePath = "../assets/images/no-image.webp";
-    print <<<HTML
-                      <li class="list_select-image" id="select_image_{$imagePathKey}">
-                        <button type="button" onclick='selectFileModal(this,{$jsSelectAction},{$jsSelectType},{$jsTargetImage},{$jsShopId},{$jsNoUpDateKey});'>写真を選択</button>
-                      </li>
-
-
-HTML;
-  }
-}
-print <<<HTML
-                    </ul>
-                  </dd>
-                </div>
-                <div class="box-map">
-                  <dt class="required">地図URL</dt>
-                  <dd>
-                    <textarea name="form02" class="required-item" required>{$shopDetailsData['map_url']}</textarea>
-                  </dd>
-                </div>
-                <div>
-                  <dt class="required">地図URL<span>（リンク用）</span></dt>
-                  <dd>
-                    <input type="text" name="form03" value="{$shopDetailsData['map_link_url']}" class="required-item" required>
-                  </dd>
-                </div>
               </dl>
             </article>
+
+HTML;
+}
+
+print <<<HTML
             <input type="hidden" name="action" value="sendInput">
             <input type="hidden" name="method" value="{$method}">
             <input type="hidden" name="shopId" value="{$shopId}">
-            <input type="hidden" name="main_image_path" value="{$shopDetailsData['main_image_path']}">
-            <input type="hidden" name="image_path_1" value="{$shopDetailsData['image_path_1']}">
-            <input type="hidden" name="image_title_1" value="{$shopDetailsData['image_title_1']}">
-            <input type="hidden" name="image_path_2" value="{$shopDetailsData['image_path_2']}">
-            <input type="hidden" name="image_title_2" value="{$shopDetailsData['image_title_2']}">
-            <input type="hidden" name="image_path_3" value="{$shopDetailsData['image_path_3']}">
-            <input type="hidden" name="image_title_3" value="{$shopDetailsData['image_title_3']}">
             <input type="hidden" name="noUpDateKey" value="{$noUpDateKey}">
             <div class="box-btn">
               <button type="button" class="btn-return" onclick="history.back()">戻る</button>
               <button type="button" class="btn-submit" onclick="sendInput();">登録</button>
             </div>
           </form>
-          <a href="javascript:void(0);" class="link_page-back_top" onclick="history.back()">戻る</a>
+          <a href="javascript:void(0)" class="link_page-back_top" onclick="history.back()">戻る</a>
           <a href="#" class="move_page-top"><i>↑</i>TOPへ</a>
         </div>
       </div>
@@ -340,7 +273,7 @@ print <<<HTML
     <script src="../assets/js/common.js" defer></script>
     <script src="../assets/js/modal.js" defer></script>
     <script src="../assets/js/form.js" defer></script>
-    <script src="./assets/js/master01_01_02.js" defer></script>
+    <script src="./assets/js/master01_01_03.js" defer></script>
   </body>
 </html>
 

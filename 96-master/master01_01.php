@@ -219,6 +219,9 @@ if (!empty($shopsList)) {
   foreach ($shopsList as $shop) {
     $shopId = htmlspecialchars($shop['shop_id'], ENT_QUOTES, 'UTF-8');
     $shopName = htmlspecialchars($shop['shop_name'], ENT_QUOTES, 'UTF-8');
+    $shopNameEngRaw = isset($shop['shop_name_en']) ? (string)$shop['shop_name_en'] : '';
+    #URL用：スペース等（半角/全角含むホワイトスペース）を全て削除
+    $shopNameEng = preg_replace('/[\s　]+/u', '', $shopNameEngRaw);
     #改行を除去して１行にまとめる
     $shopName = preg_replace('/\r\n|\r|\n/', '', $shopName);
     $shopTel = htmlspecialchars($shop['tel'], ENT_QUOTES, 'UTF-8');
@@ -229,8 +232,8 @@ if (!empty($shopsList)) {
     $changeStatus = ($shop['is_public'] == 1) ? '0' : '1';
     $changeStatusLabel = ($shop['is_public'] == 1) ? '非公開へ' : '公開へ';
     #サイト確認URL
-    $websiteUrl = htmlspecialchars($shop['website_url'], ENT_QUOTES, 'UTF-8');
-    $websiteUrl = ($websiteUrl !== '') ? $websiteUrl : 'javascript:void(0);';
+    $websiteUrl = 'https://demo-kurokawa-onsen.tuna-pic.co.jp/shops/' . rawurlencode($shopNameEng) . '/';
+    $websiteUrl = htmlspecialchars($websiteUrl, ENT_QUOTES, 'UTF-8');
     #inline JS用エスケープ（属性崩壊・注入対策）
     $shopIdJs = json_encode($shopId, $jsonHex);
     $shopNameJs = json_encode($shopName, $jsonHex);
@@ -257,7 +260,7 @@ if (!empty($shopsList)) {
                   <a href="./master01_01_02.php?shopId={$shopId}"></a>
                 </div>
                 <div class="item_edit">
-                  <a href="#"></a>
+                  <a href="./master01_01_03.php?shopId={$shopId}"></a>
                 </div>
                 <div class="item_status">
                   <!-- NOTE ↑公開中→[is-active] / 非公開→[is-inactive] -->

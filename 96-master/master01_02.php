@@ -123,7 +123,7 @@ if ($method === 'new') {
 print <<<HTML
 <html lang="ja">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
     <meta name="robots" content="noindex,nofollow">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">

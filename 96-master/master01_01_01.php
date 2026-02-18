@@ -331,7 +331,7 @@ HTML;
 print <<<HTML
             </section>
           </article>
-          <a href="#" class="link_page-back_bottom">戻る</a>
+          <a href="./master01_01.php" class="link_page-back_bottom">戻る</a>
           <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
         </div>
       </div>
