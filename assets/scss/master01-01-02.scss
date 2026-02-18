@@ -102,8 +102,11 @@
                     &.box-map {
                         @include dt-top;
                         dd {
+                            display: flex;
+                            min-width: 0;
                             textarea {
                                 min-height: 5lh;
+                                white-space: pre-wrap;
                             }
                         }
                     }
