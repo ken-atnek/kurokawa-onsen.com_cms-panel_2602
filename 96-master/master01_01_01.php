@@ -72,15 +72,12 @@ if ($shopId !== null) {
   header("Location: ./master01_01.php");
   exit;
 }
-
 #-------------#
 #inline JS用エスケープ宣言
 $jsonHex = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
-
 #-------------#
 #XSS対策：エスケープ処理
 $escShopName = htmlspecialchars($shopData['shop_name'], ENT_QUOTES, 'UTF-8');
-
 
 #***** タグ生成開始 *****#
 print <<<HTML
@@ -166,9 +163,6 @@ print <<<HTML
                         </div>
                       </div>
                     </div>
-
-
-
                     <div class="wrap_02" id="js-dragDrop-photoImage">
                       <input type="file" name="images_tmp" id="js-fileElem-photoImage" accept="image/*" style="display: none">
                       <input type="hidden" name="upload_image_mode" value="only" id="js-uploadImageMode-photoImage">
@@ -180,10 +174,6 @@ print <<<HTML
                         <li>追加する写真、画像を選択して下さい。</li>
                       </ul>
                     </div>
-
-
-
-
                     <div class="wrap_03">
                       <h4>画像タイトル</h4>
                       <input type="text" name="photoName">

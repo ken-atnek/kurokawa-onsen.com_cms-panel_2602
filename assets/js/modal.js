@@ -8,11 +8,16 @@
  *
  */
 function closeModal() {
-  let blockModal = document.getElementById('modalBlock');
-  if (!blockModal) return;
-  blockModal.classList.remove('is-active');
-  blockModal.classList.remove('bg-orange');
-  blockModal.classList.remove('bg-black');
+  const modals = [
+    document.getElementById('modalBlock'),
+    document.getElementById('modalSelectBlock'),
+  ].filter(Boolean);
+  if (modals.length === 0) return;
+  modals.forEach((blockModal) => {
+    blockModal.classList.remove('is-active');
+    blockModal.classList.remove('bg-orange');
+    blockModal.classList.remove('bg-black');
+  });
   document.documentElement.style.overflow = '';
 }
 /**

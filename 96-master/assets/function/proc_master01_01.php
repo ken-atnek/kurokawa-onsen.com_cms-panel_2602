@@ -287,7 +287,7 @@ if (!empty($shopsList)) {
                   <a href="./master01_02.php?method=edit&shopId={$shopId}"></a>
                 </div>
                 <div class="item_edit">
-                  <a href="#"></a>
+                  <a href="./master01_01_02.php?shopId={$shopId}"></a>
                 </div>
                 <div class="item_edit">
                   <a href="#"></a>

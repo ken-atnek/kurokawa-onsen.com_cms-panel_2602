@@ -603,6 +603,13 @@ header {
                     }
                     .inner_right {
                         @include select-image-block-right;
+                        button {
+                            width: 8rem;
+                            height: 3rem;
+                            &.btn-confirm {
+                                @include main-button("confirm");
+                            }
+                        }
                     }
                 }
             }

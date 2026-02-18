@@ -444,22 +444,12 @@ switch ($action) {
               case 'new': {
                   $makeTag['title'] = '新規店舗登録';
                   $makeTag['msg'] = '登録が完了しました。';
-                  #----------------------------
-                  # DB更新完了のJSONファイル作成
-                  #----------------------------
-                  $cmd = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShops.php ' . $newShopId . ' 2>&1 &';
-                  exec($cmd, $output, $return_var);
                 }
                 break;
               #***** 編集 *****#
               case 'edit': {
                   $makeTag['title'] = '店舗情報編集';
                   $makeTag['msg'] = '更新が完了しました。';
-                  #----------------------------
-                  # DB更新完了のJSONファイル作成
-                  #----------------------------
-                  $cmd = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShops.php ' . $shopId . ' 2>&1 &';
-                  exec($cmd, $output, $return_var);
                 }
                 break;
             }
