@@ -46,6 +46,7 @@ $DB_CONNECT = db_connect();
 function SQL_Process($connect, $table, $inSqlParams, $whereParams, $processFlg, $exeFlg)
 {
 	global $DB_CONNECT;
+	$GLOBALS['DB_LAST_ERROR'] = null;
 	$SQLDefine = '';
 	if ($processFlg == 1) {
 		#登録
@@ -110,7 +111,15 @@ function SQL_Process($connect, $table, $inSqlParams, $whereParams, $processFlg, 
 			$DB_CONNECT = db_connect();
 			return SQL_Process($DB_CONNECT, $table, $inSqlParams, $whereParams, $processFlg, $exeFlg);
 		} else {
-			throw $e;
+			#呼び出し元で処理できるよう失敗として返す（Fatal error を防止）
+			$GLOBALS['DB_LAST_ERROR'] = [
+				'table' => $table,
+				'processFlg' => $processFlg,
+				'exeFlg' => $exeFlg,
+				'sqlstate' => (string)$e->getCode(),
+				'message' => $e->getMessage(),
+			];
+			return 0;
 		}
 	}
 }
@@ -167,6 +176,12 @@ function pdoQueryExecute($connect, $inSqlParams, $whereParams)
 	#var_dump($inSqlParams, $whereParams);
 	$result = $connect->execute();
 	if (!$result) {
+		$info = $connect->errorInfo();
+		$GLOBALS['DB_LAST_ERROR'] = [
+			'sqlstate' => (string)($info[0] ?? ''),
+			'driver_code' => (string)($info[1] ?? ''),
+			'message' => (string)($info[2] ?? ''),
+		];
 		#失敗応答
 		return 0;
 	} else {

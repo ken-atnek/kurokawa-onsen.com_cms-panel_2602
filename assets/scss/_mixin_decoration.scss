@@ -355,6 +355,15 @@
         &:active {
             background-color: #696969;
         }
+    } @else if $type == "cancel" {
+        background-color: #fff;
+        border: 1px solid $font-black;
+        &:hover {
+            background-color: $hover-bg-blue;
+        }
+        &:active {
+            background-color: #fff;
+        }
         // } @else if $type == "back" {
         //     border: 1px solid $font-black;
         //     &:hover {
@@ -756,38 +765,10 @@
 -----------------------------------------*/
 @mixin border-image {
     background-image:
-        repeating-linear-gradient(
-            0deg,
-            var(--borderColor),
-            var(--borderColor) var(--borderWidth),
-            transparent var(--borderWidth),
-            transparent var(--borderSize),
-            var(--borderColor) var(--borderSize)
-        ),
-        repeating-linear-gradient(
-            90deg,
-            var(--borderColor),
-            var(--borderColor) var(--borderWidth),
-            transparent var(--borderWidth),
-            transparent var(--borderSize),
-            var(--borderColor) var(--borderSize)
-        ),
-        repeating-linear-gradient(
-            180deg,
-            var(--borderColor),
-            var(--borderColor) var(--borderWidth),
-            transparent var(--borderWidth),
-            transparent var(--borderSize),
-            var(--borderColor) var(--borderSize)
-        ),
-        repeating-linear-gradient(
-            270deg,
-            var(--borderColor),
-            var(--borderColor) var(--borderWidth),
-            transparent var(--borderWidth),
-            transparent var(--borderSize),
-            var(--borderColor) var(--borderSize)
-        );
+        repeating-linear-gradient(0deg, var(--borderColor), var(--borderColor) var(--borderWidth), transparent var(--borderWidth), transparent var(--borderSize), var(--borderColor) var(--borderSize)),
+        repeating-linear-gradient(90deg, var(--borderColor), var(--borderColor) var(--borderWidth), transparent var(--borderWidth), transparent var(--borderSize), var(--borderColor) var(--borderSize)),
+        repeating-linear-gradient(180deg, var(--borderColor), var(--borderColor) var(--borderWidth), transparent var(--borderWidth), transparent var(--borderSize), var(--borderColor) var(--borderSize)),
+        repeating-linear-gradient(270deg, var(--borderColor), var(--borderColor) var(--borderWidth), transparent var(--borderWidth), transparent var(--borderSize), var(--borderColor) var(--borderSize));
     background-size:
         1px 100%,
         100% 1px,
@@ -1009,9 +990,7 @@
     &:has(> :is(button, a):only-child) {
         grid-template-columns: 1fr;
     }
-    &:has(> :is(button, a):nth-child(2)):not(
-            :has(> :is(button, a):nth-child(3))
-        ) {
+    &:has(> :is(button, a):nth-child(2)):not(:has(> :is(button, a):nth-child(3))) {
         grid-template-columns: repeat(2, auto);
     }
 }

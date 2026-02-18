@@ -640,7 +640,16 @@ print <<<HTML
 HTML;
 #表示可能リストあればループ処理
 if (isset($shopCloseWeekList) && is_array($shopCloseWeekList) && count($shopCloseWeekList) > 0) {
-  $closedWeekdays = isset($shopData['closed_weekdays']) ? json_decode($shopData['closed_weekdays'], true) : array();
+  #closed_weekdays は「DB取得時: JSON文字列」「新規初期値: 配列」の両方があり得る
+  $closedWeekdays = array();
+  if (isset($shopData['closed_weekdays'])) {
+    if (is_string($shopData['closed_weekdays'])) {
+      $decoded = json_decode($shopData['closed_weekdays'], true);
+      $closedWeekdays = is_array($decoded) ? $decoded : array();
+    } elseif (is_array($shopData['closed_weekdays'])) {
+      $closedWeekdays = $shopData['closed_weekdays'];
+    }
+  }
   foreach ($shopCloseWeekList as $weekKey => $weekLabel) {
     $checked = (isset($closedWeekdays) && in_array($weekKey, $closedWeekdays)) ? 'checked' : '';
     print <<<HTML
@@ -707,7 +716,7 @@ print <<<HTML
           ></button>
         </div>
         <div class="box-details">
-          <p>基本情報情報を修正します。よろしいですか？</p>
+          <p></p>
           <div class="box-btn">
             <button type="button" class="btn-cancel">キャンセル</button>
             <button type="button" class="btn-confirm">はい</button>

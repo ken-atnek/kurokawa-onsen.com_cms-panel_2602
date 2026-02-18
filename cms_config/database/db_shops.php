@@ -13,7 +13,7 @@ function getShopList()
 								lunch_open_time, lunch_close_time, lunch_note, 
 								dinner_open_time, dinner_close_time, dinner_note, 
 								regular_holiday_display, closed_weekdays, sort_order, created_at 
-						FROM shops WHERE is_active = 1 ORDER BY shop_id DESC";
+							FROM shops WHERE is_active = 1 ORDER BY shop_id DESC";
 		#プリペアードステートメント作成
 		$newStmt = $DB_CONNECT->prepare($strSQL);
 		#SQL実行
@@ -44,7 +44,7 @@ function searchShopList($searchConditions)
 								lunch_open_time, lunch_close_time, lunch_note, 
 								dinner_open_time, dinner_close_time, dinner_note, 
 								regular_holiday_display, closed_weekdays, sort_order, created_at 
-						FROM shops WHERE is_active = 1";
+							FROM shops WHERE is_active = 1";
 		#WHERE句生成：ヘルパー関数呼び出し
 		list($whereSql, $sqlParams) = searchShopHelper($searchConditions);
 		$strSQL .= $whereSql;
@@ -115,12 +115,12 @@ function getShops_FindById($shopId = null)
 	try {
 		if ($shopId !== null) {
 			$strSQL = "SELECT 
-								shop_id, is_public,shop_type, shop_name, shop_name_kana, shop_name_en, 
-								postal_code, address1, address2, address3, tel, fax, email, is_email_public, website_url, 
-								lunch_open_time, lunch_close_time, lunch_note, 
-								dinner_open_time, dinner_close_time, dinner_note, 
-								regular_holiday_display, closed_weekdays, sort_order, is_active, created_at 
-							FROM shops WHERE shop_id = :value LIMIT 1";
+									shop_id, is_public,shop_type, shop_name, shop_name_kana, shop_name_en, 
+									postal_code, address1, address2, address3, tel, fax, email, is_email_public, website_url, 
+									lunch_open_time, lunch_close_time, lunch_note, 
+									dinner_open_time, dinner_close_time, dinner_note, 
+									regular_holiday_display, closed_weekdays, sort_order, is_active, created_at 
+								FROM shops WHERE shop_id = :value LIMIT 1";
 		} else {
 			#店舗IDが指定されていない場合
 			return null;
