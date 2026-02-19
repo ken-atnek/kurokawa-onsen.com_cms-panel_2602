@@ -178,6 +178,9 @@ h3 {
     &.menu-color01 {
         background-color: $menu-color01;
     }
+    &.menu-color03 {
+        background-color: $menu-color03;
+    }
     .block_inner {
         position: relative;
         background-color: $base-white;
@@ -291,7 +294,7 @@ header {
     }
     & > nav {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         font-size: inherit;
         a {
             position: relative;
@@ -347,14 +350,16 @@ header {
                     }
                 }
             }
-            // &.menu-color-03 {
-            //     span {
-            //         &::before {
-            //             width: 1.8em;
-            //             @include svg-iconMenu03("000000");
-            //         }
-            //     }
-            // }
+            &.menu-color-03 {
+                background-color: $menu-color03;
+
+                span {
+                    &::before {
+                        width: 2em;
+                        @include svg-icon-cart02("000000");
+                    }
+                }
+            }
             // &.menu-color-04 {
             //     span {
             //         &::before {
@@ -490,6 +495,14 @@ header {
         .title {
             &::before {
                 @include svg-iconMenu01("000000");
+            }
+        }
+    }
+    &.menu-color03 {
+        background-color: $menu-color03;
+        .title {
+            &::before {
+                @include svg-icon-cart02("000000");
             }
         }
     }

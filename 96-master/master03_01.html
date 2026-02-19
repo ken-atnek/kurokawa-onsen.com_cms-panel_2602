@@ -1,0 +1,622 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/master03-01.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-03-01 status-master">
+      <section class="container-left-menu menu-color03">
+        <div class="title">EC販売管理</div>
+        <nav>
+          <a href="#" class="is-active"><span>受注ステータス</span></a>
+          <!-- <a href="#"><span>店舗登録</span></a> -->
+        </nav>
+      </section>
+      <div class="main-contents menu-color03">
+        <div class="block_inner">
+          <h2>EC販売管理</h2>
+          <form name="searchForm" class="head_search_setting">
+            <h3>検索条件設定</h3>
+            <dl>
+              <div class="box_shop">
+                <dt>店名</dt>
+                <dd>
+                  <div class="select-shop-name" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="select-shop-name"
+                        value=""
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="1"
+                            id="shop01"
+                          />
+                          <label for="shop01">すみよし食堂</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="2"
+                            id="shop02"
+                          />
+                          <label for="shop02">とうふ吉祥</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="3"
+                            id="shop03"
+                          />
+                          <label for="shop03">寺子屋本舗</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="4"
+                            id="shop04"
+                          />
+                          <label for="shop04">やまたけ </label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-shop-name"
+                            value="5"
+                            id="shop05"
+                          />
+                          <label for="shop05">白玉っ子 </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </dd>
+              </div>
+              <div class="box-status">
+                <dt>ステータス</dt>
+                <dd>
+                  <div class="select-search-status" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="select-search-status"
+                        value=""
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-search-status"
+                            value="1"
+                            id="searchStatus01"
+                          />
+                          <label for="searchStatus01">受付中</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-search-status"
+                            value="2"
+                            id="searchStatus02"
+                          />
+                          <label for="searchStatus02">準備中</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-search-status"
+                            value="3"
+                            id="searchStatus03"
+                          />
+                          <label for="searchStatus03">発送済</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-search-status"
+                            value="4"
+                            id="searchStatus04"
+                          />
+                          <label for="searchStatus04">対応済み </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </dd>
+              </div>
+              <div class="box-date">
+                <dt>受付日</dt>
+                <dd>
+                  <div class="wrap-period">
+                    <input type="date" name="searchStartDay" />
+                    <span>〜</span>
+                    <input type="date" name="searchEndDay" />
+                  </div>
+                </dd>
+              </div>
+              <div class="box-name">
+                <dt>お客様名</dt>
+                <dd>
+                  <input type="text" />
+                </dd>
+              </div>
+              <div>
+                <dt>注文番号</dt>
+                <dd>
+                  <input type="text" />
+                </dd>
+              </div>
+              <div class="box-tel">
+                <dt>電話番号</dt>
+                <dd>
+                  <input type="text" />
+                </dd>
+              </div>
+              <div class="box-mail">
+                <dt>メールアドレス</dt>
+                <dd>
+                  <input type="text" />
+                </dd>
+              </div>
+            </dl>
+            <div class="box-btn">
+              <button type="button" class="item-reset">リセット</button>
+              <button type="button" class="item-search">条件で検索</button>
+            </div>
+          </form>
+          <article class="inner_search-list">
+            <ul>
+              <li>
+                <div>注文日・番号</div>
+                <div>受注店舗・お客様情報</div>
+                <div>商品</div>
+                <div>個数</div>
+                <div>小計</div>
+                <div>進捗状況/変更日</div>
+              </li>
+              <li>
+                <div class="item-date">
+                  <span>2026/2/22</span><i>EK00257</i>
+                </div>
+                <div class="wrap-customer-info">
+                  <div class="shop-name">
+                    <span>Au Pan & Coffee</span>
+                  </div>
+                  <div class="inner-customer">
+                    <div class="name">浦上謙太</div>
+                    <div class="address">
+                      <span>熊本市中央区下通2丁目5-18</span>
+                      <span>加納ビル2F</span>
+                    </div>
+                    <div class="tel">
+                      <span>0967-44-0657</span>
+                    </div>
+                    <div class="mail">
+                      <a href="mailto:ken.atnek@gmail.com"
+                        >ken.atnek@gmail.com</a
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="wrap-goods">
+                  <ul>
+                    <li>
+                      <div class="goods-name">タオル</div>
+                      <div class="goods-pieces">3</div>
+                      <div class="goods-price"><span>980</span></div>
+                    </li>
+                    <li>
+                      <div class="goods-name">
+                        スギルコンディショナー（20ℓ入）
+                      </div>
+                      <div class="goods-pieces">10</div>
+                      <div class="goods-price"><span>5,980</span></div>
+                    </li>
+                  </ul>
+                  <div class="item-price">
+                    <span>25,430</span>
+                  </div>
+                </div>
+
+                <div class="wrap-status">
+                  <div class="apply-status" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="List01Status"
+                        value="1"
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                      <i></i>
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <!-- NOTE  インラインでz-indexを付与 -->
+                        <li style="z-index: 2">
+                          <input
+                            type="radio"
+                            name="List01Status"
+                            value="1"
+                            id="list01-registered"
+                            checked
+                          />
+                          <label
+                            for="list01-registered"
+                            class="status-registered"
+                            >受付中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List01Status"
+                            value="2"
+                            id="list01-preparing"
+                          />
+                          <label for="list01-preparing" class="status-preparing"
+                            >準備中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List01Status"
+                            value="3"
+                            id="list01-shippedw"
+                          />
+                          <label for="list01-shippedw" class="status-shipped"
+                            >発送済</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List01Status"
+                            value="4"
+                            id="list01-completed"
+                          />
+                          <label for="list01-completed" class="status-completed"
+                            >対応済</label
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <span class="date">2025/12/31</span>
+                </div>
+                <div class="box-note">
+                  <span>メモ</span>
+                  <textarea></textarea>
+                </div>
+              </li>
+              <li>
+                <div class="item-date">
+                  <span>2026/2/22</span><i>EK00257</i>
+                </div>
+                <div class="wrap-customer-info">
+                  <div class="shop-name">
+                    <span>Au Pan & Coffee</span>
+                  </div>
+                  <div class="inner-customer">
+                    <div class="name">浦上謙太</div>
+                    <div class="address">
+                      <span>熊本市中央区下通2丁目5-18</span>
+                      <span>加納ビル2F</span>
+                    </div>
+                    <div class="tel">
+                      <span>0967-44-0657</span>
+                    </div>
+                    <div class="mail">
+                      <a href="mailto:ken.atnek@gmail.com"
+                        >ken.atnek@gmail.com</a
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="wrap-goods">
+                  <ul>
+                    <li>
+                      <div class="goods-name">タオル</div>
+                      <div class="goods-pieces">3</div>
+                      <div class="goods-price"><span>980</span></div>
+                    </li>
+                    <li>
+                      <div class="goods-name">
+                        スギルコンディショナー（20ℓ入）
+                      </div>
+                      <div class="goods-pieces">10</div>
+                      <div class="goods-price"><span>5,980</span></div>
+                    </li>
+                  </ul>
+                  <div class="item-price">
+                    <span>25,430</span>
+                  </div>
+                </div>
+
+                <div class="wrap-status">
+                  <div class="apply-status" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="List02Status"
+                        value="1"
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                      <i></i>
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <!-- NOTE  インラインでz-indexを付与 -->
+                        <li style="z-index: 2">
+                          <input
+                            type="radio"
+                            name="List02Status"
+                            value="1"
+                            id="list02-registered"
+                          />
+                          <label
+                            for="list02-registered"
+                            class="status-registered"
+                            >受付中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List02Status"
+                            value="2"
+                            id="list02-preparing"
+                            checked
+                          />
+                          <label for="list02-preparing" class="status-preparing"
+                            >準備中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List02Status"
+                            value="3"
+                            id="list02-shippedw"
+                          />
+                          <label for="list02-shippedw" class="status-shipped"
+                            >発送済</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List02Status"
+                            value="4"
+                            id="list02-completed"
+                          />
+                          <label for="list02-completed" class="status-completed"
+                            >対応済</label
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <span class="date">2025/12/31</span>
+                </div>
+                <div class="box-note">
+                  <span>メモ</span>
+                  <textarea></textarea>
+                </div>
+              </li>
+              <li>
+                <div class="item-date">
+                  <span>2026/2/22</span><i>EK00257</i>
+                </div>
+                <div class="wrap-customer-info">
+                  <div class="shop-name">
+                    <span>Au Pan & Coffee</span>
+                  </div>
+                  <div class="inner-customer">
+                    <div class="name">浦上謙太</div>
+                    <div class="address">
+                      <span>熊本市中央区下通2丁目5-18</span>
+                      <span>加納ビル2F</span>
+                    </div>
+                    <div class="tel">
+                      <span>0967-44-0657</span>
+                    </div>
+                    <div class="mail">
+                      <a href="mailto:ken.atnek@gmail.com"
+                        >ken.atnek@gmail.com</a
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="wrap-goods">
+                  <ul>
+                    <li>
+                      <div class="goods-name">タオル</div>
+                      <div class="goods-pieces">3</div>
+                      <div class="goods-price"><span>980</span></div>
+                    </li>
+                    <li>
+                      <div class="goods-name">
+                        スギルコンディショナー（20ℓ入）
+                      </div>
+                      <div class="goods-pieces">10</div>
+                      <div class="goods-price"><span>5,980</span></div>
+                    </li>
+                  </ul>
+                  <div class="item-price">
+                    <span>25,430</span>
+                  </div>
+                </div>
+
+                <div class="wrap-status">
+                  <div class="apply-status" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="List01Status"
+                        value="1"
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                      <i></i>
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <!-- NOTE  インラインでz-indexを付与 -->
+                        <li style="z-index: 2">
+                          <input
+                            type="radio"
+                            name="List03Status"
+                            value="1"
+                            id="list03-registered"
+                          />
+                          <label
+                            for="list03-registered"
+                            class="status-registered"
+                            >受付中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List03Status"
+                            value="2"
+                            id="list03-preparing"
+                          />
+                          <label for="list03-preparing" class="status-preparing"
+                            >準備中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List03Status"
+                            value="3"
+                            id="list03-shippedw"
+                            checked
+                          />
+                          <label for="list03-shippedw" class="status-shipped"
+                            >発送済</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List03Status"
+                            value="4"
+                            id="list03-completed"
+                          />
+                          <label for="list03-completed" class="status-completed"
+                            >対応済</label
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <span class="date">2025/12/31</span>
+                </div>
+                <div class="box-note">
+                  <span>メモ</span>
+                  <textarea></textarea>
+                </div>
+              </li>
+            </ul>
+            <div class="box-pager">
+              <div class="box_number">
+                <nav>
+                  <a href="#" class="is-active"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                </nav>
+                <button type="button" class="btn_next"></button>
+              </div>
+              <div class="box_input">
+                <input type="text" placeholder="1/16513" />
+              </div>
+            </div>
+          </article>
+          <a href="./grp02_01.php" class="link_page-back_bottom">戻る</a>
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>
