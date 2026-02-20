@@ -259,13 +259,13 @@ print <<<HTML
                   </dd>
                 </div>
                 <div>
-                  <dt class="required">メールアドレス</dt>
+                  <dt>メールアドレス</dt>
                   <dd>
                     <input type="text" name="form06" value="{$escEmail}" class="email">
                   </dd>
                 </div>
                 <div class="box_setting">
-                  <dt class="required">メールアドレス<br>公開設定</dt>
+                  <dt>メールアドレス<br>公開設定</dt>
                   <dd>
 
 HTML;
@@ -274,11 +274,11 @@ $checkedEmailPrivate = ($shopData['is_email_public'] == 0) ? 'checked' : '';
 $checkedEmailPublic = ($shopData['is_email_public'] == 1) ? 'checked' : '';
 print <<<HTML
                     <div>
-                      <input type="radio" name="form06_01" value="0" id="form06_private" {$checkedEmailPrivate} class="required-item" required>
+                      <input type="radio" name="form06_01" value="0" id="form06_private" {$checkedEmailPrivate}>
                       <label for="form06_private">非公開</label>
                     </div>
                     <div>
-                      <input type="radio" name="form06_01" value="1" id="form06_public" {$checkedEmailPublic} class="required-item" required>
+                      <input type="radio" name="form06_01" value="1" id="form06_public" {$checkedEmailPublic}>
                       <label for="form06_public">公開</label>
                     </div>
                   </dd>
@@ -630,8 +630,8 @@ print <<<HTML
                   </dd>
                 </div>
                 <div class="box_textarea">
-                  <dt class="required">店休日<span>(表示用)</span></dt>
-                  <dd><textarea name="form09" class="required-item" required>{$escRegularHolidayDisplay}</textarea></dd>
+                  <dt>店休日<span>(表示用)</span></dt>
+                  <dd><textarea name="form09">{$escRegularHolidayDisplay}</textarea></dd>
                 </div>
                 <div class="box_close-week-day">
                   <dt>店休日<span>(システム用)</span></dt>

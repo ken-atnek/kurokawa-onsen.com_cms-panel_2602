@@ -173,6 +173,61 @@ function sendMail_Common($toEmail, $toName, $mailTitle, $mailBody, $fromEmail, $
 
 
 
+/**
+ * db/ を同期する
+ * db/shops/product(s) を除外して db/ を同期（--delete あり）
+ */
+function mirrorDbSelectiveMasterByRsync(string $srcDbDir, string $destDbDir, string $masterOnlyFile): void
+{
+	$srcDbDir  = rtrim($srcDbDir, "/\\");
+	$destDbDir = rtrim($destDbDir, "/\\");
+	if ($srcDbDir === '' || $destDbDir === '' || $srcDbDir === $destDbDir) {
+		return;
+	}
+	if (!is_dir($srcDbDir)) {
+		return;
+	}
+	if (!is_dir($destDbDir)) {
+		@mkdir($destDbDir, 0777, true);
+	}
+	#同時実行対策（src側でロック）
+	$lockFp = @fopen($srcDbDir . '/.mirror_rsync.lock', 'c');
+	if ($lockFp === false) {
+		return;
+	}
+	if (!flock($lockFp, LOCK_EX)) {
+		fclose($lockFp);
+		return;
+	}
+	try {
+		$rsync = defined('DEFINE_RSYNC_BIN') ? (string)DEFINE_RSYNC_BIN : 'rsync';
+		# db/ 全体同期（--delete あり、shopのproductsだけ除外）
+		# NOTE: 仕様表記ゆれ対策で product / products の両方を除外
+		$cmd = escapeshellcmd($rsync)
+			. ' -a --delete'
+			. ' --exclude=' . escapeshellarg('.mirror_rsync.lock')
+			. ' --exclude=' . escapeshellarg('shops/product/')
+			. ' --exclude=' . escapeshellarg('shops/product/**')
+			. ' --exclude=' . escapeshellarg('shops/products/')
+			. ' --exclude=' . escapeshellarg('shops/products/**')
+			. ' ' . escapeshellarg($srcDbDir . '/')
+			. ' ' . escapeshellarg($destDbDir . '/')
+			. ' 2>&1';
+		$out = [];
+		$code = 0;
+		@exec($cmd, $out, $code);
+		if ($code !== 0) {
+			error_log('[json-mirror] rsync failed code=' . $code . ' cmd=' . $cmd . ' out=' . implode("\n", $out));
+		}
+	} finally {
+		flock($lockFp, LOCK_UN);
+		fclose($lockFp);
+	}
+}
+
+
+
+
 
 
 /*

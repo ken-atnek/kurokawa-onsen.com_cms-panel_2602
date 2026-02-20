@@ -16,13 +16,13 @@ function getShopItemsData(int $shopId): array
 	try {
 		#SQL定義
 		$strSQL = "
-            SELECT
-                shop_id, item_type, slot,
-                title, description, price_yen, image_path, image_title, is_active
-            FROM shop_items
-            WHERE shop_id = :shop_id
-            ORDER BY item_type, slot
-        ";
+			SELECT
+				shop_id, item_type, slot,
+				title, description, price_yen, image_path, image_title, is_active
+			FROM shop_items
+			WHERE shop_id = :shop_id
+			ORDER BY item_type, slot
+		";
 		#プリペアードステートメント作成
 		$newStmt = $DB_CONNECT->prepare($strSQL);
 		#変数バインド
@@ -81,27 +81,28 @@ function defaultShopItemRow(int $shopId, string $type, int $slot): array
 		'is_active'    => 1,
 	];
 }
-
-
+/**
+ * おすすめ商品が1件でも有効か
+ */
 function hasRecommendedItems(int $shopId): bool
 {
 	global $DB_CONNECT;
 	#SQL定義
 	$strSQL = "
-        SELECT 1
-        FROM shop_items
-        WHERE shop_id = :shop_id
-          AND item_type = 'recommended'
-          AND is_active = 1
-          AND (
-               (title IS NOT NULL AND title <> '')
-            OR (description IS NOT NULL AND description <> '')
-            OR  price_yen IS NOT NULL
-            OR (image_path IS NOT NULL AND image_path <> '')
-            OR (image_title IS NOT NULL AND image_title <> '')
-          )
-        LIMIT 1
-    ";
+		SELECT 1
+			FROM shop_items
+				WHERE shop_id = :shop_id
+				AND item_type = 'recommended'
+				AND is_active = 1
+				AND (
+					(title IS NOT NULL AND title <> '')
+					OR (description IS NOT NULL AND description <> '')
+					OR price_yen IS NOT NULL
+					OR (image_path IS NOT NULL AND image_path <> '')
+					OR (image_title IS NOT NULL AND image_title <> '')
+				)
+			LIMIT 1
+		";
 	#プリペアードステートメント作成
 	$newStmt = $DB_CONNECT->prepare($strSQL);
 	#変数バインド

@@ -7,13 +7,15 @@ function getShopList()
 	global $DB_CONNECT;
 	try {
 		#SQL定義
-		$strSQL = "SELECT 
+		$strSQL = "
+							SELECT 
 								shop_id, is_public,shop_type, shop_name, shop_name_kana, shop_name_en, 
 								postal_code, address1, address2, address3, tel, fax, email, is_email_public, website_url, 
 								lunch_open_time, lunch_close_time, lunch_note, 
 								dinner_open_time, dinner_close_time, dinner_note, 
 								regular_holiday_display, closed_weekdays, sort_order, created_at 
-							FROM shops WHERE is_active = 1 ORDER BY shop_id DESC";
+							FROM shops WHERE is_active = 1 ORDER BY shop_id ASC
+							";
 		#プリペアードステートメント作成
 		$newStmt = $DB_CONNECT->prepare($strSQL);
 		#SQL実行
@@ -48,7 +50,7 @@ function searchShopList($searchConditions)
 		#WHERE句生成：ヘルパー関数呼び出し
 		list($whereSql, $sqlParams) = searchShopHelper($searchConditions);
 		$strSQL .= $whereSql;
-		$strSQL .= " ORDER BY shop_id DESC";
+		$strSQL .= " ORDER BY shop_id ASC";
 		#プリペアードステートメント作成
 		$newStmt = $DB_CONNECT->prepare($strSQL);
 		#変数バインド

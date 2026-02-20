@@ -13,7 +13,9 @@ define('DEFINE_DEBUGFLG', 0);
 
 #ドメイン定義
 #define('DOMAIN_NAME', 'https://kurokawa-onsen.com');
-define('DOMAIN_NAME', '../../2603/public');
+#define('DOMAIN_NAME_PREVIEW', 'https://kurokawa-onsen.com/2603');
+define('DOMAIN_NAME', '../../../2603/public');
+define('DOMAIN_NAME_PREVIEW', '../../../2603/public');
 
 #ドキュメントルート定義
 define('DOCUMENT_ROOT_PATH', dirname(__DIR__) . '/../');
@@ -37,6 +39,7 @@ define('DEFINE_FRONTEND_DIR_PATH', PUBLIC_HTML_DIR . '/2603/public');
 
 #===================================#
 #json生成ファンクションファイルパス
+#define('DEFINE_JSON_FUNCTION_MASTER', PUBLIC_HTML_DIR . '/demo-cms-panel/cms_config/common');
 define('DEFINE_JSON_FUNCTION_MASTER', PUBLIC_HTML_DIR . '/cms-panel_2602/cms_config/common');
 
 #===================================#
@@ -49,8 +52,8 @@ define('DEFINE_MASTER_JSON_DIR_PATH', DEFINE_FRONTEND_DIR_PATH . '/db/master');
 #プレビュー画像保存パス
 define('DEFINE_PREVIEW_IMAGE_DIR_PATH', '../../../tmp_upload');
 
-#事業所登録画像ファイル保存パス
-define('DEFINE_FILE_DIR_PATH', DEFINE_JSON_DIR_PATH . '/images');
+#店舗登録画像ファイル保存パス
+define('DEFINE_FILE_DIR_PATH', DEFINE_JSON_DIR_PATH . '/images/shops');
 
 #===================================#
 #管理画面URL
@@ -70,4 +73,22 @@ $DEFINE_MASTER_NOTIFY_NAME = '黒川温泉観光協会';
 $DEFINE_NO_REPLY = 'noreply@kurokawa-onsen.com';
 
 #メール送信元名称
-$DEFINE_MAIL_SENDER_NAME = '黒川温泉観光協会事務局';
+$DEFINE_MAIL_SENDER_NAME = '黒川温泉観光協会';
+
+
+
+#===================================#
+# JSONミラー設定（プレリリース用）
+#  - ミラー元：正式ドメイン側
+#  - ミラー先：初期ドメイン側
+#  - 検証が終わったら DEFINE_DEBUGFLG を 0 に戻す（=同期OFF）
+#===================================#
+#JSONミラー同期有効フラグ (検証中だけ 1、本番は 0)
+define('DEFINE_JSON_MIRROR_FLG', 0);
+define('DEFINE_JSON_MIRROR_ENABLE', (DEFINE_JSON_MIRROR_FLG === 1));
+#ミラー元（正式ドメイン側）
+define('DEFINE_JSON_MIRROR_SRC_DB_DIR',  '/home/xbaf8039/kurokawa-onsen.com/public_html/2603/db');
+#ミラー先（初期ドメイン側）
+define('DEFINE_JSON_MIRROR_DEST_DB_DIR', '/home/xbaf8039/tuna-pic.co.jp/public_html/demo-kurokawa-onsen/2603/db');
+#rsync のパス（環境により異なる場合があるので要調整）
+define('DEFINE_RSYNC_BIN', '/usr/bin/rsync');

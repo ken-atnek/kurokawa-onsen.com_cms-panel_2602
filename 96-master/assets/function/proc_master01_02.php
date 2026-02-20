@@ -134,9 +134,9 @@ switch ($action) {
       if ($form01 !== null && $form01 !== '0' && $form01 !== '1') {
         $validationErrors[] = '公開設定の値が不正です。';
       }
-      if ($form06_01 !== null && $form06_01 !== '0' && $form06_01 !== '1') {
-        $validationErrors[] = 'メールアドレス公開設定の値が不正です。';
-      }
+      #if ($form06_01 !== null && $form06_01 !== '0' && $form06_01 !== '1') {
+      #  $validationErrors[] = 'メールアドレス公開設定の値が不正です。';
+      #}
       #店舗種別バリデーション
       $allowedShopTypes = ['food', 'souvenir', 'other'];
       if (!empty($form02) && in_array((string)$form02, $allowedShopTypes, true) === false) {
@@ -151,8 +151,8 @@ switch ($action) {
         'form03_02' => '店舗名（英語）',
         'form04' => '郵便番号',
         'form05' => '電話番号',
-        'form06_01' => 'メールアドレスの公開設定',
-        'form09' => '店休日（表示用）',
+        #'form06_01' => 'メールアドレスの公開設定',
+        #'form09' => '店休日（表示用）',
         'form11_01' => 'ログインID',
         'form11_02' => 'パスワード',
       ];
