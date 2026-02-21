@@ -33,11 +33,37 @@ $pagePrefix = 'mKey01-01-01_';
 #このページのユニークなセッションキーを生成
 $noUpDateKey = $pagePrefix . bin2hex(random_bytes(8));
 $_SESSION['sKey'] = $noUpDateKey;
-#不要なセッション削除
+#不要なセッション削除（uploadドラフトtmpも回収）
+$tmpUploadRoot = realpath(dirname(__DIR__) . '/tmp_upload');
 foreach ($_SESSION as $key => $val) {
-  if ($key !== 'sKey' && $key !== 'master_login' && $key !== $noUpDateKey) {
-    unset($_SESSION[$key]);
+  if ($key === 'sKey' || $key === 'master_login' || $key === $noUpDateKey) {
+    continue;
   }
+  #uploadドラフト（proc_master01_01_01.php が保存する形式）から tmp を削除
+  if (is_array($val)) {
+    foreach ($val as $row) {
+      if (!is_array($row)) {
+        continue;
+      }
+      $tmp = $row['tmp_name'] ?? '';
+      if (!is_string($tmp) || $tmp === '') {
+        continue;
+      }
+      $real = realpath($tmp);
+      if ($real === false || $tmpUploadRoot === false) {
+        continue;
+      }
+      $realNorm = str_replace('\\', '/', $real);
+      $rootNorm = str_replace('\\', '/', $tmpUploadRoot);
+      if (strpos($realNorm, rtrim($rootNorm, '/') . '/') !== 0) {
+        continue;
+      }
+      if (is_file($real)) {
+        @unlink($real);
+      }
+    }
+  }
+  unset($_SESSION[$key]);
 }
 #セッション本体の初期化
 $_SESSION[$noUpDateKey] = array();
@@ -354,7 +380,7 @@ print <<<HTML
     <script src="../assets/js/common.js" defer></script>
     <script src="../assets/js/dropZone.js" defer></script>
     <script src="../assets/js/modal.js" defer></script>
-    <script src="./assets/js/master01_01_01.js" defer></script>
+    <script src="./assets/js/master01_01_01.js?46081621022026" defer></script>
   </body>
 </html>
 

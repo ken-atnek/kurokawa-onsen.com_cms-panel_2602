@@ -150,7 +150,7 @@ switch ($action) {
         'form03_01' => '店舗名（ふりがな）',
         'form03_02' => '店舗名（英語）',
         'form04' => '郵便番号',
-        'form05' => '電話番号',
+        #'form05' => '電話番号',
         #'form06_01' => 'メールアドレスの公開設定',
         #'form09' => '店休日（表示用）',
         'form11_01' => 'ログインID',
@@ -218,11 +218,19 @@ switch ($action) {
           #郵便番号フォーマット
           $postalCode = formatPostalCode($form04);
           #電話番号フォーマット
-          $phone = str_replace(['-', '−', '―', 'ー', '‐'], '', $form05);
-          $phone = formatPhoneNumber($phone, false);
+          if (!empty($form05)) {
+            $phone = str_replace(['-', '−', '―', 'ー', '‐'], '', $form05);
+            $phone = formatPhoneNumber($phone, false);
+          } else {
+            $phone = null;
+          }
           #FAX番号フォーマット
-          $fax = str_replace(['-', '−', '―', 'ー', '‐'], '', $form05_01);
-          $fax = formatPhoneNumber($fax, false);
+          if (!empty($form05_01)) {
+            $fax = str_replace(['-', '−', '―', 'ー', '‐'], '', $form05_01);
+            $fax = formatPhoneNumber($fax, false);
+          } else {
+            $fax = null;
+          }
           #DB登録情報準備
           $lunchOpenTime = (!empty($form08_01_open_hour) && !empty($form08_01_open_minute)) ? sprintf('%02d:%02d:00', $form08_01_open_hour, $form08_01_open_minute) : null;
           $lunchCloseTime = (!empty($form08_01_close_hour) && !empty($form08_01_close_minute)) ? sprintf('%02d:%02d:00', $form08_01_close_hour, $form08_01_close_minute) : null;

@@ -151,7 +151,6 @@ function cleanupFiles(array $paths): void
 		}
 	}
 }
-
 /**
  * shops_folders: 削除済み(is_active=0)の同名フォルダが残っていると UNIQUE により再利用できないため、
  * 同名の削除済みレコードを退避名へリネームしてユニーク枠を解放する。
@@ -603,6 +602,7 @@ switch ($action) {
 						#プレビュー用タグ生成
 						$makeTag['tag'] .= <<<HTML
                         <li>
+                          <input type="hidden" name="draft_file_name" value="{$uniqueName}">
                           {$uniqueName}
                           <button type="button" class="btn_close" onclick="deleteFile(this);"></button>
                         </li>
@@ -752,11 +752,17 @@ HTML;
 						$mimeType = '';
 						break;
 				}
+				$hiddenDraft = '';
+				if (isset($row['tmp_name']) && is_string($row['tmp_name']) && $row['tmp_name'] !== '' && isset($row['name']) && is_string($row['name']) && $row['name'] !== '') {
+					$hiddenName = htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8');
+					$hiddenDraft = '<input type="hidden" name="draft_file_name" value="' . $hiddenName . '">';
+				}
 				$makeTag['tag'] .= <<<HTML
-                        <li>
-                          {$displayName}
-                          <button type="button" class="btn_close" onclick="deleteFile(this);"></button>
-                        </li>
+                  <li>
+                    {$hiddenDraft}
+                    {$displayName}
+                    <button type="button" class="btn_close" onclick="deleteFile(this);"></button>
+                  </li>
 
 HTML;
 			}
@@ -1286,6 +1292,9 @@ if ($shopId !== null) {
 	header("Location: ./master01_01.php");
 	exit;
 }
+#-------------#
+#XSS対策：エスケープ処理
+$escShopName = htmlspecialchars($shopData['shop_name'], ENT_QUOTES, 'UTF-8');
 
 #***** タグ生成開始 *****#
 switch ($action) {
@@ -1463,6 +1472,62 @@ HTML;
 				$photoKey = isset($_POST['photoKey']) ? $_POST['photoKey'] : null;
 				#画像ファイル名
 				$photoName = isset($_POST['photoName']) ? $_POST['photoName'] : null;
+				#checkPhoto（確認）では、file input が空でも upload draft があれば進める
+				#ただしドラフトもアップロードも無い場合はエラー
+				if ((string)$action === 'checkPhoto' && (string)$method === 'new') {
+					$hasUploadedFile = false;
+					if (isset($_FILES['images_tmp']) && is_array($_FILES['images_tmp'])) {
+						$tmp = (string)($_FILES['images_tmp']['tmp_name'] ?? '');
+						if ($tmp !== '' && is_uploaded_file($tmp)) {
+							$hasUploadedFile = true;
+						}
+					}
+					$hasDraft = false;
+					if ($targetImageUploadSessionKey !== '' && isset($_SESSION[$targetImageUploadSessionKey]) && is_array($_SESSION[$targetImageUploadSessionKey])) {
+						$rows = $_SESSION[$targetImageUploadSessionKey];
+						for ($i = count($rows) - 1; $i >= 0; $i--) {
+							if (!is_array($rows[$i])) {
+								continue;
+							}
+							$tp = $rows[$i]['tmp_name'] ?? '';
+							if (is_string($tp) && $tp !== '' && file_exists($tp) && is_file($tp)) {
+								$hasDraft = true;
+								break;
+							}
+						}
+					}
+					#セッションのドラフトが消えている場合でも、POSTされた tmp_upload 名から復元できるようにする
+					if (!$hasUploadedFile && !$hasDraft && $targetImageUploadSessionKey !== '') {
+						$postedDraftName = '';
+						if (isset($_POST['draft_file_name'])) {
+							if (is_array($_POST['draft_file_name'])) {
+								$postedDraftName = (string)($_POST['draft_file_name'][count($_POST['draft_file_name']) - 1] ?? '');
+							} else {
+								$postedDraftName = (string)$_POST['draft_file_name'];
+							}
+						}
+						$postedDraftName = trim($postedDraftName);
+						if ($postedDraftName !== '' && preg_match('/\Aphoto_\d{14}_[0-9a-f]{8}\.(?:jpe?g|png|gif|webp)\z/i', $postedDraftName)) {
+							$tmpDir = __DIR__ . '/../../../tmp_upload/';
+							$abs = $tmpDir . $postedDraftName;
+							if (file_exists($abs) && is_file($abs)) {
+								$_SESSION[$targetImageUploadSessionKey] = [[
+									'tmp_name' => $abs,
+									'preview' => '/tmp_upload/' . $postedDraftName,
+									'name' => $postedDraftName,
+									'original' => $postedDraftName,
+									'uploaded_at' => time(),
+								]];
+								$hasDraft = true;
+							}
+						}
+					}
+					if (!$hasUploadedFile && !$hasDraft) {
+						$makeTag['status'] = 'error';
+						$makeTag['msg'] = '追加する写真を選択してください。';
+						break;
+					}
+				}
 				#エディットモード判定
 				$isEdit = '';
 				if ($action == 'checkPhoto' || $action == 'editPhotoDetail') {
@@ -1472,7 +1537,7 @@ HTML;
 				}
 				$makeTag['tag'] .= <<<HTML
           <article class="block_01" id="block01">
-            <h3>写真フォルダ</h3>
+            <h3>{$escShopName}</h3>
             <dl>
 
 HTML;

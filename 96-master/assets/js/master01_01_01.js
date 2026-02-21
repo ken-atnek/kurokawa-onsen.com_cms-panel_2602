@@ -508,12 +508,6 @@ async function sendSubmit() {
  *
  */
 async function checkSubmit() {
-    //写真選択チェック
-    let fileInput = document.getElementById("js-fileElem-photoImage");
-    if (fileInput.files.length == 0) {
-        showModalMessage("追加する写真を選択してください。");
-        return false;
-    }
     //格納フォルダ選択チェック
     let folderKey = "";
     const selected = document.querySelector('input[name="selectFolder"]:checked');

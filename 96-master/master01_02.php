@@ -247,9 +247,9 @@ print <<<HTML
                   </dd>
                 </div>
                 <div class="box_tel">
-                  <dt class="required">電話番号</dt>
+                  <dt>電話番号</dt>
                   <dd>
-                    <input type="text" name="form05" value="{$escTel}" class="required-item phone_number" required>
+                    <input type="text" name="form05" value="{$escTel}">
                   </dd>
                 </div>
                 <div class="box_fax">
@@ -261,7 +261,7 @@ print <<<HTML
                 <div>
                   <dt>メールアドレス</dt>
                   <dd>
-                    <input type="text" name="form06" value="{$escEmail}" class="email">
+                    <input type="text" name="form06" value="{$escEmail}">
                   </dd>
                 </div>
                 <div class="box_setting">
@@ -360,11 +360,11 @@ HTML;
 #表示可能リストあればループ処理
 if (isset($shopMinuteList) && is_array($shopMinuteList) && count($shopMinuteList) > 0) {
   foreach ($shopMinuteList as $minuteValue => $minuteLabel) {
-    $checked = (isset($open08_01TimeParts[1]) && $open08_01TimeParts[1] === $minuteValue) ? 'checked' : '';
+    $checked = (isset($open08_01TimeParts[1]) && (int)$open08_01TimeParts[1] === (int)$minuteLabel) ? 'checked' : '';
     print <<<HTML
                               <li>
-                                <input type="radio" name="form08_01_open_minute" value="{$minuteValue}" id="open01_minute{$minuteValue}" {$checked}>
-                                <label for="open01_minute{$minuteValue}">{$minuteLabel}</label>
+                                <input type="radio" name="form08_01_open_minute" value="{$minuteLabel}" id="open01_minute{$minuteLabel}" {$checked}>
+                                <label for="open01_minute{$minuteLabel}">{$minuteLabel}</label>
                               </li>
 
 HTML;
@@ -442,11 +442,11 @@ HTML;
 #表示可能リストあればループ処理
 if (isset($shopMinuteList) && is_array($shopMinuteList) && count($shopMinuteList) > 0) {
   foreach ($shopMinuteList as $minuteValue => $minuteLabel) {
-    $checked = (isset($close08_01TimeParts[1]) && $close08_01TimeParts[1] === $minuteValue) ? 'checked' : '';
+    $checked = (isset($close08_01TimeParts[1]) && (int)$close08_01TimeParts[1] === (int)$minuteLabel) ? 'checked' : '';
     print <<<HTML
                               <li>
-                                <input type="radio" name="form08_01_close_minute" value="{$minuteValue}" id="close01_minute{$minuteValue}" {$checked}>
-                                <label for="close01_minute{$minuteValue}">{$minuteLabel}</label>
+                                <input type="radio" name="form08_01_close_minute" value="{$minuteLabel}" id="close01_minute{$minuteLabel}" {$checked}>
+                                <label for="close01_minute{$minuteLabel}">{$minuteLabel}</label>
                               </li>
 
 HTML;
@@ -527,11 +527,11 @@ HTML;
 #表示可能リストあればループ処理
 if (isset($shopMinuteList) && is_array($shopMinuteList) && count($shopMinuteList) > 0) {
   foreach ($shopMinuteList as $minuteValue => $minuteLabel) {
-    $checked = (isset($open08_02TimeParts[1]) && $open08_02TimeParts[1] === $minuteValue) ? 'checked' : '';
+    $checked = (isset($open08_02TimeParts[1]) && (int)$open08_02TimeParts[1] === (int)$minuteLabel) ? 'checked' : '';
     print <<<HTML
                               <li>
-                                <input type="radio" name="form08_02_open_minute" value="{$minuteValue}" id="open02_minute{$minuteValue}" {$checked}>
-                                <label for="open02_minute{$minuteValue}">{$minuteLabel}</label>
+                                <input type="radio" name="form08_02_open_minute" value="{$minuteLabel}" id="open02_minute{$minuteLabel}" {$checked}>
+                                <label for="open02_minute{$minuteLabel}">{$minuteLabel}</label>
                               </li>
 
 HTML;
@@ -609,11 +609,11 @@ HTML;
 #表示可能リストあればループ処理
 if (isset($shopMinuteList) && is_array($shopMinuteList) && count($shopMinuteList) > 0) {
   foreach ($shopMinuteList as $minuteValue => $minuteLabel) {
-    $checked = (isset($close08_02TimeParts[1]) && $close08_02TimeParts[1] === $minuteValue) ? 'checked' : '';
+    $checked = (isset($close08_02TimeParts[1]) && (int)$close08_02TimeParts[1] === (int)$minuteLabel) ? 'checked' : '';
     print <<<HTML
                               <li>
-                                <input type="radio" name="form08_02_close_minute" value="{$minuteValue}" id="close02_minute{$minuteValue}" {$checked}>
-                                <label for="close02_minute{$minuteValue}">{$minuteLabel}</label>
+                                <input type="radio" name="form08_02_close_minute" value="{$minuteLabel}" id="close02_minute{$minuteLabel}" {$checked}>
+                                <label for="close02_minute{$minuteLabel}">{$minuteLabel}</label>
                               </li>
 
 HTML;
