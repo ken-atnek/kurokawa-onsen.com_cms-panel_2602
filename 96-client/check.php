@@ -1,11 +1,11 @@
 <?php
 /*
- * [96-master/check.php]
- *  - 管理画面 -
+ * [96-client/check.php]
+ *  - 【加盟店】管理画面 -
  *  ログインチェック
  *
  * [初版]
- *  2025.2.14
+ *  2025.2.23
  */
 
 #***** 定数定義ファイル：インクルード *****#
@@ -33,7 +33,7 @@ $userPassword = isset($_POST['userPassword']) ? $_POST['userPassword'] : null;
 #***** セッション宣言 *****#
 session_cache_limiter('private,must-revalidate');
 #セッション名設定
-session_name('KKY_MASTER_SESSID');
+session_name('KKY_CLIENT_SESSID');
 #セッションCookie設定
 session_set_cookie_params([
 	'lifetime' => 0,                #ブラウザ終了まで有効
@@ -60,17 +60,17 @@ if ($loginId === '' || $loginPassword === '') {
 	exit;
 }
 
-#オペレーター種別かつ店舗ひも付きが無いことを確認
+#加盟店種別かつ店舗ひも付きが無いことを確認
 $loginData = accounts_Login($loginId);
 $shopValue = $loginData['shop_id'] ?? null;
-$isOperator = $loginData && isset($loginData['account_type']) && $loginData['account_type'] === 'operator';
-$hasNoShopBinding = $loginData && $shopValue === null;
+$isOperator = $loginData && isset($loginData['account_type']) && $loginData['account_type'] === 'shop';
+$hasNoShopBinding = $loginData && $shopValue !== null;
 if (!$loginData || !$isOperator || !$hasNoShopBinding || !password_verify($loginPassword, $loginData['password_hash'])) {
-	#管理者アカウントじゃない場合や認証失敗
+	#加盟店アカウントじゃない場合や認証失敗
 	if (!$loginData) {
 		$loginErrorMessage = "入力されたログインIDは登録されていません。";
 	} elseif (!$isOperator || !$hasNoShopBinding) {
-		$loginErrorMessage = "管理者アカウントでログインしてください。";
+		$loginErrorMessage = "加盟店アカウントでログインしてください。";
 	} else {
 		$loginErrorMessage = "パスワードが正しくありません。";
 	}
@@ -80,10 +80,10 @@ if (!$loginData || !$isOperator || !$hasNoShopBinding || !password_verify($login
 }
 
 #既存セッションがある場合は同一アカウントか判定
-if (!empty($_SESSION['master_login']['status'])) {
-	$currentAccountId = $_SESSION['master_login']['account_id'] ?? null;
+if (!empty($_SESSION['client_login']['status'])) {
+	$currentAccountId = $_SESSION['client_login']['account_id'] ?? null;
 	if ($currentAccountId === (int)$loginData['account_id']) {
-		header("Location: ./master01_01.php");
+		header("Location: ./client01_02.php");
 	} else {
 		$_SESSION["login_err"] = "既にログイン中のアカウントがあります。ログアウト後に再度お試しください";
 		header("Location: ./index.php?loginERR=1");
@@ -98,11 +98,11 @@ accounts_UpdateLastLoginAt($loginData['account_id']);
 session_regenerate_id(true);
 
 #画面遷移後でも最低限のアカウント情報だけ参照できるよう格納
-$_SESSION['master_login'] = [];
-$_SESSION['master_login']['account_id'] = (int)$loginData['account_id'];
-$_SESSION['master_login']['account_type'] = $loginData['account_type'];
-$_SESSION['master_login']['shop_id'] = $shopValue;
-$_SESSION['master_login']['status'] = 1;
+$_SESSION['client_login'] = [];
+$_SESSION['client_login']['account_id'] = (int)$loginData['account_id'];
+$_SESSION['client_login']['account_type'] = $loginData['account_type'];
+$_SESSION['client_login']['shop_id'] = $shopValue;
+$_SESSION['client_login']['status'] = 1;
 $_SESSION['login_err'] = '';
-header("Location: ./master01_01.php");
+header("Location: ./client01_02.php");
 exit;

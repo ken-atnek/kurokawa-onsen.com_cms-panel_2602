@@ -1,11 +1,11 @@
 ﻿<?php
 /*
- * [96-master/assets/function/proc_master01_01_02.php]
- *  - 管理画面 -
+ * [96-client/assets/function/proc_client01_01_02.php]
+ *  - 【加盟店】管理画面 -
  *  店舗紹介情報登録／編集 処理
  *
  * [初版]
- *  2026.2.18
+ *  2026.2.23
  */
 
 #***** 定数定義ファイル：インクルード *****#
@@ -16,7 +16,7 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
-require_once DOCUMENT_ROOT_PATH . '/cms_config/master/start_processing.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/client/start_processing.php';
 #***** ★ DBテーブル読み書きファイル：インクルード ★ *****#
 #店舗情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shops.php';
@@ -55,13 +55,39 @@ if ($noUpDateKey === '' || isset($_SESSION[$noUpDateKey]) === false) {
     exit;
   }
 }
-
+#-------------#
 #新規／編集
 $method = isset($_POST['method']) ? $_POST['method'] : null;
 #確認／修正／登録
 $action = isset($_POST['action']) ? $_POST['action'] : null;
 #店舗ID
 $shopId = isset($_POST['shopId']) ? $_POST['shopId'] : null;
+
+#==============================#
+# 加盟店権限チェック（shopId固定）
+#------------------------------#
+$sessionShopId = $_SESSION['client_login']['shop_id'] ?? null;
+if ($sessionShopId === null || is_numeric($sessionShopId) === false || (int)$sessionShopId <= 0) {
+  header('Content-Type: application/json; charset=UTF-8');
+  $makeTag['status'] = 'error';
+  $makeTag['title'] = 'セッションエラー';
+  $makeTag['msg'] = '店舗情報が取得できませんでした。再ログインしてください。';
+  echo json_encode($makeTag);
+  exit;
+}
+$sessionShopId = (int)$sessionShopId;
+if ($shopId === null || $shopId === '') {
+  $shopId = $sessionShopId;
+}
+if (is_numeric($shopId) === false || (int)$shopId !== $sessionShopId) {
+  header('Content-Type: application/json; charset=UTF-8');
+  $makeTag['status'] = 'error';
+  $makeTag['title'] = '権限エラー';
+  $makeTag['msg'] = '不正な操作です。ページを再読み込みしてください。';
+  echo json_encode($makeTag);
+  exit;
+}
+$shopId = $sessionShopId;
 #-------------#
 #紹介文章
 $form01 = isset($_POST['form01']) ? $_POST['form01'] : null;
@@ -307,7 +333,7 @@ HTML;
         if ($result == false) {
           #エラーログ出力
           $data = [
-            'pageName' => 'proc_master01_01_02',
+            'pageName' => 'proc_client01_01_02',
             'reason' => 'トランザクション開始失敗',
           ];
           makeLog($data);
@@ -332,7 +358,7 @@ HTML;
                 if (!is_numeric($shopId) || (int)$shopId <= 0) {
                   #エラーログ出力
                   $data = [
-                    'pageName' => 'proc_master01_01_02',
+                    'pageName' => 'proc_client01_01_02',
                     'reason' => '店舗ID未指定（新規）',
                   ];
                   makeLog($data);
@@ -368,7 +394,7 @@ HTML;
                 if ($dbSuccessFlg != 1) {
                   #エラーログ出力
                   $data = [
-                    'pageName' => 'proc_master01_01_02',
+                    'pageName' => 'proc_client01_01_02',
                     'reason' => '新規店舗紹介登録失敗',
                   ];
                   makeLog($data);
@@ -382,7 +408,7 @@ HTML;
                 if (!is_numeric($shopId) || (int)$shopId <= 0) {
                   #エラーログ出力
                   $data = [
-                    'pageName' => 'proc_master01_01_02',
+                    'pageName' => 'proc_client01_01_02',
                     'reason' => '店舗ID未指定（編集）',
                   ];
                   makeLog($data);
@@ -418,7 +444,7 @@ HTML;
                 if ($dbSuccessFlg != 1) {
                   #エラーログ出力
                   $data = [
-                    'pageName' => 'proc_master01_01_02',
+                    'pageName' => 'proc_client01_01_02',
                     'reason' => '店舗紹介情報更新失敗',
                   ];
                   makeLog($data);
@@ -453,11 +479,11 @@ HTML;
             # DB更新完了のJSONファイル作成
             #----------------------------
             #shop.json
-            $cmdShop = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShops.php ' . $shopId . ' 2>&1 &';
-            exec($cmdShop, $output, $return_var);
+            ## $cmdShop = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShops.php ' . $shopId . ' 2>&1 &';
+            ## exec($cmdShop, $output, $return_var);
             #shopsIndex.json
-            $cmdShopsIndex = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShopsIndex.php 2>&1 &';
-            exec($cmdShopsIndex, $output, $return_var);
+            ## $cmdShopsIndex = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShopsIndex.php 2>&1 &';
+            ## exec($cmdShopsIndex, $output, $return_var);
           } else {
             #失敗時はROLLBACK
             DB_Transaction(3);
@@ -473,7 +499,7 @@ HTML;
         DB_Transaction(3);
         #エラーログ出力
         $data = [
-          'pageName' => 'proc_master01_01_02',
+          'pageName' => 'proc_client01_01_02',
           'reason' => 'トランザクション開始失敗',
           'errorMessage' => $e->getMessage(),
         ];

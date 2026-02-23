@@ -17,11 +17,12 @@ $requireFilePath = $trace[1]['file'] ?? $trace[0]['file'] ?? __FILE__;
 #ファイルパスから動的に変数生成
 $fileParts = pathinfo($requireFilePath);
 $fileName = $fileParts['filename'];
-#$fileNameから先頭11文字を取得
-$shortFileName = substr($fileName, 0, 11);
+#メニュー判定キー（ファイル名そのもの）
+# 以前は先頭11文字で切り詰めていたが、client01_01_01 のように 11 文字を超える命名があるため不適。
+$menuKey = (string)$fileName;
 #メニュー側で参照される *_active 変数は未定義Warningを避けるため初期化する
 #命名規則：master01_02.php / client01_02.php のような形式を前提に、該当ディレクトリを自動スキャン
-$prefix = substr($shortFileName, 0, 6); // 'master' or 'client'
+$prefix = substr($menuKey, 0, 6); // 'master' or 'client'
 $scanDir = null;
 if ($prefix === 'master') {
 	$scanDir = rtrim((string)DOCUMENT_ROOT_PATH, '/\\') . '/96-master';
@@ -38,8 +39,7 @@ if ($scanDir !== null) {
 		}
 	}
 }
-${$shortFileName . '_active'} = ' class="is-active"';
-
+${$menuKey . '_active'} = ' class="is-active"';
 
 /*
  * [ページャー処理関数定義]
