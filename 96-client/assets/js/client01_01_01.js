@@ -2,7 +2,7 @@
  * API送信先 共通定数
  *
  */
-const requestURL = "./assets/function/proc_master01_01_01.php";
+const requestURL = "./assets/function/proc_client01_01_01.php";
 
 /**
  * モーダル共通ヘルパ

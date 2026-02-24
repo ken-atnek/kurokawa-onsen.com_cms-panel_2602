@@ -9,10 +9,16 @@ function getPhotoList($shopId = null)
 	global $DB_CONNECT;
 	try {
 		if ($shopId !== null) {
-			$strSQL = "SELECT 
-									photo_id, shop_id, folder_id, file_path, title, 
-									mime_type, file_size, width, height, is_active, created_at 
-								FROM shops_photos WHERE shop_id = :value AND is_active = 1 ORDER BY created_at DESC";
+			$strSQL = "
+				SELECT 
+					photo_id, shop_id, folder_id, file_path, title, 
+					mime_type, file_size, width, height, is_active, created_at 
+				FROM 
+					shops_photos 
+				WHERE 
+					shop_id = :value AND is_active = 1 
+				ORDER BY created_at DESC
+			";
 		} else {
 			#店舗IDが指定されていない場合
 			return null;
@@ -45,10 +51,14 @@ function getDeletePhoto($shopId = null, $photoId = null)
 	global $DB_CONNECT;
 	try {
 		if ($shopId !== null && $photoId !== null) {
-			$strSQL = "SELECT 
-									photo_id, shop_id, folder_id, file_path, title, 
-									mime_type, file_size, width, height, is_active, created_at 
-								FROM shops_photos WHERE shop_id = :shop_id AND photo_id = :photo_id AND is_active = 1 LIMIT 1";
+			$strSQL = "
+				SELECT 
+					photo_id, shop_id, folder_id, file_path, title, 
+					mime_type, file_size, width, height, is_active, created_at 
+				FROM 
+					shops_photos 
+				WHERE shop_id = :shop_id AND photo_id = :photo_id AND is_active = 1 LIMIT 1
+			";
 		} else {
 			#店舗IDまたは写真IDが指定されていない場合
 			return null;

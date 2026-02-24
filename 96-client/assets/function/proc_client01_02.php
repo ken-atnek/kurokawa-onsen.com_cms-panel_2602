@@ -1,11 +1,11 @@
 ﻿<?php
 /*
- * [96-master/assets/function/proc_master01_02.php]
- *  - 管理画面 -
+ * [96-client/assets/function/proc_client01_02.php]
+ *  - 【加盟店】管理画面 -
  *  店舗登録／編集 処理
  *
  * [初版]
- *  2026.2.16
+ *  2026.2.23
  */
 
 #***** 定数定義ファイル：インクルード *****#
@@ -16,7 +16,7 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
-require_once DOCUMENT_ROOT_PATH . '/cms_config/master/start_processing.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/client/start_processing.php';
 #***** ★ DBテーブル読み書きファイル：インクルード ★ *****#
 #アカウント情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_accounts.php';
@@ -58,6 +58,44 @@ $method = isset($_POST['method']) ? $_POST['method'] : null;
 $action = isset($_POST['action']) ? $_POST['action'] : null;
 #店舗ID
 $shopId = isset($_POST['shopId']) ? $_POST['shopId'] : null;
+
+#==============================#
+# 加盟店権限チェック（shopId固定）
+#------------------------------#
+$sessionShopId = $_SESSION['client_login']['shop_id'] ?? null;
+if ($sessionShopId === null || is_numeric($sessionShopId) === false || (int)$sessionShopId <= 0) {
+  header('Content-Type: application/json; charset=UTF-8');
+  $makeTag['status'] = 'error';
+  $makeTag['title'] = 'セッションエラー';
+  $makeTag['msg'] = '店舗情報が取得できませんでした。再ログインしてください。';
+  echo json_encode($makeTag);
+  exit;
+}
+$sessionShopId = (int)$sessionShopId;
+
+# shopId はクライアントPOSTを信用せず、ログイン店舗に固定する
+if ($shopId === null || $shopId === '') {
+  $shopId = $sessionShopId;
+}
+if (is_numeric($shopId) === false || (int)$shopId !== $sessionShopId) {
+  header('Content-Type: application/json; charset=UTF-8');
+  $makeTag['status'] = 'error';
+  $makeTag['title'] = '権限エラー';
+  $makeTag['msg'] = '不正な操作です。ページを再読み込みしてください。';
+  echo json_encode($makeTag);
+  exit;
+}
+$shopId = $sessionShopId;
+
+# 基本情報は店舗側で新規作成不可（マスターで発行された店舗のみ編集）
+if ($method !== 'edit') {
+  header('Content-Type: application/json; charset=UTF-8');
+  $makeTag['status'] = 'error';
+  $makeTag['title'] = '処理エラー';
+  $makeTag['msg'] = '不正な処理方法です。ページを再読み込みしてください。';
+  echo json_encode($makeTag);
+  exit;
+}
 #-------------#
 #公開設定
 $form01 = isset($_POST['form01']) ? $_POST['form01'] : null;
@@ -202,7 +240,7 @@ switch ($action) {
         if ($result == false) {
           #エラーログ出力
           $data = [
-            'pageName' => 'proc_master01_02',
+            'pageName' => 'proc_client01_02',
             'reason' => 'トランザクション開始失敗',
           ];
           makeLog($data);
@@ -281,7 +319,7 @@ switch ($action) {
                   $newShopIdRaw = $DB_CONNECT->lastInsertId();
                   if (!is_numeric($newShopIdRaw) || (int)$newShopIdRaw <= 0) {
                     $data = [
-                      'pageName' => 'proc_master01_02',
+                      'pageName' => 'proc_client01_02',
                       'reason' => '店舗ID採番失敗（lastInsertId不正）: ' . (string)$newShopIdRaw,
                     ];
                     makeLog($data);
@@ -313,7 +351,7 @@ switch ($action) {
                   if ($dbAccountSuccessFlg != 1) {
                     #エラーログ出力
                     $data = [
-                      'pageName' => 'proc_master01_02',
+                      'pageName' => 'proc_client01_02',
                       'reason' => '新規店舗ログイン情報登録失敗',
                     ];
                     makeLog($data);
@@ -323,7 +361,7 @@ switch ($action) {
                 } else {
                   #エラーログ出力
                   $data = [
-                    'pageName' => 'proc_master01_02',
+                    'pageName' => 'proc_client01_02',
                     'reason' => '新規店舗登録失敗',
                   ];
                   makeLog($data);
@@ -337,7 +375,7 @@ switch ($action) {
                 if (!is_numeric($shopId) || (int)$shopId <= 0) {
                   #エラーログ出力
                   $data = [
-                    'pageName' => 'proc_master01_02',
+                    'pageName' => 'proc_client01_02',
                     'reason' => '店舗ID未指定（編集）',
                   ];
                   makeLog($data);
@@ -387,7 +425,7 @@ switch ($action) {
                   $accountData = accounts_FindById(null, $shopId);
                   if (!is_array($accountData)) {
                     $data = [
-                      'pageName' => 'proc_master01_02',
+                      'pageName' => 'proc_client01_02',
                       'reason' => '店舗アカウント情報取得失敗（編集）',
                     ];
                     makeLog($data);
@@ -419,7 +457,7 @@ switch ($action) {
                     if ($dbAccountSuccessFlg != 1) {
                       #エラーログ出力
                       $data = [
-                        'pageName' => 'proc_master01_02',
+                        'pageName' => 'proc_client01_02',
                         'reason' => '店舗ログイン情報更新失敗',
                       ];
                       makeLog($data);
@@ -430,7 +468,7 @@ switch ($action) {
                 } else {
                   #エラーログ出力
                   $data = [
-                    'pageName' => 'proc_master01_02',
+                    'pageName' => 'proc_client01_02',
                     'reason' => '店舗更新情報登録失敗',
                   ];
                   makeLog($data);
@@ -476,7 +514,7 @@ switch ($action) {
         DB_Transaction(3);
         #エラーログ出力
         $data = [
-          'pageName' => 'proc_master01_02',
+          'pageName' => 'proc_client01_02',
           'reason' => 'トランザクション開始失敗',
           'errorMessage' => $e->getMessage(),
         ];

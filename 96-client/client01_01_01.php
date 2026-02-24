@@ -1,7 +1,7 @@
 <?php
 /*
- * [96-master/master01_01_01.php]
- *  - 管理画面 -
+ * [96-client/client01_01_01.php]
+ *  - 【加盟店】管理画面 -
  *  店舗：アルバム管理
  *
  * [初版]
@@ -16,7 +16,7 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
-require_once DOCUMENT_ROOT_PATH . '/cms_config/master/start_processing.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/client/start_processing.php';
 #***** ★ DBテーブル読み書きファイル：インクルード ★ *****#
 #店舗情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shops.php';
@@ -29,17 +29,17 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_photos.php';
 # SESSIONチェック
 #----------------#
 #セッションキー
-$pagePrefix = 'mKey01-01-01_';
+$pagePrefix = 'cKey01-01-01_';
 #このページのユニークなセッションキーを生成
 $noUpDateKey = $pagePrefix . bin2hex(random_bytes(8));
 $_SESSION['sKey'] = $noUpDateKey;
 #不要なセッション削除（uploadドラフトtmpも回収）
 $tmpUploadRoot = realpath(dirname(__DIR__) . '/tmp_upload');
 foreach ($_SESSION as $key => $val) {
-  if ($key === 'sKey' || $key === 'master_login' || $key === $noUpDateKey) {
+  if ($key === 'sKey' || $key === 'client_login' || $key === $noUpDateKey) {
     continue;
   }
-  #uploadドラフト（proc_master01_01_01.php が保存する形式）から tmp を削除
+  #uploadドラフト（proc_client01_01_01.php が保存する形式）から tmp を削除
   if (is_array($val)) {
     foreach ($val as $row) {
       if (!is_array($row)) {
@@ -68,9 +68,9 @@ foreach ($_SESSION as $key => $val) {
 #セッション本体の初期化
 $_SESSION[$noUpDateKey] = array();
 #アカウントキー
-$_SESSION[$noUpDateKey]['masterKey'] = $_SESSION['master_login']['account_id'];
+$_SESSION[$noUpDateKey]['clientKey'] = $_SESSION['client_login']['account_id'];
 #データ取得エラー
-if ($_SESSION[$noUpDateKey]['masterKey'] < 1) {
+if ($_SESSION[$noUpDateKey]['clientKey'] < 1) {
   header("Location: ./logout.php");
   exit;
 }
@@ -79,14 +79,14 @@ if ($_SESSION[$noUpDateKey]['masterKey'] < 1) {
 # POSTチェック
 #-------------#
 #店舗ID
-$shopId = isset($_GET['shopId']) ? $_GET['shopId'] : null;
+$shopId = isset($_SESSION['client_login']['shop_id']) ? $_SESSION['client_login']['shop_id'] : null;
 #店舗IDがあれば店舗情報取得
 if ($shopId !== null) {
   #店舗情報
   $shopData = getShops_FindById($shopId);
   if ($shopData === null) {
-    #店舗情報が存在しない場合は一覧にリダイレクト
-    header("Location: ./master01_01.php");
+    #店舗情報が存在しない場合は不正アクセス：ログインページへリダイレクト
+    header("Location: ./logout.php");
     exit;
   } else {
     #店舗情報が存在する場合はフォルダと写真情報も取得
@@ -94,10 +94,23 @@ if ($shopId !== null) {
     $photoList = getPhotoList($shopId);
   }
 } else {
-  #店舗IDがない場合は一覧にリダイレクト
-  header("Location: ./master01_01.php");
+  #不正アクセス：ログインページへリダイレクト
+  header("Location: ./logout.php");
   exit;
 }
+
+#=======#
+# 店舗名
+#-------#
+$headerShopName = "";
+if (!isset($shopData) || empty($shopData)) {
+  #店舗データが無い場合は不正アクセス：ログインページへリダイレクト
+  header("Location: ./logout.php");
+  exit;
+} else {
+  $headerShopName = htmlspecialchars($shopData['shop_name'], ENT_QUOTES, 'UTF-8');
+}
+
 #-------------#
 #inline JS用エスケープ宣言
 $jsonHex = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -131,8 +144,10 @@ print <<<HTML
       <section class="container-left-menu menu-color01">
         <div class="title">店舗管理</div>
         <nav>
-          <a href="./master01_01.php"><span>店舗一覧</span></a>
-          <a href="./master01_02.php?method=new" class="is-active"><span>店舗登録</span></a>
+          <a href="./client01_02.php" {$client01_02_active}><span>基本情報</span></a>
+          <a href="./client01_01_02.php" {$client01_01_02_active}><span>紹介情報</span></a>
+          <a href="./client01_01_03.php" {$client01_01_03_active}><span>おすすめ商品</span></a>
+          <a href="./client01_01_01.php" {$client01_01_01_active}><span>写真整理</span></a>
         </nav>
       </section>
       <div class="main-contents menu-color01">
@@ -194,7 +209,7 @@ print <<<HTML
                       <input type="hidden" name="upload_image_mode" value="only" id="js-uploadImageMode-photoImage">
                       <input type="hidden" name="upload_image_area" value="photo_image" id="js-uploadImageArea-photoImage">
                       <input type="hidden" name="up_image_area[]" value="photo_image">
-                      <input type="hidden" name="send_php" value="proc_master01_01_01.php">
+                      <input type="hidden" name="send_php" value="proc_client01_01_01.php">
                       <button type="button" class="btn_select" id="js-fileSelect-photoImage">写真を選択</button>
                       <ul id="fileList">
                         <li>追加する写真、画像を選択して下さい。</li>
@@ -357,7 +372,7 @@ HTML;
 print <<<HTML
             </section>
           </article>
-          <a href="./master01_01.php" class="link_page-back_bottom">戻る</a>
+          <a href="./client01_02.php" class="link_page-back_bottom">戻る</a>
           <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
         </div>
       </div>
@@ -380,7 +395,7 @@ print <<<HTML
     <script src="../assets/js/common.js" defer></script>
     <script src="../assets/js/dropZone.js" defer></script>
     <script src="../assets/js/modal.js" defer></script>
-    <script src="./assets/js/master01_01_01.js?46081621022026" defer></script>
+    <script src="./assets/js/client01_01_01.js?46081621022026" defer></script>
   </body>
 </html>
 

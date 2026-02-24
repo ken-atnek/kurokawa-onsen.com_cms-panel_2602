@@ -23,7 +23,7 @@ require_once __DIR__ . '/../database/set_login.php';
  */
 session_cache_limiter('private,must-revalidate');
 #セッション名設定
-session_name('KKY_SHOP_SESSID');
+session_name('KKY_CLIENT_SESSID');
 #セッションCookie設定
 session_set_cookie_params([
 	'lifetime' => 0,
@@ -56,8 +56,8 @@ if ($loginCheck == 1) {
 		$currentAccount = accounts_FindActiveById($accountId);
 	}
 	if ($currentAccount) {
-		#事業所アカウント以外であればセッションを破棄してログイン画面へ
-		if ($currentAccount['account_type'] !== 'facility' || $currentAccount['facility_id'] === null) {
+		#加盟店アカウント以外であればセッションを破棄してログイン画面へ
+		if ($currentAccount['account_type'] !== 'shop' || $currentAccount['shop_id'] === null) {
 			$_SESSION = [];
 			session_destroy();
 			header("Location: ./");
@@ -124,6 +124,6 @@ function makeLog($data)
 		@mkdir($todayDir, 0755, true);
 	}
 	#ログファイル名生成
-	$logFile = 'shop_operation.log';
+	$logFile = 'client_operation.log';
 	@file_put_contents($todayDir . $logFile, $dump, FILE_APPEND);
 }

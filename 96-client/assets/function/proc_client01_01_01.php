@@ -1,7 +1,7 @@
 <?php
 /*
- * [96-master/assets/function/proc_master01_01_01.php]
- *  - 管理画面 -
+ * [96-client/assets/function/proc_client01_01_01.php]
+ *  - 【加盟店】管理画面 -
  *  店舗：アルバム管理
  *
  * [初版]
@@ -16,7 +16,7 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
-require_once DOCUMENT_ROOT_PATH . '/cms_config/master/start_processing.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/client/start_processing.php';
 #***** ★ DBテーブル読み書きファイル：インクルード ★ *****#
 #店舗情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shops.php';
@@ -79,6 +79,32 @@ $uploadOnlyActions = [
 ];
 #店舗ID
 $shopId = isset($_POST['shopId']) ? $_POST['shopId'] : null;
+
+#==============================#
+# 加盟店権限チェック（shopId固定）
+#------------------------------#
+$sessionShopId = $_SESSION['client_login']['shop_id'] ?? null;
+if ($sessionShopId === null || is_numeric($sessionShopId) === false || (int)$sessionShopId <= 0) {
+	header('Content-Type: application/json; charset=UTF-8');
+	$makeTag['status'] = 'error';
+	$makeTag['title'] = 'セッションエラー';
+	$makeTag['msg'] = '店舗情報が取得できませんでした。再ログインしてください。';
+	echo json_encode($makeTag);
+	exit;
+}
+$sessionShopId = (int)$sessionShopId;
+if ($shopId === null || $shopId === '') {
+	$shopId = $sessionShopId;
+}
+if (is_numeric($shopId) === false || (int)$shopId !== $sessionShopId) {
+	header('Content-Type: application/json; charset=UTF-8');
+	$makeTag['status'] = 'error';
+	$makeTag['title'] = '権限エラー';
+	$makeTag['msg'] = '不正な操作です。ページを再読み込みしてください。';
+	echo json_encode($makeTag);
+	exit;
+}
+$shopId = $sessionShopId;
 #店舗IDが必要なアクションでは店舗情報取得（upload-only は shopId なしでも処理する）
 if (!in_array((string)$action, $uploadOnlyActions, true)) {
 	if ($shopId !== null) {
@@ -480,7 +506,7 @@ switch ($action) {
 					if ($failedUnlink) {
 						$makeTag['msg'] .= '<br>画像ファイルの削除に失敗しました。サーバー権限をご確認ください。';
 						$data = [
-							'pageName' => 'proc_master01_01_01',
+							'pageName' => 'proc_client01_01_01',
 							'reason' => 'deletePhoto unlink failed',
 							'filePath' => (string)$deleteFilePublic,
 							'absPath' => (string)$deleteFileAbs,
@@ -1208,7 +1234,7 @@ HTML;
 				$makeTag['status'] = 'error';
 				$makeTag['msg'] = ($method === 'new') ? '写真の追加に失敗しました。' : '写真の更新に失敗しました。';
 				$data = [
-					'pageName' => 'proc_master01_01_01',
+					'pageName' => 'proc_client01_01_01',
 					'reason' => 'sendPhoto failed',
 					'errorMessage' => $e->getMessage(),
 				];
@@ -1270,8 +1296,8 @@ if ($shopId !== null) {
 			echo json_encode($makeTag);
 			exit;
 		}
-		#（直接アクセス等）一覧にリダイレクト
-		header("Location: ./master01_01.php");
+		#（直接アクセス等）ログアウトしてログインページへリダイレクト
+		header("Location: ./logout.php");
 		exit;
 	} else {
 		#店舗情報が存在する場合はフォルダと写真情報も取得
@@ -1288,8 +1314,8 @@ if ($shopId !== null) {
 		echo json_encode($makeTag);
 		exit;
 	}
-	#（直接アクセス等）一覧にリダイレクト
-	header("Location: ./master01_01.php");
+	#（直接アクセス等）ログアウトしてログインページへリダイレクト
+	header("Location: ./logout.php");
 	exit;
 }
 #-------------#
@@ -1760,7 +1786,7 @@ HTML;
                           <input type="hidden" name="upload_image_mode" value="only" id="js-uploadImageMode-photoImage">
                           <input type="hidden" name="upload_image_area" value="photo_image" id="js-uploadImageArea-photoImage">
                           <input type="hidden" name="up_image_area[]" value="photo_image">
-                          <input type="hidden" name="send_php" value="proc_master01_01_01.php">
+                          <input type="hidden" name="send_php" value="proc_client01_01_01.php">
                           <input type="file" name="images_tmp" id="js-fileElem-photoImage" accept="image/*" style="display:none">
                           <picture>
                             <source srcset="{$imgPathEsc}" id="preview-source">
@@ -1780,7 +1806,7 @@ HTML;
                       <input type="hidden" name="upload_image_mode" value="only" id="js-uploadImageMode-photoImage">
                       <input type="hidden" name="upload_image_area" value="photo_image" id="js-uploadImageArea-photoImage">
                       <input type="hidden" name="up_image_area[]" value="photo_image">
-                      <input type="hidden" name="send_php" value="proc_master01_01_01.php">
+                      <input type="hidden" name="send_php" value="proc_client01_01_01.php">
                       <button type="button" class="btn_select" id="js-fileSelect-photoImage">写真を選択</button>
                       <ul id="fileList"><li>追加する写真、画像を選択して下さい。</li></ul>
 

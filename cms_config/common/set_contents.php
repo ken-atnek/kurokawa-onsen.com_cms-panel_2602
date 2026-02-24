@@ -15,7 +15,7 @@ $shopCategoryList = [
 #-------------------------------------
 #営業開始
 $shopOpenHourList = [];
-for ($i = 6; $i <= 13; $i++) {
+for ($i = 6; $i <= 20; $i++) {
 	$shopOpenHourList[$i] = $i;
 }
 #営業終了

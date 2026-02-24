@@ -1,11 +1,11 @@
 ﻿<?php
 /*
- * [96-master/assets/function/proc_master01_01_03.php]
- *  - 管理画面 -
- *  おすすめ商品登録／編集 処理
+ * [96-client/assets/function/proc_client01_01_02.php]
+ *  - 【加盟店】管理画面 -
+ *  店舗紹介情報登録／編集 処理
  *
  * [初版]
- *  2026.2.18
+ *  2026.2.23
  */
 
 #***** 定数定義ファイル：インクルード *****#
@@ -16,12 +16,12 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
-require_once DOCUMENT_ROOT_PATH . '/cms_config/master/start_processing.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/client/start_processing.php';
 #***** ★ DBテーブル読み書きファイル：インクルード ★ *****#
 #店舗情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shops.php';
-#おすすめ商品情報
-require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shop_items.php';
+#店舗紹介情報
+require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shop_details.php';
 #フォルダ情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_folders.php';
 #写真情報
@@ -55,24 +55,59 @@ if ($noUpDateKey === '' || isset($_SESSION[$noUpDateKey]) === false) {
     exit;
   }
 }
-
+#-------------#
 #新規／編集
 $method = isset($_POST['method']) ? $_POST['method'] : null;
 #確認／修正／登録
 $action = isset($_POST['action']) ? $_POST['action'] : null;
 #店舗ID
 $shopId = isset($_POST['shopId']) ? $_POST['shopId'] : null;
-#-------------#
-for ($slot = 1; $slot <= $recommendedItemMax; $slot++) {
-  #商品タイトル
-  ${"title" . $slot} = isset($_POST['item']['recommended'][$slot]['title']) ? $_POST['item']['recommended'][$slot]['title'] : null;
-  #価格
-  ${"price" . $slot} = isset($_POST['item']['recommended'][$slot]['price']) ? $_POST['item']['recommended'][$slot]['price'] : null;
-  #商品説明
-  ${"description" . $slot} = isset($_POST['item']['recommended'][$slot]['description']) ? $_POST['item']['recommended'][$slot]['description'] : null;
-  #画像パス
-  ${"imagePath" . $slot} = isset($_POST["image_path{$slot}"]) ? $_POST["image_path{$slot}"] : null;
+
+#==============================#
+# 加盟店権限チェック（shopId固定）
+#------------------------------#
+$sessionShopId = $_SESSION['client_login']['shop_id'] ?? null;
+if ($sessionShopId === null || is_numeric($sessionShopId) === false || (int)$sessionShopId <= 0) {
+  header('Content-Type: application/json; charset=UTF-8');
+  $makeTag['status'] = 'error';
+  $makeTag['title'] = 'セッションエラー';
+  $makeTag['msg'] = '店舗情報が取得できませんでした。再ログインしてください。';
+  echo json_encode($makeTag);
+  exit;
 }
+$sessionShopId = (int)$sessionShopId;
+if ($shopId === null || $shopId === '') {
+  $shopId = $sessionShopId;
+}
+if (is_numeric($shopId) === false || (int)$shopId !== $sessionShopId) {
+  header('Content-Type: application/json; charset=UTF-8');
+  $makeTag['status'] = 'error';
+  $makeTag['title'] = '権限エラー';
+  $makeTag['msg'] = '不正な操作です。ページを再読み込みしてください。';
+  echo json_encode($makeTag);
+  exit;
+}
+$shopId = $sessionShopId;
+#-------------#
+#紹介文章
+$form01 = isset($_POST['form01']) ? $_POST['form01'] : null;
+#紹介文章（英語）
+$form01_01 = isset($_POST['form01_01']) ? $_POST['form01_01'] : null;
+#地図URL
+$form02 = isset($_POST['form02']) ? $_POST['form02'] : null;
+#地図URL（リンク用）
+$form03 = isset($_POST['form03']) ? $_POST['form03'] : null;
+#メイン画像
+$mainImagePath = isset($_POST['main_image_path']) ? $_POST['main_image_path'] : null;
+#画像1
+$image1Path = isset($_POST['image_path_1']) ? $_POST['image_path_1'] : null;
+$image1Title = isset($_POST['image_title_1']) ? $_POST['image_title_1'] : null;
+#画像2
+$image2Path = isset($_POST['image_path_2']) ? $_POST['image_path_2'] : null;
+$image2Title = isset($_POST['image_title_2']) ? $_POST['image_title_2'] : null;
+#画像3
+$image3Path = isset($_POST['image_path_3']) ? $_POST['image_path_3'] : null;
+$image3Title = isset($_POST['image_title_3']) ? $_POST['image_title_3'] : null;
 #-------------#
 #inline JS用エスケープ宣言
 $jsonHex = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -82,8 +117,7 @@ switch ($action) {
   #***** 画像選択モーダル生成 *****#
   case 'changeFolder':
   case 'selectFileModal': {
-      if ($shopId !== null && is_numeric($shopId) && (int)$shopId > 0) {
-        $shopId = (int)$shopId;
+      if ($shopId !== null) {
         #店舗情報が存在する場合はフォルダと写真情報も取得
         $folderList = getFolderList($shopId);
         $photoList = getPhotoList($shopId);
@@ -262,18 +296,25 @@ HTML;
       if ($method !== 'new' && $method !== 'edit') {
         $validationErrors[] = '処理方法が不正です。';
       }
-      #必須項目チェック（最低1枠目のみ）
-      $requiredTitle = isset($_POST['item']['recommended'][1]['title']) ? trim((string)$_POST['item']['recommended'][1]['title']) : '';
-      $requiredDescription = isset($_POST['item']['recommended'][1]['description']) ? trim((string)$_POST['item']['recommended'][1]['description']) : '';
-      $requiredImagePath = isset($_POST['image_path1']) ? trim((string)$_POST['image_path1']) : '';
-      if ($requiredTitle === '') {
-        $validationErrors[] = '商品タイトルは必須です。';
+      #必須項目チェック
+      $requiredFields = [
+        'form01' => '紹介文章',
+        'form01_01' => '紹介文章（英語）',
+        'form02' => '地図URL',
+        'form03' => '地図URL（リンク用）',
+      ];
+      foreach ($requiredFields as $fieldName => $fieldLabel) {
+        $value = isset($_POST[$fieldName]) ? trim($_POST[$fieldName]) : '';
+        if ($value === '') {
+          $validationErrors[] = $fieldLabel . 'は必須です。';
+        }
       }
-      if ($requiredDescription === '') {
-        $validationErrors[] = '商品説明は必須です。';
+      #地図URL形式チェック（空でない場合のみ）
+      if (!empty($form02) && !filter_var($form02, FILTER_VALIDATE_URL)) {
+        $validationErrors[] = '地図URLの形式が正しくありません。';
       }
-      if ($requiredImagePath === '') {
-        $validationErrors[] = 'メイン写真は必須です。';
+      if (!empty($form03) && !filter_var($form03, FILTER_VALIDATE_URL)) {
+        $validationErrors[] = '地図URL（リンク用）の形式が正しくありません。';
       }
       #バリデーションエラーがあれば処理中断
       if (!empty($validationErrors)) {
@@ -292,7 +333,7 @@ HTML;
         if ($result == false) {
           #エラーログ出力
           $data = [
-            'pageName' => 'proc_master01_01_03',
+            'pageName' => 'proc_client01_01_02',
             'reason' => 'トランザクション開始失敗',
           ];
           makeLog($data);
@@ -305,69 +346,113 @@ HTML;
         } else {
           #DB登録結果フラグ：初期化
           $dbCompleteFlg = true;
-          if (!is_numeric($shopId) || (int)$shopId <= 0) {
-            #エラーログ出力
-            $data = [
-              'pageName' => 'proc_master01_01_03',
-              'reason' => '店舗ID未指定',
-            ];
-            makeLog($data);
-            $dbCompleteFlg = false;
-          } else {
-            $shopId = (int)$shopId;
-
-            #---------------------------------
-            # recommended は固定枠なので、一旦削除→全枠INSERT
-            #（新規/編集、途中欠損データの救済も兼ねる）
-            #---------------------------------
-            $delWhere = array();
-            $delWhere['shop_id'] = array(':shop_id', $shopId, 1);
-            $delWhere['item_type'] = array(':item_type', 'recommended', 0);
-            $delFlg = SQL_Process($DB_CONNECT, 'shop_items', array(), $delWhere, 3, 2);
-            if ($delFlg != 1) {
-              $data = [
-                'pageName' => 'proc_master01_01_03',
-                'reason' => 'おすすめ商品削除失敗',
-                'dbError' => $GLOBALS['DB_LAST_ERROR'] ?? null,
-              ];
-              makeLog($data);
-              $dbCompleteFlg = false;
-            } else {
-              for ($slot = 1; $slot <= $recommendedItemMax; $slot++) {
-                $titleRaw = isset(${"title" . $slot}) ? trim((string)${"title" . $slot}) : '';
-                $descRaw = isset(${"description" . $slot}) ? trim((string)${"description" . $slot}) : '';
-                $imageRaw = isset(${"imagePath" . $slot}) ? trim((string)${"imagePath" . $slot}) : '';
-                $priceRaw = isset(${"price" . $slot}) ? trim((string)${"price" . $slot}) : '';
-
-                $titleVal = ($titleRaw === '') ? null : $titleRaw;
-                $descVal = ($descRaw === '') ? null : $descRaw;
-                $imageVal = ($imageRaw === '') ? null : $imageRaw;
-                $priceVal = ($priceRaw === '') ? null : (int)$priceRaw;
-
-                $ins = array();
-                $ins['shop_id'] = array(':shop_id', $shopId, 1);
-                $ins['item_type'] = array(':item_type', 'recommended', 0);
-                $ins['slot'] = array(':slot', $slot, 1);
-                $ins['title'] = array(':title', $titleVal, ($titleVal === null ? 2 : 0));
-                $ins['description'] = array(':description', $descVal, ($descVal === null ? 2 : 0));
-                $ins['price_yen'] = array(':price_yen', $priceVal, ($priceVal === null ? 2 : 1));
-                $ins['image_path'] = array(':image_path', $imageVal, ($imageVal === null ? 2 : 0));
-                $ins['is_active'] = array(':is_active', 1, 1);
-
-                $insFlg = SQL_Process($DB_CONNECT, 'shop_items', $ins, array(), 1, 2);
-                if ($insFlg != 1) {
+          #DB登録情報準備
+          $mapURLRaw = (!empty($form02)) ? trim($form02) : '';
+          $mapLinkURLRaw = (!empty($form03)) ? trim($form03) : '';
+          #URL用：スペース等（半角/全角含むホワイトスペース）を全て削除
+          $mapURL = preg_replace('/[\s　]+/u', '', $mapURLRaw);
+          $mapLinkURL = preg_replace('/[\s　]+/u', '', $mapLinkURLRaw);
+          switch ($method) {
+            #***** 新規登録 *****#
+            case 'new': {
+                if (!is_numeric($shopId) || (int)$shopId <= 0) {
+                  #エラーログ出力
                   $data = [
-                    'pageName' => 'proc_master01_01_03',
-                    'reason' => 'おすすめ商品INSERT失敗',
-                    'slot' => $slot,
-                    'dbError' => $GLOBALS['DB_LAST_ERROR'] ?? null,
+                    'pageName' => 'proc_client01_01_02',
+                    'reason' => '店舗ID未指定（新規）',
+                  ];
+                  makeLog($data);
+                  $dbCompleteFlg = false;
+                  break;
+                }
+                $shopId = (int)$shopId;
+                #登録用配列：初期化
+                $dbFiledData = array();
+                #登録情報セット
+                $dbFiledData['shop_id'] = array(':shop_id', $shopId, 1);
+                $dbFiledData['intro_body'] = array(':intro_body', $form01, 1);
+                $dbFiledData['intro_body_en'] = array(':intro_body_en', $form01_01, 1);
+                $dbFiledData['main_image_path'] = array(':main_image_path', $mainImagePath, 0);
+                $dbFiledData['image_path_1'] = array(':image_path_1', $image1Path, 0);
+                $dbFiledData['image_title_1'] = array(':image_title_1', $image1Title, 0);
+                $dbFiledData['image_path_2'] = array(':image_path_2', $image2Path, 0);
+                $dbFiledData['image_title_2'] = array(':image_title_2', $image2Title, 0);
+                $dbFiledData['image_path_3'] = array(':image_path_3', $image3Path, 0);
+                $dbFiledData['image_title_3'] = array(':image_title_3', $image3Title, 0);
+                $dbFiledData['map_url'] = array(':map_url', $mapURL, 0);
+                $dbFiledData['map_link_url'] = array(':map_link_url', $mapLinkURL, 0);
+                $dbFiledData['created_at'] = array(':created_at', date("Y-m-d H:i:s"), 0);
+                #更新用キー：初期化
+                $dbFiledValue = array();
+                #処理モード：[1].新規追加｜[2].更新｜[3].削除
+                $processFlg = 1;
+                #実行モード：[1].トランザクション｜[2].即実行
+                $exeFlg = 2;
+                #DB更新
+                $dbSuccessFlg = SQL_Process($DB_CONNECT, "shops_details", $dbFiledData, $dbFiledValue, $processFlg, $exeFlg);
+                #基本情報の更新が成功したらJSONデータ書き出し処理に進む
+                if ($dbSuccessFlg != 1) {
+                  #エラーログ出力
+                  $data = [
+                    'pageName' => 'proc_client01_01_02',
+                    'reason' => '新規店舗紹介登録失敗',
                   ];
                   makeLog($data);
                   $dbCompleteFlg = false;
                   break;
                 }
               }
-            }
+              break;
+            #***** 編集 *****#
+            case 'edit': {
+                if (!is_numeric($shopId) || (int)$shopId <= 0) {
+                  #エラーログ出力
+                  $data = [
+                    'pageName' => 'proc_client01_01_02',
+                    'reason' => '店舗ID未指定（編集）',
+                  ];
+                  makeLog($data);
+                  $dbCompleteFlg = false;
+                  break;
+                }
+                $shopId = (int)$shopId;
+                #登録用配列：初期化
+                $dbFiledData = array();
+                #登録情報セット
+                $dbFiledData['intro_body'] = array(':intro_body', $form01, 1);
+                $dbFiledData['intro_body_en'] = array(':intro_body_en', $form01_01, 1);
+                $dbFiledData['main_image_path'] = array(':main_image_path', $mainImagePath, 0);
+                $dbFiledData['image_path_1'] = array(':image_path_1', $image1Path, 0);
+                $dbFiledData['image_title_1'] = array(':image_title_1', $image1Title, 0);
+                $dbFiledData['image_path_2'] = array(':image_path_2', $image2Path, 0);
+                $dbFiledData['image_title_2'] = array(':image_title_2', $image2Title, 0);
+                $dbFiledData['image_path_3'] = array(':image_path_3', $image3Path, 0);
+                $dbFiledData['image_title_3'] = array(':image_title_3', $image3Title, 0);
+                $dbFiledData['map_url'] = array(':map_url', $mapURL, 0);
+                $dbFiledData['map_link_url'] = array(':map_link_url', $mapLinkURL, 0);
+                $dbFiledData['updated_at'] = array(':updated_at', date("Y-m-d H:i:s"), 0);
+                #更新用キー：初期化
+                $dbFiledValue = array();
+                $dbFiledValue['shop_id'] = array(':shop_id', $shopId, 1);
+                #処理モード：[1].新規追加｜[2].更新｜[3].削除
+                $processFlg = 2;
+                #実行モード：[1].トランザクション｜[2].即実行
+                $exeFlg = 2;
+                #DB更新
+                $dbSuccessFlg = SQL_Process($DB_CONNECT, "shops_details", $dbFiledData, $dbFiledValue, $processFlg, $exeFlg);
+                #基本情報の更新が成功したらログイン情報の登録処理に進む
+                if ($dbSuccessFlg != 1) {
+                  #エラーログ出力
+                  $data = [
+                    'pageName' => 'proc_client01_01_02',
+                    'reason' => '店舗紹介情報更新失敗',
+                  ];
+                  makeLog($data);
+                  $dbCompleteFlg = false;
+                  break;
+                }
+              }
+              break;
           }
           #全ての処理成功
           if ($dbCompleteFlg == true) {
@@ -379,13 +464,13 @@ HTML;
             switch ($method) {
               #***** 新規登録 *****#
               case 'new': {
-                  $makeTag['title'] = '新規おすすめ商品登録';
+                  $makeTag['title'] = '新規店舗登録';
                   $makeTag['msg'] = '登録が完了しました。';
                 }
                 break;
               #***** 編集 *****#
               case 'edit': {
-                  $makeTag['title'] = 'おすすめ商品情報編集';
+                  $makeTag['title'] = '店舗情報編集';
                   $makeTag['msg'] = '更新が完了しました。';
                 }
                 break;
@@ -394,11 +479,11 @@ HTML;
             # DB更新完了のJSONファイル作成
             #----------------------------
             #shop.json
-            $cmdShop = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShops.php ' . $shopId . ' 2>&1 &';
-            exec($cmdShop, $output, $return_var);
+            ## $cmdShop = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShops.php ' . $shopId . ' 2>&1 &';
+            ## exec($cmdShop, $output, $return_var);
             #shopsIndex.json
-            $cmdShopsIndex = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShopsIndex.php 2>&1 &';
-            exec($cmdShopsIndex, $output, $return_var);
+            ## $cmdShopsIndex = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShopsIndex.php 2>&1 &';
+            ## exec($cmdShopsIndex, $output, $return_var);
           } else {
             #失敗時はROLLBACK
             DB_Transaction(3);
@@ -414,7 +499,7 @@ HTML;
         DB_Transaction(3);
         #エラーログ出力
         $data = [
-          'pageName' => 'proc_master01_01_03',
+          'pageName' => 'proc_client01_01_02',
           'reason' => 'トランザクション開始失敗',
           'errorMessage' => $e->getMessage(),
         ];
