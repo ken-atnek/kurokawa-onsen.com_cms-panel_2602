@@ -94,7 +94,58 @@
         }
     }
 }
-
+/*=========================================
+検索結果一覧ヘッド部分
+-----------------------------------------*/
+@mixin wrapPagerBlock {
+    position: relative;
+    z-index: +2;
+    font-size: 1em;
+    padding: 1.6em 2em 1em;
+    display: flex;
+    align-items: center;
+    h3 {
+        display: flex;
+        align-items: center;
+        span {
+            font-size: 0.8em;
+            margin-left: 0.5em;
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            i {
+                margin-left: 0.5em;
+                font-weight: 700;
+            }
+        }
+    }
+    .select-display-number {
+        position: relative;
+        margin-left: 6em;
+        font-size: inherit;
+        width: 5em;
+        &::before,
+        &::after {
+            position: absolute;
+            top: 50%;
+            translate: 0 -50%;
+            font-size: FZ(14);
+        }
+        &::before {
+            content: "表示件数";
+            right: calc(100% + 0.5em);
+            width: max-content;
+        }
+        &::after {
+            content: "件";
+            left: calc(100% + 0.3em);
+        }
+        @include select-list-box(
+            $height: 4.4rem,
+            $position: "right",
+            $list-height: 3rem
+        );
+    }
+}
 /*================================
  メインコンテンツオレンジ背景
 --------------------------------*/

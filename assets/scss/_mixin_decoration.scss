@@ -192,6 +192,17 @@
             width: 1.8rem;
             @include svg-iconSite("646464");
         }
+    } @else if $direction == "icon_up" {
+        &::after {
+            width: 1.4rem;
+            @include svg-icon-arrow02("646464");
+        }
+    } @else if $direction == "icon_down" {
+        &::after {
+            width: 1.4rem;
+            @include svg-icon-arrow02("646464");
+            scale: 1 -1;
+        }
     } @else if $direction == "icon_delate" {
         &::after {
             width: 1.4rem;
@@ -577,6 +588,9 @@
         font-size: FZ(14);
         @if $position == "center" {
             text-align: center;
+        } @else if $position == "right" {
+            text-align: right;
+            padding-right: 1em;
         } @else {
             text-align: left;
         }
@@ -605,6 +619,14 @@
             li {
                 position: relative;
                 font-size: inherit;
+                display: flex;
+                @if $position == "right" {
+                    justify-content: flex-end;
+                } @else if $position == "center" {
+                    justify-content: center;
+                } @else {
+                    justify-content: stretch;
+                }
                 input[type="radio"] {
                     position: absolute;
                     inset: 0;
@@ -614,11 +636,13 @@
                     height: $list-height;
                     cursor: pointer;
                     font-size: FZ(14);
-                    padding-left: 1.4em;
                     display: flex;
                     align-items: center;
                     @if $position == "center" {
                         padding-right: 1.4em;
+                    } @else if $position == "right" {
+                        justify-self: flex-end;
+                        padding-right: 2em;
                     } @else {
                         padding-left: 1.4em;
                     }

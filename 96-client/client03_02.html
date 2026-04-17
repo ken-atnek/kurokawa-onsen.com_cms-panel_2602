@@ -1,0 +1,359 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/master03-02.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-03-02 status-client">
+      <section class="container-left-menu menu-color03">
+        <div class="title">EC販売管理</div>
+        <nav>
+          <a href="#"><span>受注一覧</span></a>
+          <a href="#" class="is-active"><span>商品一覧</span></a>
+          <a href="#"><span>カテゴリ登録</span></a>
+          <a href="#"><span>規格管理</span></a>
+          <a href="#"><span>集計</span></a>
+          <!-- <a href="#"><span>店舗登録</span></a> -->
+        </nav>
+      </section>
+      <div class="main-contents menu-color03">
+        <div class="block_inner">
+          <h2>商品一覧</h2>
+          <form name="searchForm" class="head_search_setting">
+            <h3>検索条件設定</h3>
+            <dl>
+              <div class="box-name">
+                <dt>商品名・商品ID</dt>
+                <dd>
+                  <input type="text" />
+                </dd>
+              </div>
+              <div class="box-category">
+                <dt>ステータス</dt>
+                <dd>
+                  <div class="select-search-category" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="select-search-category"
+                        value=""
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-search-category"
+                            value="1"
+                            id="searchCategory01"
+                          />
+                          <label for="searchCategory01">置物</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-search-category"
+                            value="2"
+                            id="searchCategory02"
+                          />
+                          <label for="searchCategory02">お酒</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-search-category"
+                            value="3"
+                            id="searchCategory03"
+                          />
+                          <label for="searchCategory03">食品</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="select-search-category"
+                            value="4"
+                            id="searchCategory04"
+                          />
+                          <label for="searchCategory04">その他 </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </dd>
+              </div>
+              <div class="box-status">
+                <dt>公開状態</dt>
+                <dd>
+                  <div>
+                    <input
+                      type="radio"
+                      name="displayFlg"
+                      value="0"
+                      checked="checked"
+                    /><label for="displayFlg_01">全て</label>
+                  </div>
+                  <div>
+                    <input type="radio" name="displayFlg" value="1" /><label
+                      for="displayFlg_02"
+                      >公開</label
+                    >
+                  </div>
+                  <div>
+                    <input type="radio" name="displayFlg" value="2" /><label
+                      for="displayFlg_03"
+                      >非公開</label
+                    >
+                  </div>
+                </dd>
+              </div>
+            </dl>
+            <div class="box-btn">
+              <button type="button" class="item-reset">リセット</button>
+              <button type="button" class="item-search">条件で検索</button>
+            </div>
+          </form>
+          <article class="inner_search-list">
+            <div class="wrap_pager-block">
+              <h3>検索結果<span>-<i>1234件</i>が該当</span></h3>
+              <div class="select-display-number" data-selectbox>
+                <button
+                  type="button"
+                  class="selectbox__head"
+                  aria-expanded="false"
+                >
+                  <input
+                    type="hidden"
+                    name="select-display-number""
+                    value="1"
+                    data-selectbox-hidden
+                  />
+                  <span class="selectbox__value" data-selectbox-value>10</span>
+                </button>
+                <div class="list-wrapper">
+                  <ul class="selectbox__panel">
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-number""
+                        value="1"
+                        id="number01"
+                        checked="checked"
+                      />
+                      <label for="number01">10</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-number""
+                        value="2"
+                        id="number02"
+                      />
+                      <label for="number02">20</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-number""
+                        value="3"
+                        id="number03"
+                      />
+                      <label for="number03">30</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-number""
+                        value="4"
+                        id="number04"
+                      />
+                      <label for="number04">50 </label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-number""
+                        value="5"
+                        id="number05"
+                      />
+                      <label for="number05">100 </label>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <ul>
+              <li>
+                <div>ID</div>
+                <div>画像</div>
+                <div>商品名</div>
+                <div>価格</div>
+                <div>在庫数</div>
+                <div>公開状態</div>
+                <div>登録日</div>
+                <div>更新日</div>
+                <div>確認</div>
+              </li>
+              <li>
+                <div class="item-id">
+                  <span>001</span>
+                </div>
+                <div class="item-image">
+                  <picture>
+                    <source src="../assets/images/_dummy/item203.webp">
+                    <img src="../assets/images/_dummy/item203.webp" alt="商品名">
+                  </picture>
+                </div>
+                <div class="item-name">
+                   <a href="#"></a>
+                  <span>黒川温泉タオル</span>
+                </div>
+                <div class="item-price">
+                  <span>1,500</span>
+                </div>
+                <div class="item-stock">
+                  <span>123</span>
+                </div>
+                <div class="item-status">
+                  <!-- <span class="is-active">公開</span> -->
+                  <span class="is-inactive">非公開</span>
+                </div>
+                <div class="item-date">
+                  <span>2026/04/12<i>14:15</i></span>
+                </div>
+                <div class="item-date">
+                  <span>2026/05/11<i>08:05</i></span>
+                </div>
+                <div class="item-check">
+                  <a href="#"></a>
+                </div>
+              </li>
+              <li>
+                <div class="item-id">
+                  <span>001</span>
+                </div>
+                <div class="item-image">
+                  <picture>
+                    <source src="../assets/images/_dummy/item203.webp">
+                    <img src="../assets/images/_dummy/item203.webp" alt="商品名">
+                  </picture>
+                </div>
+                <div class="item-name">
+                  <a href="#"></a>
+                  <span>黒川温泉タオル</span>
+                </div>
+                <div class="item-price">
+                  <span>980</span>
+                </div>
+                <div class="item-stock">
+                  <span>123</span>
+                </div>
+                <div class="item-status">
+                  <span class="is-active">公開</span>
+                </div>
+                <div class="item-date">
+                  <span>2026/04/12<i>14:15</i></span>
+                </div>
+                <div class="item-date">
+                  <span>2026/05/11<i>08:05</i></span>
+                </div>
+                <div class="item-check">
+                  <a href="#"></a>
+                </div>
+              </li>
+              <li>
+                <div class="item-id">
+                  <span>001</span>
+                </div>
+                <div class="item-image">
+                  <picture>
+                    <source src="../assets/images/_dummy/item203.webp">
+                    <img src="../assets/images/_dummy/item203.webp" alt="商品名">
+                  </picture>
+                </div>
+                <div class="item-name">
+                                    <a href="#"></a>
+
+                  <span>黒川温泉タオル</span>
+                </div>
+                <div class="item-price">
+                  <span>1,500</span>
+                </div>
+                <div class="item-stock">
+                  <span>123</span>
+                </div>
+                <div class="item-status">
+                  <!-- <span class="is-active">公開</span> -->
+                  <span class="is-inactive">非公開</span>
+                </div>
+                <div class="item-date">
+                  <span>2026/04/12<i>14:15</i></span>
+                </div>
+                <div class="item-date">
+                  <span>2026/05/11<i>08:05</i></span>
+                </div>
+                <div class="item-check">
+                  <a href="#"></a>
+                </div>
+              </li>
+   
+            </ul>
+            <div class="box-pager">
+              <div class="box_number">
+                <nav>
+                  <a href="#" class="is-active"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                </nav>
+                <button type="button" class="btn_next"></button>
+              </div>
+              <div class="box_input">
+                <input type="text" placeholder="1/16513" />
+              </div>
+            </div>
+          </article>
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>

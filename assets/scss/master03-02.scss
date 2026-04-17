@@ -1,0 +1,277 @@
+/*==========================================================
+EC販売管理
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+.link_page-back_bottom {
+    @include linkPageBack_bottom;
+}
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+/*=========================================
+商品一覧
+-----------------------------------------*/
+.inner-03-02 {
+    .head_search_setting {
+        @include layoutContentsWhiteBlock;
+        border-bottom-left-radius: unset;
+        border-bottom-right-radius: unset;
+        z-index: 3;
+        flex-grow: unset;
+        h3 {
+            @include decorationHeadH3;
+        }
+        dl {
+            position: relative;
+            font-size: inherit;
+            display: grid;
+            grid-template-columns: auto 1fr auto 1fr;
+            border-top: 1px solid #c7c7c7;
+            & > div {
+                font-size: inherit;
+                grid-column: span 2;
+                display: grid;
+                grid-template-columns: subgrid;
+                padding: 0.6em clamp(1rem, 1.6em, 3.6rem);
+                align-items: center;
+                border-bottom: 1px solid #c7c7c7;
+                gap: 0 2em;
+            }
+            dt {
+                font-size: FZ(14);
+                display: flex;
+                flex-direction: column;
+            }
+            dd {
+                position: relative;
+                font-size: 1em;
+                display: flex;
+                input [type="text"],
+                input [type="tel"] {
+                    height: 4.4rem;
+                }
+            }
+            .box-name {
+                grid-column: span 4;
+                dd {
+                    grid-column: span 3;
+                }
+            }
+            .box-category {
+                border-right: 1px solid #c7c7c7;
+                dd {
+                    .select-search-category {
+                        width: 100%;
+                        @include select-list-box(
+                            $height: 4.4rem,
+                            $position: "left",
+                            $list-height: 3.4rem
+                        );
+                    }
+                }
+            }
+            .box-status {
+                dd {
+                    display: flex;
+                    align-items: center;
+                    gap: 0 0.8em;
+                    padding-block: 0.3em;
+                    padding-left: 1em;
+                    & > div {
+                        position: relative;
+                        font-size: 1em;
+                        @include radioCheck;
+                        margin-right: 1em;
+                        label {
+                            font-size: FZ(14);
+                            padding-left: 2.2em;
+                        }
+                    }
+                }
+            }
+        }
+        .box-btn {
+            position: relative;
+            display: flex;
+            gap: 0 1em;
+            font-size: inherit;
+            padding-block: 1rem;
+            align-self: flex-end;
+            align-items: center;
+            padding-right: 2.4rem;
+            button {
+                font-size: FZ(14);
+            }
+            .item-reset {
+                width: 8.8rem;
+                @include main-button("reset");
+                height: 3.2rem;
+            }
+            .item-search {
+                @include main-button("confirm");
+                width: 24rem;
+                height: 4rem;
+            }
+        }
+    }
+    .inner_search-list {
+        @include layoutContentsWhiteBlock;
+
+        .wrap_pager-block {
+            @include wrapPagerBlock;
+        }
+        & > ul {
+            @include layout-table-list(
+                auto auto 1fr auto auto auto auto auto auto,
+                9
+            );
+            & > li {
+                &:not(:first-of-type) {
+                    cursor: auto;
+                    &:active {
+                        &::before {
+                            background-color: #edf1f8;
+                        }
+                    }
+                    & > div {
+                        font-size: inherit;
+                    }
+                }
+                &:first-of-type {
+                    & > div {
+                        &:has(span) {
+                            padding-inline: unset;
+                        }
+                    }
+                }
+                .item-id {
+                    font-size: inherit;
+                    padding-inline: 1rem;
+                    @include flex-center(column);
+                    gap: 0.3em 0;
+                    span {
+                        font-size: FZ(14);
+                    }
+                }
+                .item-image {
+                    @include flex-center(column);
+                    padding: 1rem;
+                    img {
+                        max-width: 4.8rem;
+                        aspect-ratio: 1;
+                    }
+                }
+                .item-name {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    padding-inline: 1rem;
+                    span {
+                        font-size: FZ(14);
+                        display: inline-block;
+                        position: relative;
+                        &::after {
+                            content: "";
+                            position: absolute;
+                            left: 0;
+                            width: 100%;
+                            top: calc(100% + 0.1em);
+                            height: 2px;
+                            background-color: $hover-blue;
+                            transition: 0.2s ease-out;
+                            clip-path: inset(0 100% 0 0);
+                        }
+                    }
+                    a {
+                        position: absolute;
+                        inset: 0;
+                        z-index: 1;
+                    }
+                    &:has(a:hover) {
+                        span {
+                            &::after {
+                                clip-path: inset(0);
+                            }
+                        }
+                    }
+                }
+                .item-price {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    padding-inline: 1rem;
+                    span {
+                        font-size: FZ(14);
+                        &::after {
+                            content: "円";
+                            margin-left: 0.1em;
+                        }
+                    }
+                }
+                .item-stock {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    padding-inline: 1rem;
+                    span {
+                        font-size: FZ(14);
+                    }
+                }
+                .item-status {
+                    @include flex-center(column);
+                    padding: 1rem;
+                    span {
+                        font-size: FZ(12);
+                        color: #fff;
+                        @include flex-center;
+                        width: 4.6em;
+                        height: 1.8em;
+                        border-radius: 100vmax;
+                        font-weight: 600;
+                        &.is-active {
+                            background-color: $confirm-blue;
+                        }
+                        &.is-inactive {
+                            background-color: #888780;
+                        }
+                    }
+                }
+                .item-date {
+                    @include flex-center;
+                    padding-inline: 1rem;
+
+                    span {
+                        font-size: FZ(12);
+                        font-weight: 500;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        i {
+                            margin-left: 0.2em;
+                        }
+                    }
+                }
+                .item-check {
+                    @include flex-center;
+                    a {
+                        @include decorationIcon("icon_check");
+                    }
+                }
+            }
+        }
+        // ページャー
+        .box-pager {
+            @include layout-pager;
+        }
+    }
+}
