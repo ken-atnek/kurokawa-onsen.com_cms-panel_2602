@@ -238,10 +238,9 @@ header {
         color: #fff;
         font-size: inherit;
         background-color: var(--cp-color);
-        span {
-            font-size: FZ(30);
-            font-weight: 700;
-            line-height: 1.6em;
+        img {
+            width: 100%;
+            max-width: 11rem;
         }
     }
     .inner_head {

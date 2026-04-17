@@ -1,5 +1,5 @@
 /*==========================================================
-店舗一覧
+EC販売管理
 ==========================================================*/
 @use "./_reset_v2.5" as *;
 @use "./_variable" as *;
@@ -221,7 +221,7 @@
                     display: grid;
                     grid-template-columns: subgrid;
                     font-size: inherit;
-                    grid-template-rows: auto 1fr;
+                    grid-template-rows: auto auto 1fr;
 
                     & > ul {
                         grid-column: span 3;
@@ -252,7 +252,6 @@
                                 justify-content: flex-end;
                                 span {
                                     font-size: FZ(14);
-
                                     &::after {
                                         content: "円";
                                         font-size: 0.85em;
@@ -267,6 +266,39 @@
                             }
                         }
                     }
+                    .item-shipping {
+                        grid-column: span 3;
+                        display: grid;
+                        grid-template-columns: subgrid;
+                        font-size: inherit;
+                        border-top: 1px solid $border-gray;
+
+                        & > div {
+                            padding-inline: 1rem;
+                            padding-block: 0.5rem;
+                        }
+                        .title {
+                            font-size: FZ(14);
+                            border-right: 1px solid #c7c7c7;
+                            text-align: right;
+                        }
+                        .shipping-price {
+                            font-size: inherit;
+                            display: flex;
+                            justify-content: flex-end;
+                            grid-column: span 2;
+
+                            span {
+                                font-size: FZ(14);
+
+                                &::after {
+                                    content: "円";
+                                    font-size: 0.85em;
+                                    margin-left: 0.1em;
+                                }
+                            }
+                        }
+                    }
                     .item-price {
                         grid-column: span 3;
                         display: grid;
@@ -277,6 +309,7 @@
                         display: flex;
                         justify-content: flex-end;
                         align-items: flex-end;
+                        align-self: stretch;
                         span {
                             font-size: FZ(16);
                             font-weight: 700;
