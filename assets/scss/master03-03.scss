@@ -42,13 +42,36 @@ EC販売管理
         }
     }
     .block-basic-info {
+        .box-date {
+            position: relative;
+            font-size: inherit;
+            border-top: 1px solid #c7c7c7;
+            padding: 1em 2em 1em;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0 1em;
+            div {
+                font-size: inherit;
+                display: flex;
+                align-items: center;
+                h4,
+                span {
+                    font-size: FZ(14);
+                }
+                h4 {
+                    &::after {
+                        content: "：";
+                    }
+                }
+            }
+        }
         dl {
             position: relative;
             font-size: inherit;
             display: grid;
             grid-template-columns: auto 1fr auto 1fr;
-            border-top: 1px solid #c7c7c7;
-            padding: 2em;
+            padding: 0 2em 2em;
             & > div {
                 font-size: inherit;
                 grid-column: span 2;
