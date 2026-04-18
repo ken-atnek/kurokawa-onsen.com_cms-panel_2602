@@ -638,11 +638,13 @@
                     font-size: FZ(14);
                     display: flex;
                     align-items: center;
+                    width: 100%;
                     @if $position == "center" {
                         padding-right: 1.4em;
                     } @else if $position == "right" {
-                        justify-self: flex-end;
                         padding-right: 2em;
+                        text-align: right;
+                        justify-content: flex-end;
                     } @else {
                         padding-left: 1.4em;
                     }
@@ -824,65 +826,55 @@
 /*=========================================
 画像セレクト部分
 -----------------------------------------*/
-// @mixin item-select-image {
-//     position: relative;
-//     font-size: inherit;
-//     width: 100%;
-//     color: #ababab;
-//     background-color: #f7f7f7;
-//     border-radius: 8px;
-//     display: flex;
-//     flex-direction: column;
-//     align-items: center;
-//     padding-block: 3.4rem;
-//     gap: 1rem 0;
-//     @include borderImage;
-//     --borderColor: #c7c7c7;
-//     --borderSize: 12px;
-//     --borderWidth: 6px;
-//     h4 {
-//         font-size: FZ(18);
-//     }
-//     span {
-//         font-size: FZ(12);
-//     }
-//     button {
-//         background-color: #fff;
-//         border-radius: 8px;
-//         @include flex-center;
-//         width: 136px;
-//         height: 36px;
-//         font-size: FZ(14);
-//         border: 1px solid #e2e0db;
-//     }
-//     .wrap-caution {
-//         font-size: inherit;
-//         display: flex;
-//         flex-direction: column;
-//         align-items: center;
-//         color: #df3d3d;
-//         gap: 0.3rem 0;
-//         h5 {
-//             font-size: FZ(16);
-//             font-weight: 600;
-//         }
-//         p {
-//             font-size: FZ(14);
-//             color: #df3d3d;
-//         }
-//     }
-//     &.is-active {
-//         pointer-events: none;
-//         &::after {
-//             content: "";
-//             position: absolute;
-//             inset: 0;
-//             background-color: rgba(34, 34, 34, 0.3);
-//             z-index: +1;
-//             border-radius: 8px;
-//         }
-//     }
-// }
+@mixin item-select-image {
+    position: relative;
+    font-size: inherit;
+    width: 100%;
+    color: #ababab;
+    background-color: #f7f7f7;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-block: 3.4rem;
+    gap: 1rem 0;
+    @include border-image;
+    --borderColor: #c7c7c7;
+    --borderSize: 8px;
+    --borderWidth: 4px;
+    h4 {
+        font-size: FZ(18);
+    }
+    span {
+        font-size: FZ(12);
+    }
+    button {
+        background-color: $hover-bg-blue;
+        border-radius: 8px;
+        @include flex-center;
+        width: 136px;
+        height: 36px;
+        font-size: FZ(14);
+        color: $hover-blue;
+        border: 1px solid $hover-blue;
+    }
+    .wrap-caution {
+        font-size: inherit;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #df3d3d;
+        gap: 0.3rem 0;
+        h5 {
+            font-size: FZ(16);
+            font-weight: 600;
+        }
+        p {
+            font-size: FZ(14);
+            color: #df3d3d;
+        }
+    }
+}
 /*=========================================
 画像セレクト時の表示リスト
 -----------------------------------------*/
