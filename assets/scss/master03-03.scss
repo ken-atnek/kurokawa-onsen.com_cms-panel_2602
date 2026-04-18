@@ -40,6 +40,28 @@ EC販売管理
         h3 {
             @include decorationHeadH3;
         }
+        dl {
+            div {
+                dt {
+                    font-size: FZ(14);
+                    text-align: right;
+                    &.is-required {
+                        display: flex;
+                        align-items: center;
+                        flex-direction: row;
+                        &::before {
+                            content: "必須";
+                            font-size: 1.2rem;
+                            color: #fff;
+                            background-color: $caution-red;
+                            padding: 0.2em 0.5em;
+                            border-radius: 4px;
+                            margin-right: 0.5em;
+                        }
+                    }
+                }
+            }
+        }
     }
     .block-basic-info {
         .box-date {
@@ -81,11 +103,7 @@ EC販売管理
                 align-items: center;
                 gap: 0 2em;
             }
-            dt {
-                font-size: FZ(14);
-                display: flex;
-                flex-direction: column;
-            }
+
             dd {
                 position: relative;
                 font-size: 1em;
@@ -241,12 +259,7 @@ EC販売管理
                 align-items: center;
                 gap: 0 2em;
             }
-            dt {
-                font-size: FZ(14);
-                display: flex;
-                flex-direction: column;
-                text-align: right;
-            }
+
             dd {
                 position: relative;
                 font-size: 1em;
@@ -336,12 +349,7 @@ EC販売管理
                 align-items: center;
                 gap: 0 2em;
             }
-            dt {
-                font-size: FZ(14);
-                display: flex;
-                flex-direction: column;
-                text-align: right;
-            }
+
             dd {
                 position: relative;
                 font-size: 1em;
