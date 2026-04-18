@@ -527,3 +527,216 @@ EC販売管理
         }
     }
 }
+/*=========================================
+商品規格登録
+-----------------------------------------*/
+.inner-03-03-01 {
+    .block-head {
+        @include layoutContentsWhiteBlock;
+        border-bottom-right-radius: unset;
+        border-bottom-left-radius: unset;
+        margin-bottom: unset;
+        flex-grow: unset;
+        padding-bottom: 1em;
+        h3 {
+            @include decorationHeadH3;
+        }
+        .inner-top {
+            position: relative;
+            font-size: inherit;
+            padding: 2em 2em 1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            span {
+                font-size: FZ(18);
+                font-weight: 600;
+            }
+            button {
+                @include main-button("confirm");
+                width: 10em;
+                font-size: FZ(16);
+                height: 4rem;
+            }
+        }
+        .variable-list {
+            position: relative;
+            font-size: inherit;
+            display: flex;
+            flex-direction: column;
+            padding-inline: 2em;
+            gap: 1rem 0;
+            .list-item {
+                position: relative;
+                font-size: inherit;
+                .select-variable01 {
+                    width: 100%;
+                    @include select-list-box(
+                        $height: 4.4rem,
+                        $position: "left",
+                        $list-height: 3.4rem
+                    );
+                }
+            }
+        }
+    }
+    .block-details {
+        @include layoutContentsWhiteBlock;
+        border-bottom-right-radius: unset;
+        border-bottom-left-radius: unset;
+        margin-bottom: unset;
+        flex-grow: unset;
+        padding-bottom: 1em;
+        margin-bottom: 4rem;
+        .inner-top {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            font-size: inherit;
+            align-items: center;
+            padding: 1em 2em 1em;
+            p {
+                font-size: FZ(16);
+            }
+            button {
+                background-color: #fff;
+                border: 1px solid $font-black;
+                font-size: inherit;
+                @include flex-center;
+                height: 4rem;
+                border-radius: 6px;
+                transition: 0.3s ease-out;
+                padding-inline: 1.8em;
+                span {
+                    position: relative;
+                    font-size: FZ(14);
+                    padding-left: 2em;
+                    &::before {
+                        content: "";
+                        position: absolute;
+                        top: 50%;
+                        left: 0;
+                        translate: 0 -50%;
+                        width: 2.2rem;
+                        @include svg-icon-copy("1a1818");
+                    }
+                }
+                &:hover {
+                    background-color: $hover-bg-blue;
+                }
+            }
+        }
+        ul {
+            @include layout-table-list(auto 1fr 1fr auto auto, 5);
+            & > li {
+                &:first-of-type {
+                    & > div {
+                        border-right: unset;
+                        align-items: flex-start;
+                        &:has(span) {
+                            padding-inline: unset;
+                        }
+                    }
+                }
+                &:not(:first-of-type) {
+                    cursor: auto;
+                    &:active {
+                        &::before {
+                            background-color: #edf1f8;
+                        }
+                    }
+                    & > div {
+                        font-size: inherit;
+                        border-right: unset;
+                        span {
+                            font-size: FZ(14);
+                        }
+                    }
+                    .item-toggle {
+                        padding: 1rem;
+                        align-self: center;
+                        .wrap-toggle-button {
+                            label {
+                                @include toggle-button();
+                            }
+                        }
+                    }
+                    .item-name {
+                        padding: 1rem 2rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0 1em;
+                        p {
+                            font-size: FZ(16);
+                            font-weight: 600;
+                        }
+                    }
+                    .item-stock {
+                        padding: 1rem 2rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0 1rem;
+                        & > div {
+                            font-size: inherit;
+                            display: flex;
+                            align-items: center;
+
+                            &.number {
+                                input {
+                                    max-width: 8rem;
+                                    text-align: right;
+                                }
+                            }
+                            &.check-box {
+                                position: relative;
+                                font-size: 1em;
+                                @include radioCheck;
+                                margin-right: 1em;
+                                label {
+                                    font-size: FZ(14);
+                                    padding-left: 2.2em;
+                                }
+                            }
+                        }
+                    }
+                    .item-price {
+                        padding: 1rem 2rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0 0.2em;
+                        input {
+                            max-width: 11rem;
+                            text-align: right;
+                        }
+                    }
+                }
+            }
+        }
+        .box-btn {
+            position: relative;
+            font-size: inherit;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0 1rem;
+            margin-top: 2rem;
+            padding-inline: 2em;
+            button {
+                height: 4rem;
+                display: flex;
+                justify-content: center;
+                border-radius: 6px;
+                transition: 0.3s ease-out;
+                &.btn-confirmed {
+                    background-color: $confirm-blue;
+                    color: #fff;
+                    font-size: FZ(14);
+                    font-weight: 600;
+                    width: 12rem;
+                    &:hover {
+                        opacity: 0.8;
+                    }
+                }
+            }
+        }
+    }
+}

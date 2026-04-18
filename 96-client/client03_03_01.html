@@ -1,0 +1,301 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/master03-03.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-03-03-01 status-client">
+      <section class="container-left-menu menu-color03">
+        <div class="title">EC販売管理</div>
+        <nav>
+          <a href="#"><span>受注一覧</span></a>
+          <a href="#"><span>商品一覧</span></a>
+          <a href="#"><span>カテゴリ管理</span></a>
+          <a href="#"><span>規格管理</span></a>
+          <a href="#" class="is-active"><span>商品登録</span></a>
+          <a href="#"><span>集計</span></a>
+        </nav>
+      </section>
+      <div class="main-contents menu-color03">
+        <div class="block_inner">
+          <h2>商品規格登録</h2>
+          <form class="block-head">
+            <h3>商品規格</h3>
+            <div class="inner-top">
+              <span class="item-name">黒川温泉入浴セット</span>
+              <button type="button">商品規格の設定</button>
+            </div>
+
+            <ul class="variable-list">
+              <li class="list-item">
+                <div class="select-variable01" data-selectbox>
+                  <button
+                    type="button"
+                    class="selectbox__head"
+                    aria-expanded="false"
+                  >
+                    <input
+                      type="hidden"
+                      name="selectVariable01"
+                      value=""
+                      data-selectbox-hidden
+                    />
+                    <span class="selectbox__value" data-selectbox-value
+                      >規格1を選択してください</span
+                    >
+                  </button>
+                  <div class="list-wrapper">
+                    <ul class="selectbox__panel">
+                      <li>
+                        <input
+                          type="radio"
+                          name="selectVariable01"
+                          value="1"
+                          id="selectVariable01Option01"
+                        />
+                        <label for="selectVariable01Option01"
+                          >フレバー（CUBE用味）</label
+                        >
+                      </li>
+                      <li>
+                        <input
+                          type="radio"
+                          name="selectVariable01"
+                          value="2"
+                          id="selectVariable01Option02"
+                        />
+                        <label for="selectVariable01Option02"
+                          >サイズ（CUBE用サイズ）</label
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </li>
+              <li class="list-item">
+                <div class="select-variable01" data-selectbox>
+                  <button
+                    type="button"
+                    class="selectbox__head"
+                    aria-expanded="false"
+                  >
+                    <input
+                      type="hidden"
+                      name="selectVariable02"
+                      value=""
+                      data-selectbox-hidden
+                    />
+                    <span class="selectbox__value" data-selectbox-value
+                      >規格2を選択してください</span
+                    >
+                  </button>
+                  <div class="list-wrapper">
+                    <ul class="selectbox__panel">
+                      <li>
+                        <input
+                          type="radio"
+                          name="selectVariable02"
+                          value="1"
+                          id="selectVariable02Option01"
+                        />
+                        <label for="selectVariable02Option01"
+                          >フレバー（CUBE用味）</label
+                        >
+                      </li>
+                      <li>
+                        <input
+                          type="radio"
+                          name="selectVariable02"
+                          value="2"
+                          id="selectVariable02Option02"
+                        />
+                        <label for="selectVariable02Option02"
+                          >サイズ（CUBE用サイズ）</label
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </form>
+          <form class="block-details">
+            <div class="inner-top">
+              <p><span>3</span>件の組み合わせがあります。</p>
+              <button type="button"><span>1行目を全ての行に複製</span></button>
+            </div>
+            <ul>
+              <li>
+                <div>有効</div>
+                <div>規格名01</div>
+                <div>規格名02</div>
+                <div style="padding-left: 3rem">在庫数</div>
+                <div style="align-items: center">販売価格</div>
+              </li>
+              <li>
+                <div class="item-toggle">
+                  <div
+                    class="wrap-toggle-button"
+                    data-tooltip-on="有効中 | 無効にする"
+                    data-tooltip-off="無効中 | 有効する"
+                  >
+                    <label class="toggle-button">
+                      <input type="checkbox" checked />
+                    </label>
+                  </div>
+                </div>
+                <div class="item-name"><p>チョコ</p></div>
+                <div class="item-name"><p>抹茶</p></div>
+                <div class="item-stock">
+                  <div class="number">
+                    <input type="text" />
+                  </div>
+                  <div class="check-box">
+                    <input
+                      type="checkbox"
+                      name="stockUnlimited"
+                      id="stockUnlimited"
+                      value="1"
+                    /><label for="stockUnlimited"> 無制限</label>
+                  </div>
+                </div>
+                <div class="item-price">
+                  <input type="text" />
+                  <span>円</span>
+                </div>
+              </li>
+              <li>
+                <div class="item-toggle">
+                  <div
+                    class="wrap-toggle-button"
+                    data-tooltip-on="有効中 | 無効にする"
+                    data-tooltip-off="無効中 | 有効する"
+                  >
+                    <label class="toggle-button">
+                      <input type="checkbox" checked />
+                    </label>
+                  </div>
+                </div>
+                <div class="item-name"><p>チョコ</p></div>
+                <div class="item-name"><p>抹茶</p></div>
+                <div class="item-stock">
+                  <div class="number">
+                    <input type="text" />
+                  </div>
+                  <div class="check-box">
+                    <input
+                      type="checkbox"
+                      name="stockUnlimited"
+                      id="stockUnlimited"
+                      value="1"
+                    /><label for="stockUnlimited"> 無制限</label>
+                  </div>
+                </div>
+                <div class="item-price">
+                  <input type="text" />
+                  <span>円</span>
+                </div>
+              </li>
+              <li>
+                <div class="item-toggle">
+                  <div
+                    class="wrap-toggle-button"
+                    data-tooltip-on="有効中 | 無効にする"
+                    data-tooltip-off="無効中 | 有効する"
+                  >
+                    <label class="toggle-button">
+                      <input type="checkbox" checked />
+                    </label>
+                  </div>
+                </div>
+                <div class="item-name"><p>チョコ</p></div>
+                <div class="item-name"><p>抹茶</p></div>
+                <div class="item-stock">
+                  <div class="number">
+                    <input type="text" />
+                  </div>
+                  <div class="check-box">
+                    <input
+                      type="checkbox"
+                      name="stockUnlimited"
+                      id="stockUnlimited"
+                      value="1"
+                    /><label for="stockUnlimited"> 無制限</label>
+                  </div>
+                </div>
+                <div class="item-price">
+                  <input type="text" />
+                  <span>円</span>
+                </div>
+              </li>
+              <li>
+                <div class="item-toggle">
+                  <div
+                    class="wrap-toggle-button"
+                    data-tooltip-on="有効中 | 無効にする"
+                    data-tooltip-off="無効中 | 有効する"
+                  >
+                    <label class="toggle-button">
+                      <input type="checkbox" checked />
+                    </label>
+                  </div>
+                </div>
+                <div class="item-name"><p>チョコ</p></div>
+                <div class="item-name"><p>抹茶</p></div>
+                <div class="item-stock">
+                  <div class="number">
+                    <input type="text" />
+                  </div>
+                  <div class="check-box">
+                    <input
+                      type="checkbox"
+                      name="stockUnlimited"
+                      id="stockUnlimited"
+                      value="1"
+                    /><label for="stockUnlimited"> 無制限</label>
+                  </div>
+                </div>
+                <div class="item-price">
+                  <input type="text" />
+                  <span>円</span>
+                </div>
+              </li>
+            </ul>
+            <div class="box-btn">
+              <button class="btn-confirmed">登録</button>
+            </div>
+          </form>
+          <a href="#" class="link_page-back_top">戻る</a>
+          <a href="#" class="link_page-back_bottom">戻る</a>
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>
