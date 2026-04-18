@@ -24,36 +24,57 @@
       href="../assets/images/favicon/apple-touch-icon.png"
     />
     <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
-    <link rel="stylesheet" href="../assets/css/master03-04.css" />
+    <link rel="stylesheet" href="../assets/css/master03-05.css" />
   </head>
 
   <body>
     <!--#include virtual="./inc_header.html"-->
-    <main class="inner-03-04 status-client">
+    <main class="inner-03-05 status-client">
       <section class="container-left-menu menu-color03">
         <div class="title">EC販売管理</div>
         <nav>
           <a href="#"><span>受注一覧</span></a>
           <a href="#"><span>商品一覧</span></a>
-          <a href="#" class="is-active"><span>カテゴリ管理</span></a>
-          <a href="#"><span>規格管理</span></a>
+          <a href="#"><span>カテゴリ管理</span></a>
+          <a href="#" class="is-active"><span>規格管理</span></a>
           <a href="#"><span>集計</span></a>
-          <!-- <a href="#"><span>店舗登録</span></a> -->
+          <!-- <a href="#"><span>店舗登録</span ></a> -->
         </nav>
       </section>
       <div class="main-contents menu-color03">
         <div class="block_inner">
-          <h2>カテゴリ一覧</h2>
+          <h2>規格詳細</h2>
+          <article class="inner-head">
+            <h3>企画情報</h3>
+            <dl>
+              <div>
+                <dt>規格名</dt>
+                <dd>フレーバー</dd>
+              </div>
+              <div>
+                <dt>管理名</dt>
+                <dd>お土産フレーバー</dd>
+              </div>
+            </dl>
+          </article>
           <article class="inner_search-list">
+            <h3>規格一覧</h3>
             <form class="box-new-entry">
-              <input type="text" placeholder="カテゴリ名を入力" />
+              <div>
+                <span>規格名</span>
+                <input type="text" placeholder="規格名を入力" />
+              </div>
+              <div>
+                <span>管理名</span>
+                <input type="text" placeholder="省略可" />
+              </div>
               <button type="button">新規作成</button>
             </form>
             <ul>
               <li>
                 <div></div>
                 <div>ID</div>
-                <div style="align-items: flex-start">カテゴリ名</div>
+                <div style="align-items: flex-start">規格管理</div>
                 <div></div>
               </li>
               <li>
@@ -68,7 +89,9 @@
                   <span>01</span>
                 </div>
                 <div class="item-name">
-                  <span>温泉グッズ</span>
+                  <span class="name">フレーバー</span>
+                  <span class="admin">お土産フレーバー</span>
+                  <span class="number">4</span>
                 </div>
                 <nav>
                   <button
@@ -87,6 +110,15 @@
                     data-tooltip="編集"
                     aria-label="編集"
                   ></button>
+                  <div
+                    class="wrap-toggle-button"
+                    data-tooltip-on="表示中 | 非表示にする"
+                    data-tooltip-off="非表示中 | 表示する"
+                  >
+                    <label class="toggle-button">
+                      <input type="checkbox" />
+                    </label>
+                  </div>
                   <button
                     class="btn-delate"
                     data-tooltip="削除"
@@ -106,7 +138,9 @@
                   <span>02</span>
                 </div>
                 <div class="item-name">
-                  <span>入浴剤</span>
+                  <span class="name">フレーバー</span>
+                  <span class="admin">お土産フレーバー</span>
+                  <span class="number">4</span>
                 </div>
                 <nav>
                   <button
@@ -125,6 +159,15 @@
                     data-tooltip="編集"
                     aria-label="編集"
                   ></button>
+                  <div
+                    class="wrap-toggle-button"
+                    data-tooltip-on="表示中 | 非表示にする"
+                    data-tooltip-off="非表示中 | 表示する"
+                  >
+                    <label class="toggle-button">
+                      <input type="checkbox" />
+                    </label>
+                  </div>
                   <button
                     class="btn-delate"
                     data-tooltip="削除"
@@ -132,7 +175,14 @@
                   ></button>
                 </nav>
                 <form>
-                  <input type="text" placeholder="カテゴリ名を入力" />
+                  <div>
+                    <span>規格名</span>
+                    <input type="text" value="フレーバー" />
+                  </div>
+                  <div>
+                    <span>管理名</span>
+                    <input type="text" value="お土産フレーバー" />
+                  </div>
                   <button type="button" class="btn-submit">決定</button>
                   <button type="button" class="btn-cancel">キャンセル</button>
                 </form>
@@ -149,7 +199,9 @@
                   <span>03</span>
                 </div>
                 <div class="item-name">
-                  <span>酒類</span>
+                  <span class="name">温度帯</span>
+                  <span class="admin">配送温度帯</span>
+                  <span class="number">2</span>
                 </div>
                 <nav>
                   <button
@@ -168,6 +220,15 @@
                     data-tooltip="編集"
                     aria-label="編集"
                   ></button>
+                  <div
+                    class="wrap-toggle-button"
+                    data-tooltip-on="表示中 | 非表示にする"
+                    data-tooltip-off="非表示中 | 表示する"
+                  >
+                    <label class="toggle-button">
+                      <input type="checkbox" />
+                    </label>
+                  </div>
                   <button
                     class="btn-delate"
                     data-tooltip="削除"
