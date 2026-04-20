@@ -400,3 +400,442 @@ EC販売管理
         }
     }
 }
+/*=========================================
+受注一覧
+-----------------------------------------*/
+.inner-03-01-01 {
+    form {
+        position: relative;
+        font-size: inherit;
+        display: flex;
+        flex-direction: column;
+        padding-inline: 1.4em;
+    }
+    article {
+        @include layoutContentsWhiteBlock;
+        margin-left: unset;
+        margin-right: unset;
+        border-bottom-right-radius: unset;
+        border-bottom-left-radius: unset;
+        margin-bottom: unset;
+        flex-grow: unset;
+        h3 {
+            @include decorationHeadH3;
+        }
+        dl {
+            div {
+                dt {
+                    font-size: FZ(14);
+                    &.is-required {
+                        display: flex;
+                        align-items: center;
+                        flex-direction: row;
+                        &::before {
+                            content: "必須";
+                            font-size: 1.2rem;
+                            color: #fff;
+                            background-color: $caution-red;
+                            padding: 0.2em 0.5em;
+                            border-radius: 4px;
+                            margin-right: 0.5em;
+                        }
+                    }
+                }
+            }
+            .box-date {
+                dd {
+                    span {
+                        display: flex;
+                        gap: 0 0.5em;
+                        font-size: FZ(14);
+                    }
+                }
+            }
+        }
+    }
+    .block-customer-info,
+    .block-shipping-info {
+        section {
+            display: grid;
+            grid-template-columns: 55% 1fr;
+            gap: 0 2em;
+            padding: 2em;
+            align-items: start;
+            border-top: 1px solid $border-gray;
+
+            dl {
+                position: relative;
+                font-size: inherit;
+                display: grid;
+                & > div {
+                    font-size: inherit;
+                    display: grid;
+                    grid-template-columns: subgrid;
+                    align-items: center;
+                    gap: 0 1em;
+                    padding-block: 1rem;
+                    &:not(:last-of-type) {
+                        border-bottom: 1px solid $border-gray;
+                    }
+                }
+                dd {
+                    position: relative;
+                    font-size: 1em;
+                    display: flex;
+                    input [type="text"],
+                    input [type="tel"] {
+                        height: 4.4rem;
+                    }
+                    textarea {
+                        min-height: 3lh;
+                    }
+                }
+                .box-name {
+                    grid-column: span 4;
+                    dd {
+                        grid-column: span 3;
+                        grid-template-columns: subgrid;
+                        display: grid;
+                        gap: 0 0.5em;
+                    }
+                }
+                .box-status {
+                    dd {
+                        .select-search-category {
+                            width: 100%;
+                            @include select-list-box(
+                                $height: 4.4rem,
+                                $position: "left",
+                                $list-height: 3.4rem
+                            );
+                        }
+                    }
+                }
+            }
+            .inner-left {
+                grid-template-columns: auto 1fr 1fr;
+                & > div {
+                    grid-column: span 3;
+                    dd {
+                        grid-column: span 2;
+                    }
+                }
+
+                .box-address {
+                    dd {
+                        display: grid;
+                        grid-template-columns: subgrid;
+                        grid-column: span 2;
+                        gap: 0.5em 0;
+                        input {
+                            grid-column: span 2;
+                        }
+                        & > div {
+                            font-size: inherit;
+                            display: flex;
+                            align-items: center;
+                            gap: 0 0.5em;
+                            span {
+                                font-size: FZ(14);
+                            }
+                        }
+                    }
+                }
+            }
+            .inner-right {
+                grid-template-columns: auto 1fr;
+                & > div {
+                    grid-column: span 2;
+                }
+            }
+        }
+    }
+    .block-shipping-info {
+        section {
+            padding: 1em 2em 2em;
+        }
+        .box-copy {
+            grid-column: span 2;
+            margin-bottom: 0.5em;
+            font-size: inherit;
+            button {
+                background-color: #fff;
+                border: 1px solid $font-black;
+                font-size: inherit;
+                @include flex-center;
+                height: 3.6rem;
+                border-radius: 6px;
+                transition: 0.3s ease-out;
+                padding-inline: 1.8em;
+
+                span {
+                    position: relative;
+                    font-size: FZ(14);
+                    padding-left: 2em;
+                    &::before {
+                        content: "";
+                        position: absolute;
+                        top: 50%;
+                        left: 0;
+                        translate: 0 -50%;
+                        width: 2.2rem;
+                        @include svg-icon-copy("1a1818");
+                    }
+                }
+                &:hover {
+                    background-color: $hover-bg-blue;
+                }
+            }
+        }
+    }
+    .block-product-info {
+        section {
+            padding: 2em;
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid $border-gray;
+            ul {
+                border-top: 1px solid $border-gray;
+                border-left: 1px solid $border-gray;
+                border-right: 1px solid $border-gray;
+                @include layout-table-list(1fr auto auto auto auto, 5);
+                & > li {
+                    &:first-of-type {
+                        & > div {
+                            // border-right: unset;
+                            &:has(span) {
+                                padding-inline: unset;
+                            }
+                        }
+                    }
+                    &:not(:first-of-type) {
+                        cursor: auto;
+                        &:active {
+                            &::before {
+                                background-color: #edf1f8;
+                            }
+                        }
+                        & > div {
+                            font-size: inherit;
+                            // border-right: unset;
+                            span {
+                                font-size: FZ(14);
+                            }
+                        }
+                        .item-name {
+                            padding: 1rem 2rem;
+                            span {
+                                i {
+                                    font-size: 1.2rem;
+                                    margin-left: 1em;
+                                    &::before {
+                                        content: "（";
+                                    }
+                                    &::after {
+                                        content: "）";
+                                    }
+                                }
+                            }
+                        }
+                        .item-count {
+                            padding: 1rem 3rem;
+                            text-align: center;
+                        }
+                        .item-price {
+                            padding: 1rem 2rem;
+                            span {
+                                &::after {
+                                    content: "円";
+                                    margin-left: 0.2em;
+                                }
+                            }
+                        }
+                        .item-return {
+                            padding: 1rem;
+                            display: flex;
+                            justify-content: center;
+                            @include square-check-box;
+                        }
+                    }
+                    &:has(.item-return input:checked) {
+                        .item-name,
+                        .item-price,
+                        .item-count {
+                            span {
+                                color: #979797;
+                                text-decoration: line-through;
+                            }
+                        }
+                    }
+                }
+            }
+            dl {
+                align-self: flex-end;
+                font-size: inherit;
+                margin-top: 1em;
+                display: grid;
+                grid-template-columns: auto 1fr;
+                & > div {
+                    font-size: inherit;
+                    grid-column: span 2;
+                    display: grid;
+                    grid-template-columns: subgrid;
+                    gap: 0 1em;
+                    padding-block: 1rem;
+                    padding-left: 10rem;
+                    &:not(:last-of-type) {
+                        border-bottom: 1px solid $border-gray;
+                    }
+                    dt,
+                    dd {
+                        font-size: FZ(14);
+                    }
+                    dd {
+                        text-align: right;
+                        &::after {
+                            content: "円";
+                            margin-left: 0.2em;
+                        }
+                    }
+                    &:last-of-type {
+                        dt,
+                        dd {
+                            font-size: FZ(16);
+                            font-weight: 600;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .block-refund-process {
+        .block-inner {
+            font-size: inherit;
+            padding: 2em;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0 1em;
+            align-items: center;
+            .item-check {
+                font-size: inherit;
+                display: flex;
+                align-items: center;
+                @include square-check-box;
+                gap: 0 0.5em;
+                margin-right: 1em;
+                span {
+                    font-size: FZ(14);
+                }
+                &:has(input:checked) {
+                    span {
+                        font-weight: 600;
+                    }
+                }
+            }
+            .item-price {
+                font-size: inherit;
+                display: flex;
+                align-items: center;
+                gap: 0 0.5em;
+
+                input {
+                    width: 8em;
+                    text-align: right;
+                }
+            }
+            button {
+                @include flex-center;
+                border-radius: 6px;
+                transition: 0.3s ease-out;
+                color: #fff;
+                background-color: $caution-red;
+                height: 4rem;
+                padding-inline: 2em;
+                font-weight: 600;
+                transition: 0.2s ease-out;
+                &:hover {
+                    background-color: #b81e11;
+                }
+                &:active {
+                    background-color: $caution-red;
+                }
+            }
+        }
+    }
+    .block-description {
+        .block-inner {
+            font-size: inherit;
+            padding: 2em;
+            display: flex;
+            flex-direction: column;
+            gap: 2em 0;
+            textarea {
+                min-height: 6lh;
+            }
+        }
+    }
+    .box-btn {
+        position: relative;
+        font-size: inherit;
+        padding: 1.5rem 1.5rem;
+        background-color: #ebebeb;
+        border-radius: 0.6rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0 1rem;
+        border: 1px solid $border-gray;
+        margin-top: 2rem;
+        button {
+            height: 4rem;
+            display: flex;
+            justify-content: center;
+            border-radius: 6px;
+            transition: 0.3s ease-out;
+            &.btn-pdf {
+                margin-right: auto;
+                background-color: #f7994c;
+                border: 1px solid #f7994c;
+                color: #fff;
+                width: 11rem;
+                span {
+                    position: relative;
+                    font-size: FZ(14);
+                    font-weight: 600;
+                    padding-left: 1.8em;
+                    &::before {
+                        content: "";
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        translate: 0 -50%;
+                        width: 1.8rem;
+                        @include svg-icon-pdf("fff");
+                    }
+                }
+                &:hover {
+                    opacity: 0.8;
+                }
+            }
+            &.btn-edit {
+                background-color: $cp-client-color;
+                color: #fff;
+                font-size: FZ(14);
+                font-weight: 600;
+                width: 12rem;
+                &:hover {
+                    opacity: 0.8;
+                }
+            }
+            &.btn-confirmed {
+                background-color: $confirm-blue;
+                color: #fff;
+                font-size: FZ(14);
+                font-weight: 600;
+                width: 12rem;
+                &:hover {
+                    opacity: 0.8;
+                }
+            }
+        }
+    }
+}

@@ -104,6 +104,7 @@ textarea,
 input[type="text"],
 input[type="password"],
 input[type="number"],
+input[type="date"],
 input[type="email"] {
     flex-grow: 1;
     width: 100%;
@@ -137,6 +138,7 @@ input[type="date"] {
 input[type="text"],
 input[type="password"],
 input[type="number"],
+input[type="date"],
 input[type="email"] {
     background-color: #fafafa;
     height: 4rem;
