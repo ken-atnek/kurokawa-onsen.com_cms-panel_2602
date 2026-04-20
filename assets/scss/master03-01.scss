@@ -826,6 +826,16 @@ EC販売管理
                     opacity: 0.8;
                 }
             }
+            &.btn-cancel {
+                background-color: #fff;
+                border: 1px solid $base-black;
+                font-size: FZ(14);
+                font-weight: 600;
+                width: 12rem;
+                &:hover {
+                    opacity: 0.8;
+                }
+            }
             &.btn-confirmed {
                 background-color: $confirm-blue;
                 color: #fff;
