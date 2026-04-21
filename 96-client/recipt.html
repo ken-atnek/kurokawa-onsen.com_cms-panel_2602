@@ -1,0 +1,142 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>リタワーク｜コントロールパネル(管理者)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/recipt.css" />
+  </head>
+
+  <body style="background-color: #fff">
+    <!--bodyタグ直下、下記のdivタグで作成をお願いします。"-->
+    <!--A4サイズのPDFを生成するので、class="invoiceのwhidthは「width: 210mm」として下さい。"-->
+    <div id="pdfTarget" class="area-invoice">
+      <h2>お買上げ明細書（納品書）</h2>
+      <article class="block-head">
+        <div class="box-left">
+          <span class="post-number">860-2402</span>
+          <address><span>熊本県阿蘇郡南小国町満願寺</span></address>
+          <h3>山田太郎</h3>
+        </div>
+        <div class="box-right">
+          <ul>
+            <li>
+              <h4>販売元</h4>
+              <h5>黒川温泉観光協会</h5>
+              <address>
+                <span>〒869-2402</span>
+                <span>熊本県阿蘇郡南小国町満願寺黒川温泉6595-3 べっちん館</span>
+              </address>
+              <span>TEL: 0967-48-8130</span>
+            </li>
+            <li>
+              <h4>発送元</h4>
+              <h5>杉養蜂園</h5>
+              <address>
+                <span>〒869-2402</span>
+                <span>熊本県阿蘇郡南小国町大字満願寺黒川6601</span>
+              </address>
+              <span>TEL: 0967-48-8130</span>
+            </li>
+          </ul>
+        </div>
+      </article>
+      <p class="announce">
+        このたびはお買上げいただきありがとうございます。<br />
+        下記の内容にて納品させていただきます。<br />
+        ご確認くださいますよう、お願いいたします。
+      </p>
+      <article class="block-details">
+        <div class="box-price">
+          <p>総合計金額</p>
+          <span>7,000</span>
+        </div>
+        <h3>お買い上げ明細</h3>
+        <dl>
+          <div>
+            <dt>ご注文日</dt>
+            <dd><span>2026/04/04</span><span>10:30</span></dd>
+          </div>
+          <div>
+            <dt>注文番号</dt>
+            <dd><span>#123456</span></dd>
+          </div>
+        </dl>
+        <ul>
+          <li>
+            <div>商品名</div>
+            <div>税区分</div>
+            <div>数量</div>
+            <div>単価</div>
+            <div class="item-price" style="text-align: center">
+              金額(税込み)
+            </div>
+          </li>
+          <li>
+            <div class="item-name">温泉入浴剤セット</div>
+            <div><span>10</span></div>
+            <div>10</div>
+            <div class="item-price">¥2,500</div>
+            <div class="item-price">¥25,000</div>
+          </li>
+          <li>
+            <div class="item-name">温泉入浴剤セット</div>
+            <div><span>10</span></div>
+            <div>10</div>
+            <div class="item-price">¥2,500</div>
+            <div class="item-price">¥25,000</div>
+          </li>
+          <li>
+            <div class="item-name">温泉入浴剤セット</div>
+            <div><span>10</span></div>
+            <div>10</div>
+            <div class="item-price">¥2,500</div>
+            <div class="item-price">¥25,000</div>
+          </li>
+        </ul>
+      </article>
+      <article class="block-bottom">
+        <dl>
+          <div>
+            <dt>商品合計</dt>
+            <dd>¥45,000</dd>
+          </div>
+          <div>
+            <dt>送料</dt>
+            <dd>¥500</dd>
+          </div>
+          <div>
+            <dt><em>合計</em></dt>
+            <dd><em>¥49,500</em></dd>
+          </div>
+        </dl>
+        <p>10%対象:<span> ¥5,000</span> 内消費税: <span>¥454</span></p>
+        <p>8%対象:<span> ¥2,000</span> 内消費税: <span>¥284</span></p>
+      </article>
+      <div class="item-note">
+        <h4>＜備考＞</h4>
+        <p></p>
+      </div>
+    </div>
+  </body>
+</html>

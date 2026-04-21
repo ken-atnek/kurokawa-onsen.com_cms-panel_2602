@@ -1,0 +1,275 @@
+/*==========================================================
+納品書
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+納品書
+-----------------------------------------*/
+.area-invoice {
+    position: relative;
+    width: 210mm;
+    display: flex;
+    flex-direction: column;
+    padding: 2em;
+    font-size: inherit;
+    --main-gray: #5e5b5a;
+    h2 {
+        font-size: FZ(20);
+        text-align: center;
+        padding-block: 0.5em;
+        font-weight: 700;
+        border: 1px solid;
+    }
+    .block-head {
+        position: relative;
+        font-size: inherit;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 3em;
+        color: $base-black;
+        .box-left {
+            position: relative;
+            font-size: inherit;
+            display: flex;
+            flex-direction: column;
+            .post-number {
+                font-size: FZ(16);
+                margin-bottom: 0.2em;
+                &::before {
+                    content: "〒";
+                }
+            }
+            address {
+                font-size: inherit;
+                font-size: FZ(16);
+                display: flex;
+                flex-direction: column;
+            }
+            h3 {
+                font-size: FZ(20);
+                font-weight: 700;
+                margin-top: 0.5em;
+                letter-spacing: 0.12em;
+                &::after {
+                    content: "様";
+                    margin-left: 0.3em;
+                }
+            }
+        }
+        .box-right {
+            position: relative;
+            font-size: inherit;
+            display: flex;
+            flex-direction: column;
+            ul {
+                font-size: inherit;
+                display: flex;
+                flex-direction: column;
+                gap: 1em 0;
+                li {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                    font-size: inherit;
+                    h4 {
+                        font-size: 1.2rem;
+                    }
+                    h5 {
+                        font-size: 1.4rem;
+                        font-weight: 600;
+                    }
+                    address {
+                        display: flex;
+                        font-size: 1.2rem;
+                        gap: 0 0.5em;
+                    }
+                }
+            }
+        }
+    }
+    .announce {
+        font-size: FZ(14);
+        line-height: 1.4em;
+        letter-spacing: 0.08em;
+    }
+    .block-details {
+        margin-top: 1em;
+        font-size: inherit;
+        display: flex;
+        flex-direction: column;
+        .box-price {
+            font-size: inherit;
+            border-bottom: 2px solid var(--main-gray);
+            padding: 1em;
+            display: flex;
+            align-items: center;
+            gap: 0 1em;
+            p {
+                font-size: FZ(18);
+            }
+            span {
+                font-weight: 700;
+                font-size: FZ(26);
+                &::before {
+                    content: "¥";
+                    font-size: 0.8em;
+                    margin-left: 0.2em;
+                }
+            }
+        }
+        h3 {
+            background-color: #efefef;
+            padding: 0.5em;
+            margin-top: 1rem;
+            font-size: FZ(18);
+        }
+        dl {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto auto;
+            font-size: inherit;
+            align-self: flex-start;
+            padding: 1em;
+            gap: 0 2em;
+            div {
+                display: grid;
+                grid-template-rows: subgrid;
+                grid-row: span 2;
+                font-size: inherit;
+                dt {
+                    font-size: 1.2rem;
+                    font-weight: 600;
+                }
+                dd {
+                    font-size: 1.4rem;
+                    display: flex;
+                    gap: 0 0.5em;
+                }
+            }
+        }
+        ul {
+            position: relative;
+            font-size: inherit;
+            border-top: 1px solid var(--main-gray);
+            border-left: 1px solid var(--main-gray);
+            border-right: 1px solid var(--main-gray);
+            display: grid;
+            grid-template-columns: 1fr auto auto auto auto;
+            li {
+                grid-column: span 5;
+                display: grid;
+                grid-template-columns: subgrid;
+                padding: 1rem;
+                border-bottom: 1px solid var(--main-gray);
+                font-size: inherit;
+                & > div {
+                    font-size: FZ(14);
+                    text-align: center;
+                    min-width: 10rem;
+                    &.item-name {
+                        text-align: left;
+                        padding-inline: 2em;
+                    }
+                    &.item-price {
+                        text-align: right;
+                        min-width: 6rem;
+                        padding-inline: 1rem;
+                    }
+                    span {
+                        &::after {
+                            content: "％";
+                        }
+                    }
+                }
+
+                &:first-of-type {
+                    background-color: #efefef;
+                    div {
+                        font-weight: 600;
+                    }
+                }
+                &:not(:first-of-type) {
+                    background-color: #fff;
+                    &:nth-of-type(2n - 1) {
+                        background-color: #f2f2f2;
+                    }
+                }
+            }
+        }
+    }
+    .block-bottom {
+        position: relative;
+        display: flex;
+        font-size: inherit;
+        flex-direction: column;
+        dl {
+            font-size: inherit;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            border-left: 1px solid var(--main-gray);
+            border-right: 1px solid var(--main-gray);
+            align-self: flex-end;
+            margin-bottom: 1rem;
+            div {
+                font-size: inherit;
+                grid-column: span 2;
+                display: grid;
+                grid-template-columns: subgrid;
+                border-bottom: 1px solid var(--main-gray);
+
+                dt,
+                dd {
+                    font-size: FZ(14);
+                    padding: 0.8rem 1rem;
+                    em {
+                        font-weight: 700;
+                        font-size: 1.2em;
+                    }
+                }
+                dt {
+                    border-right: 1px solid var(--main-gray);
+                    background-color: #f2f2f2;
+                    text-align: center;
+                }
+                dd {
+                    text-align: right;
+                    min-width: 14rem;
+                }
+            }
+        }
+        p {
+            font-size: FZ(12);
+            align-self: center;
+            align-self: flex-end;
+            line-height: 1.6em;
+            &::before {
+                content: "（";
+            }
+            &::after {
+                content: "）";
+            }
+        }
+    }
+    .item-note {
+        font-size: inherit;
+        border-top: 1px solid var(--main-gray);
+        margin-top: 1rem;
+        padding: 1em;
+        h4 {
+            font-size: 1.6rem;
+            font-weight: 500;
+        }
+        p {
+            font-size: 1.4rem;
+            letter-spacing: 0.04em;
+            line-height: 1.6em;
+        }
+    }
+}
