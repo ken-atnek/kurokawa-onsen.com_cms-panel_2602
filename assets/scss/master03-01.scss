@@ -93,8 +93,10 @@ EC販売管理
             .box-date {
                 dd {
                     .wrap-period {
-                        width: 37rem;
                         @include item-period;
+                        input {
+                            height: unset;
+                        }
                     }
                 }
             }

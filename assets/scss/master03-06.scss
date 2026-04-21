@@ -1,0 +1,613 @@
+/*==========================================================
+EC販売管理（集計）
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+.link_page-back_bottom {
+    @include linkPageBack_bottom;
+}
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+/*=========================================
+集計一覧（施設一覧）
+-----------------------------------------*/
+.inner-03-06 {
+    .inner_search-list {
+        @include layoutContentsWhiteBlock;
+        padding-bottom: 4rem;
+        h3 {
+            @include decorationHeadH3;
+            span {
+                margin-right: 0.5em;
+            }
+        }
+        .inner-head {
+            position: relative;
+            font-size: inherit;
+            display: flex;
+            align-items: center;
+            padding: 1.6em 2em;
+            gap: 0 0.8em;
+            .select-year {
+                @include select-list-box(
+                    $height: 4.4rem,
+                    $position: "right",
+                    $list-height: 3.4rem
+                );
+            }
+            .select-month {
+                @include select-list-box(
+                    $height: 4.4rem,
+                    $position: "right",
+                    $list-height: 3.4rem
+                );
+            }
+            .btn_submit {
+                @include main-button("confirm");
+                width: 10rem;
+                height: 4.4rem;
+            }
+            .btn_print {
+                margin-left: auto;
+                @include main-button("confirm");
+                width: 16rem;
+                height: 4.4rem;
+            }
+        }
+        & > ul {
+            @include layout-table-list(auto 1fr auto auto auto auto, 6);
+            & > li {
+                &:not(:first-of-type) {
+                    cursor: auto;
+                    &:active {
+                        &::before {
+                            background-color: #edf1f8;
+                        }
+                    }
+                    & > div {
+                        font-size: inherit;
+                    }
+                }
+                &:first-of-type {
+                    & > div {
+                        &:has(span) {
+                            padding-inline: unset;
+                        }
+                    }
+                }
+                .item-id {
+                    font-size: inherit;
+                    padding: 1.2rem 1.4rem;
+                    @include flex-center(column);
+                    gap: 0.3em 0;
+                    span {
+                        font-size: FZ(14);
+                    }
+                }
+                .item-name {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    padding-inline: 1rem;
+                    span {
+                        font-size: FZ(14);
+                        display: inline-block;
+                        position: relative;
+                        &::after {
+                            content: "";
+                            position: absolute;
+                            left: 0;
+                            width: 100%;
+                            top: calc(100% + 0.1em);
+                            height: 2px;
+                            background-color: $hover-blue;
+                            transition: 0.2s ease-out;
+                            clip-path: inset(0 100% 0 0);
+                        }
+                    }
+                    a {
+                        position: absolute;
+                        inset: 0;
+                        z-index: 1;
+                    }
+                    &:has(a:hover) {
+                        span {
+                            &::after {
+                                clip-path: inset(0);
+                            }
+                        }
+                    }
+                }
+                .item-price {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    padding-inline: 1.6rem;
+                    span {
+                        font-size: FZ(14);
+                        &::after {
+                            content: "円";
+                            margin-left: 0.1em;
+                        }
+                    }
+                }
+                .item-rebate {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    padding-inline: 1rem;
+                    span {
+                        font-size: FZ(14);
+                        &::after {
+                            content: "円";
+                            margin-left: 0.1em;
+                        }
+                    }
+                }
+                .item-count {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    padding-inline: 2rem;
+                    span {
+                        font-size: FZ(14);
+                    }
+                }
+                &:last-of-type {
+                    &:hover {
+                        &::before {
+                            opacity: 0;
+                        }
+                    }
+                    & > div {
+                        border-right: unset;
+                        padding-block: 1em;
+                        em {
+                            font-weight: 600;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+/*=========================================
+集計一覧（月別）
+-----------------------------------------*/
+.inner-03-06-01 {
+    h2 {
+        span {
+            margin-right: 1em;
+        }
+    }
+    .inner-summary-list {
+        @include layoutContentsWhiteBlock;
+        h3 {
+            @include decorationHeadH3;
+            span {
+                margin-right: 0.5em;
+            }
+        }
+        .inner-head {
+            position: relative;
+            font-size: inherit;
+            display: flex;
+            align-items: center;
+            padding: 1.6em 2em;
+            gap: 0 0.8em;
+            .select-year {
+                @include select-list-box(
+                    $height: 4.4rem,
+                    $position: "right",
+                    $list-height: 3.4rem
+                );
+            }
+            .select-month {
+                @include select-list-box(
+                    $height: 4.4rem,
+                    $position: "right",
+                    $list-height: 3.4rem
+                );
+            }
+            .btn_submit {
+                @include main-button("confirm");
+                width: 10rem;
+                height: 4.4rem;
+            }
+            .btn_print {
+                margin-left: auto;
+                @include main-button("confirm");
+                width: 16rem;
+                height: 4.4rem;
+            }
+        }
+
+        & > ul {
+            @include layout-table-list(auto 1fr auto auto auto auto, 6);
+            & > li {
+                &:not(:first-of-type) {
+                    cursor: auto;
+                    &:active {
+                        &::before {
+                            background-color: #edf1f8;
+                        }
+                    }
+                }
+                &:first-of-type {
+                    & > div {
+                        &:has(span) {
+                            padding-inline: unset;
+                        }
+                    }
+                }
+                .item-date {
+                    font-size: inherit;
+                    padding-inline: 1rem;
+                    @include flex-center(column);
+                    gap: 0.3em 0;
+                    span {
+                        font-size: FZ(14);
+                    }
+                    i {
+                        font-size: FZ(12);
+                        font-weight: 600;
+                    }
+                }
+                .wrap-customer-info {
+                    display: flex;
+                    flex-direction: column;
+                    font-size: inherit;
+                    .shop-name {
+                        font-size: inherit;
+                        padding: 1rem;
+                        border-bottom: 1px solid $border-gray;
+                        span {
+                            font-size: FZ(12);
+                            border: 1px solid $border-gray;
+                            border-radius: 100vmax;
+                            padding: 0.5em 2em;
+                            background-color: #f2f2f2;
+                        }
+                    }
+                    .inner-customer {
+                        padding: 1rem;
+                        display: flex;
+                        flex-direction: column;
+                        font-size: inherit;
+                        .name {
+                            font-size: FZ(16);
+                            font-weight: 600;
+                            letter-spacing: 0.08em;
+                        }
+                        .address {
+                            display: flex;
+                            flex-direction: column;
+                            font-size: inherit;
+                            span {
+                                font-size: FZ(14);
+                            }
+                        }
+                        .tel {
+                            font-size: inherit;
+                            span {
+                                font-size: FZ(14);
+                                &::before {
+                                    content: "TEL";
+                                    font-weight: 400;
+                                    margin-right: 0.3em;
+                                }
+                            }
+                        }
+                        .mail {
+                            font-size: inherit;
+                            a {
+                                font-size: FZ(14);
+                            }
+                        }
+                    }
+                }
+                .wrap-goods {
+                    grid-column: span 3;
+                    display: grid;
+                    grid-template-columns: subgrid;
+                    font-size: inherit;
+                    grid-template-rows: auto auto 1fr;
+
+                    & > ul {
+                        grid-column: span 3;
+                        display: grid;
+                        grid-template-columns: subgrid;
+                        font-size: inherit;
+                        li {
+                            grid-column: span 3;
+                            display: grid;
+                            grid-template-columns: subgrid;
+                            font-size: inherit;
+                            & > div {
+                                padding-inline: 1rem;
+                                padding-bottom: 0.5rem;
+                            }
+                            .goods-name {
+                                font-size: FZ(14);
+                                border-right: 1px solid #c7c7c7;
+                            }
+                            .goods-pieces {
+                                font-size: FZ(14);
+                                text-align: right;
+                                border-right: 1px solid #c7c7c7;
+                            }
+                            .goods-price {
+                                font-size: inherit;
+                                display: flex;
+                                justify-content: flex-end;
+                                span {
+                                    font-size: FZ(14);
+                                    &::after {
+                                        content: "円";
+                                        font-size: 0.85em;
+                                        margin-left: 0.1em;
+                                    }
+                                }
+                            }
+                            &:first-of-type {
+                                & > div {
+                                    padding-top: 1rem;
+                                }
+                            }
+                        }
+                    }
+                    .item-shipping {
+                        grid-column: span 3;
+                        display: grid;
+                        grid-template-columns: subgrid;
+                        font-size: inherit;
+                        border-top: 1px solid $border-gray;
+
+                        & > div {
+                            padding-inline: 1rem;
+                            padding-block: 0.5rem;
+                        }
+                        .title {
+                            font-size: FZ(14);
+                            border-right: 1px solid #c7c7c7;
+                            text-align: right;
+                        }
+                        .shipping-price {
+                            font-size: inherit;
+                            display: flex;
+                            justify-content: flex-end;
+                            grid-column: span 2;
+
+                            span {
+                                font-size: FZ(14);
+
+                                &::after {
+                                    content: "円";
+                                    font-size: 0.85em;
+                                    margin-left: 0.1em;
+                                }
+                            }
+                        }
+                    }
+                    .item-price {
+                        grid-column: span 3;
+                        display: grid;
+                        grid-template-columns: subgrid;
+                        font-size: inherit;
+                        border-top: 1px solid $border-gray;
+                        padding: 1rem;
+                        display: flex;
+                        justify-content: flex-end;
+                        align-items: flex-end;
+                        align-self: stretch;
+                        span {
+                            font-size: FZ(16);
+                            font-weight: 700;
+                            &::before {
+                                content: "合計";
+                                font-size: 0.85em;
+                                font-weight: 400;
+                                margin-right: 0.3em;
+                            }
+                            &::after {
+                                content: "円(税込)";
+                                font-size: 0.85em;
+                                margin-left: 0.1em;
+                                font-weight: 400;
+                            }
+                        }
+                    }
+                }
+                .wrap-status {
+                    font-size: inherit;
+                    padding: 0.5em;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.5em 0;
+                    .apply-status {
+                        @include apply-status-box;
+                        pointer-events: none;
+                        .selectbox__head {
+                            &::after {
+                                display: none;
+                            }
+                            .selectbox__value {
+                                border-radius: 8px;
+                            }
+                            i {
+                                display: none;
+                            }
+                        }
+                    }
+                    .date {
+                        font-size: FZ(14);
+                        &::before {
+                            content: "(";
+                            margin-right: 0.2em;
+                        }
+                        &::after {
+                            content: ")";
+                            margin-left: 0.2em;
+                        }
+                    }
+                }
+                .box-note {
+                    grid-column: span 6;
+                    padding: 1rem;
+                    font-size: inherit;
+                    display: flex;
+                    border-top: 1px solid $border-gray;
+                    gap: 0 1rem;
+                    span {
+                        width: max-content;
+                        display: inline-block;
+                        padding-top: 1rem;
+                        font-size: FZ(14);
+                    }
+                    textarea {
+                        width: unset;
+                    }
+                }
+            }
+        }
+        // ページャー
+        .box-pager {
+            @include layout-pager;
+        }
+    }
+    .block-total-price {
+        @include layoutContentsWhiteBlock;
+        margin-top: unset;
+        h3 {
+            @include decorationHeadH3;
+        }
+        & > ul {
+            @include layout-table-list(1fr auto auto auto auto, 5);
+            & > li {
+                &:not(:first-of-type) {
+                    cursor: auto;
+                    &:active {
+                        &::before {
+                            background-color: #edf1f8;
+                        }
+                    }
+                    & > div {
+                        font-size: inherit;
+                    }
+                }
+                &:first-of-type {
+                    background-color: transparent;
+                    & > div {
+                        border-right: unset;
+                        &:has(span) {
+                            padding-inline: unset;
+                        }
+                    }
+                }
+                .item-name {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    padding-inline: 1rem;
+                    span {
+                        font-size: FZ(14);
+                        display: inline-block;
+                        position: relative;
+                        &::after {
+                            content: "";
+                            position: absolute;
+                            left: 0;
+                            width: 100%;
+                            top: calc(100% + 0.1em);
+                            height: 2px;
+                            background-color: $hover-blue;
+                            transition: 0.2s ease-out;
+                            clip-path: inset(0 100% 0 0);
+                        }
+                    }
+                    a {
+                        position: absolute;
+                        inset: 0;
+                        z-index: 1;
+                    }
+                    &:has(a:hover) {
+                        span {
+                            &::after {
+                                clip-path: inset(0);
+                            }
+                        }
+                    }
+                }
+                .item-price {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    padding-inline: 1.6rem;
+                    span {
+                        font-size: FZ(14);
+                        &::after {
+                            content: "円";
+                            margin-left: 0.1em;
+                        }
+                    }
+                }
+                .item-rebate {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    padding-inline: 1rem;
+                    span {
+                        font-size: FZ(14);
+                        &::after {
+                            content: "円";
+                            margin-left: 0.1em;
+                        }
+                    }
+                }
+                .item-count {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    padding-inline: 2rem;
+                    span {
+                        font-size: FZ(14);
+                    }
+                }
+                &:last-of-type {
+                    background-color: #f1efe8;
+                    &:hover {
+                        &::before {
+                            opacity: 0;
+                        }
+                    }
+                    & > div {
+                        border-right: unset;
+                        padding-block: 1em;
+                        em {
+                            font-weight: 600;
+                        }
+                    }
+                    .item-name {
+                        justify-content: flex-end;
+                        margin-right: 2em;
+                    }
+                }
+            }
+        }
+        p {
+            font-size: FZ(14);
+            padding: 1em 2em;
+        }
+    }
+}

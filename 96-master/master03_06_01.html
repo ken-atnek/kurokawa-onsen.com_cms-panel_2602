@@ -1,0 +1,649 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/master03-06.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-03-06-01 status-master">
+      <section class="container-left-menu menu-color03">
+        <div class="title">EC販売管理</div>
+        <nav>
+          <a href="#"><span>受注一覧</span></a>
+          <a href="#"><span>商品一覧</span></a>
+          <a href="#"><span>カテゴリ登録</span></a>
+          <a href="#"><span>規格管理</span></a>
+          <a href="#" class="is-active"><span>集計</span></a>
+          <!-- <a href="#"><span>店舗登録</span></a> -->
+        </nav>
+      </section>
+      <div class="main-contents menu-color03">
+        <div class="block_inner">
+          <h2><span>住吉食堂</span>集計管理</h2>
+          <article class="inner-summary-list">
+            <h3><span>2026年4月</span>集計一覧</h3>
+            <div class="inner-head">
+              <div class="select-year" data-selectbox>
+                <button
+                  type="button"
+                  class="selectbox__head"
+                  aria-expanded="false"
+                >
+                  <input
+                    type="hidden"
+                    name="select-display-year"
+                    value="1"
+                    data-selectbox-hidden
+                  />
+                  <span class="selectbox__value" data-selectbox-value
+                    >2026年</span
+                  >
+                </button>
+                <div class="list-wrapper">
+                  <ul class="selectbox__panel">
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-year"
+                        value="1"
+                        id="number01"
+                        checked="checked"
+                      />
+                      <label for="number01">2026年</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-year"
+                        value="2"
+                        id="number02"
+                      />
+                      <label for="number02">2025年</label>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="select-month" data-selectbox>
+                <button
+                  type="button"
+                  class="selectbox__head"
+                  aria-expanded="false"
+                >
+                  <input
+                    type="hidden"
+                    name="select-display-month"
+                    value="1"
+                    data-selectbox-hidden
+                  />
+                  <span class="selectbox__value" data-selectbox-value>1月</span>
+                </button>
+                <div class="list-wrapper">
+                  <ul class="selectbox__panel">
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="1"
+                        id="month01"
+                      />
+                      <label for="month01">1月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="2"
+                        id="month02"
+                      />
+                      <label for="month02">2月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="3"
+                        id="month03"
+                      />
+                      <label for="month03">3月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="4"
+                        id="month04"
+                        checked="checked"
+                      />
+                      <label for="month04">4月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="5"
+                        id="month05"
+                      />
+                      <label for="month05">5月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="6"
+                        id="month06"
+                      />
+                      <label for="month06">6月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="7"
+                        id="month07"
+                      />
+                      <label for="month07">7月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="8"
+                        id="month08"
+                      />
+                      <label for="month08">8月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="9"
+                        id="month09"
+                      />
+                      <label for="month09">9月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="10"
+                        id="month10"
+                      />
+                      <label for="month10">10月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="11"
+                        id="month11"
+                      />
+                      <label for="month11">11月</label>
+                    </li>
+                    <li>
+                      <input
+                        type="radio"
+                        name="select-display-month"
+                        value="12"
+                        id="month12"
+                      />
+                      <label for="month12">12月</label>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <button type="button" class="btn_submit">表示</button>
+              <button type="button" class="btn_print">
+                <span>印刷用HTML</span>
+              </button>
+            </div>
+            <ul>
+              <li>
+                <div>注文日・番号</div>
+                <div>お客様情報</div>
+                <div>商品</div>
+                <div>個数</div>
+                <div>小計</div>
+                <div>進捗状況/変更日</div>
+              </li>
+              <li>
+                <div class="item-date">
+                  <span>2026/2/22</span><i>EK00257</i>
+                </div>
+                <div class="wrap-customer-info">
+                  <div class="inner-customer">
+                    <div class="name">浦上謙太</div>
+                    <div class="address">
+                      <span>熊本市中央区下通2丁目5-18</span>
+                      <span>加納ビル2F</span>
+                    </div>
+                    <div class="tel">
+                      <span>0967-44-0657</span>
+                    </div>
+                    <div class="mail">
+                      <a href="mailto:ken.atnek@gmail.com"
+                        >ken.atnek@gmail.com</a
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="wrap-goods">
+                  <ul>
+                    <li>
+                      <div class="goods-name">タオル</div>
+                      <div class="goods-pieces">3</div>
+                      <div class="goods-price"><span>980</span></div>
+                    </li>
+                    <li>
+                      <div class="goods-name">
+                        スギルコンディショナー（20ℓ入）
+                      </div>
+                      <div class="goods-pieces">10</div>
+                      <div class="goods-price"><span>5,980</span></div>
+                    </li>
+                  </ul>
+                  <div class="item-shipping">
+                    <div class="title">送料</div>
+                    <div class="shipping-price"><span>1200</span></div>
+                  </div>
+                  <div class="item-price">
+                    <span>25,430</span>
+                  </div>
+                </div>
+
+                <div class="wrap-status">
+                  <div class="apply-status" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="List01Status"
+                        value="1"
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                      <i></i>
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <!-- NOTE  インラインでz-indexを付与 -->
+                        <li style="z-index: 2">
+                          <input
+                            type="radio"
+                            name="List01Status"
+                            value="1"
+                            id="list01-registered"
+                            checked
+                          />
+                          <label
+                            for="list01-registered"
+                            class="status-registered"
+                            >受付中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List01Status"
+                            value="2"
+                            id="list01-preparing"
+                          />
+                          <label for="list01-preparing" class="status-preparing"
+                            >準備中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List01Status"
+                            value="3"
+                            id="list01-shippedw"
+                          />
+                          <label for="list01-shippedw" class="status-shipped"
+                            >発送済</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List01Status"
+                            value="4"
+                            id="list01-completed"
+                          />
+                          <label for="list01-completed" class="status-completed"
+                            >対応済</label
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <span class="date">2025/12/31</span>
+                </div>
+              </li>
+              <li>
+                <div class="item-date">
+                  <span>2026/2/22</span><i>EK00257</i>
+                </div>
+                <div class="wrap-customer-info">
+                  <div class="inner-customer">
+                    <div class="name">浦上謙太</div>
+                    <div class="address">
+                      <span>熊本市中央区下通2丁目5-18</span>
+                      <span>加納ビル2F</span>
+                    </div>
+                    <div class="tel">
+                      <span>0967-44-0657</span>
+                    </div>
+                    <div class="mail">
+                      <a href="mailto:ken.atnek@gmail.com"
+                        >ken.atnek@gmail.com</a
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="wrap-goods">
+                  <ul>
+                    <li>
+                      <div class="goods-name">タオル</div>
+                      <div class="goods-pieces">3</div>
+                      <div class="goods-price"><span>980</span></div>
+                    </li>
+                    <li>
+                      <div class="goods-name">
+                        スギルコンディショナー（20ℓ入）
+                      </div>
+                      <div class="goods-pieces">10</div>
+                      <div class="goods-price"><span>5,980</span></div>
+                    </li>
+                  </ul>
+                  <div class="item-shipping">
+                    <div class="title">送料</div>
+                    <div class="shipping-price"><span>1200</span></div>
+                  </div>
+                  <div class="item-price">
+                    <span>25,430</span>
+                  </div>
+                </div>
+
+                <div class="wrap-status">
+                  <div class="apply-status" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="List02Status"
+                        value="1"
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                      <i></i>
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <!-- NOTE  インラインでz-indexを付与 -->
+                        <li style="z-index: 2">
+                          <input
+                            type="radio"
+                            name="List02Status"
+                            value="1"
+                            id="list02-registered"
+                          />
+                          <label
+                            for="list02-registered"
+                            class="status-registered"
+                            >受付中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List02Status"
+                            value="2"
+                            id="list02-preparing"
+                            checked
+                          />
+                          <label for="list02-preparing" class="status-preparing"
+                            >準備中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List02Status"
+                            value="3"
+                            id="list02-shippedw"
+                          />
+                          <label for="list02-shippedw" class="status-shipped"
+                            >発送済</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List02Status"
+                            value="4"
+                            id="list02-completed"
+                          />
+                          <label for="list02-completed" class="status-completed"
+                            >対応済</label
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <span class="date">2025/12/31</span>
+                </div>
+              </li>
+              <li>
+                <div class="item-date">
+                  <span>2026/2/22</span><i>EK00257</i>
+                </div>
+                <div class="wrap-customer-info">
+                  <div class="inner-customer">
+                    <div class="name">浦上謙太</div>
+                    <div class="address">
+                      <span>熊本市中央区下通2丁目5-18</span>
+                      <span>加納ビル2F</span>
+                    </div>
+                    <div class="tel">
+                      <span>0967-44-0657</span>
+                    </div>
+                    <div class="mail">
+                      <a href="mailto:ken.atnek@gmail.com"
+                        >ken.atnek@gmail.com</a
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="wrap-goods">
+                  <ul>
+                    <li>
+                      <div class="goods-name">タオル</div>
+                      <div class="goods-pieces">3</div>
+                      <div class="goods-price"><span>980</span></div>
+                    </li>
+                    <li>
+                      <div class="goods-name">
+                        スギルコンディショナー（20ℓ入）
+                      </div>
+                      <div class="goods-pieces">10</div>
+                      <div class="goods-price"><span>5,980</span></div>
+                    </li>
+                  </ul>
+                  <div class="item-shipping">
+                    <div class="title">送料</div>
+                    <div class="shipping-price"><span>1200</span></div>
+                  </div>
+                  <div class="item-price">
+                    <span>25,430</span>
+                  </div>
+                </div>
+
+                <div class="wrap-status">
+                  <div class="apply-status" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="List01Status"
+                        value="1"
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                      <i></i>
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <!-- NOTE  インラインでz-indexを付与 -->
+                        <li style="z-index: 2">
+                          <input
+                            type="radio"
+                            name="List03Status"
+                            value="1"
+                            id="list03-registered"
+                          />
+                          <label
+                            for="list03-registered"
+                            class="status-registered"
+                            >受付中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List03Status"
+                            value="2"
+                            id="list03-preparing"
+                          />
+                          <label for="list03-preparing" class="status-preparing"
+                            >準備中</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List03Status"
+                            value="3"
+                            id="list03-shippedw"
+                            checked
+                          />
+                          <label for="list03-shippedw" class="status-shipped"
+                            >発送済</label
+                          >
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="List03Status"
+                            value="4"
+                            id="list03-completed"
+                          />
+                          <label for="list03-completed" class="status-completed"
+                            >対応済</label
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <span class="date">2025/12/31</span>
+                </div>
+              </li>
+            </ul>
+            <div class="box-pager">
+              <div class="box_number">
+                <nav>
+                  <a href="#" class="is-active"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                  <a href="#"></a>
+                </nav>
+                <button type="button" class="btn_next"></button>
+              </div>
+              <div class="box_input">
+                <input type="text" placeholder="1/16513" />
+              </div>
+            </div>
+          </article>
+          <article class="block-total-price">
+            <h3>合計</h3>
+            <ul>
+              <li>
+                <div></div>
+                <div>注文件数</div>
+                <div>売上合計</div>
+                <div>商品合計</div>
+                <div>協会R(00%)</div>
+              </li>
+              <li>
+                <div class="item-name">
+                  <span><em>合計</em></span>
+                </div>
+                <div class="item-count">
+                  <span><em>123</em></span>
+                </div>
+                <div class="item-price">
+                  <span><em>351,500</em></span>
+                </div>
+                <div class="item-price">
+                  <span><em>41,500</em></span>
+                </div>
+                <div class="item-rebate">
+                  <span><em>1,230</em></span>
+                </div>
+              </li>
+            </ul>
+            <p>
+              ※
+              協会Rは商品合計をもとに算出しており、個別の合計と誤差が生じる場合があります。
+            </p>
+          </article>
+          <a href="./grp02_01.php" class="link_page-back_bottom">戻る</a>
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>
