@@ -31,13 +31,13 @@ function initDropZone(options) {
     };
     //==============================
     // ページ離脱・リロード時のドラフト破棄
-    //  - 求人カード（proc_master03_02_01.php）のみ対象
+    //  - （proc_master01_01_01.php、proc_client01_01_01.php）のみ対象
     //  - sendBeacon でベストエフォート送信
     //==============================
     try {
         const sendPHP = getHiddenValue("send_php", "");
         const areaName = inputArea && inputArea.value ? String(inputArea.value) : "";
-        const discardTargets = ["proc_master01_01_01.php"];
+        const discardTargets = ["proc_master01_01_01.php", "proc_client01_01_01.php"];
         if (discardTargets.includes(sendPHP) && areaName) {
             if (!window.__rwUploadDraftDiscard) {
                 window.__rwUploadDraftDiscard = { sendPHP: sendPHP, areas: [] };

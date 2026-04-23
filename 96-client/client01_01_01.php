@@ -205,7 +205,7 @@ print <<<HTML
                       </div>
                     </div>
                     <div class="wrap_02" id="js-dragDrop-photoImage">
-                      <input type="file" name="images_tmp" id="js-fileElem-photoImage" accept="image/*" style="display: none">
+                      <input type="file" name="images_tmp" id="js-fileElem-photoImage" accept="image/jpeg" style="display: none">
                       <input type="hidden" name="upload_image_mode" value="only" id="js-uploadImageMode-photoImage">
                       <input type="hidden" name="upload_image_area" value="photo_image" id="js-uploadImageArea-photoImage">
                       <input type="hidden" name="up_image_area[]" value="photo_image">
@@ -244,13 +244,13 @@ print <<<HTML
               <nav>
 
 HTML;
-#表示可能リストあればループで差し込む
 #最初のフォルダ情報を保存する変数
 $firstFolderId = '';
 $firstFolderName = '';
 $firstFolderIdRaw = '';
 $firstFolderNameRaw = '';
 $folderNameById = array();
+#表示可能リストあればループで差し込む
 if (!empty($folderList)) {
   foreach ($folderList as $folder) {
     $folderIdEsc = htmlspecialchars($folder['folder_id'], ENT_QUOTES, 'UTF-8');

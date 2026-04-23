@@ -170,6 +170,161 @@ function sendMail_Common($toEmail, $toName, $mailTitle, $mailBody, $fromEmail, $
 	#応答
 	return $result;
 }
+/*
+ * [画像処理] JPEG を最大容量以下へ調整（リサイズ + 再圧縮）
+ *  - GIF/WebP 等のアニメーション保持は行わない（JPEG専用）
+ *  - 失敗時は false を返す
+ */
+function resizeJpegToMaxBytes(string $filePath, int $maxBytes, ?string &$error = null): bool
+{
+	$error = null;
+	if ($filePath === '' || !file_exists($filePath) || !is_file($filePath)) {
+		$error = 'ファイルが見つかりません。';
+		return false;
+	}
+	if ($maxBytes < 1) {
+		return true;
+	}
+	$curSize = @filesize($filePath);
+	if (is_int($curSize) && $curSize > 0 && $curSize <= $maxBytes) {
+		return true;
+	}
+	if (!function_exists('imagecreatefromjpeg') || !function_exists('imagejpeg') || !function_exists('imagecreatetruecolor')) {
+		$error = 'サーバーで画像リサイズ（GD）が利用できません。';
+		return false;
+	}
+	$src = @imagecreatefromjpeg($filePath);
+	if ($src === false) {
+		$error = 'JPEG画像を読み取れませんでした。';
+		return false;
+	}
+	#EXIF Orientation 対応（存在すれば）
+	if (function_exists('exif_read_data')) {
+		try {
+			$exif = @exif_read_data($filePath);
+			$ori = is_array($exif) && isset($exif['Orientation']) ? (int)$exif['Orientation'] : 0;
+			switch ($ori) {
+				case 3:
+					$rot = @imagerotate($src, 180, 0);
+					if ($rot !== false) {
+						imagedestroy($src);
+						$src = $rot;
+					}
+					break;
+				case 6:
+					$rot = @imagerotate($src, -90, 0);
+					if ($rot !== false) {
+						imagedestroy($src);
+						$src = $rot;
+					}
+					break;
+				case 8:
+					$rot = @imagerotate($src, 90, 0);
+					if ($rot !== false) {
+						imagedestroy($src);
+						$src = $rot;
+					}
+					break;
+				default:
+					break;
+			}
+		} catch (Throwable $e) {
+			# no-op
+		}
+	}
+	$origW = imagesx($src);
+	$origH = imagesy($src);
+	if ($origW <= 0 || $origH <= 0) {
+		imagedestroy($src);
+		$error = '画像サイズを取得できませんでした。';
+		return false;
+	}
+	$dir = rtrim((string)dirname($filePath), '/\\');
+	$tmpPath = $dir . '/.__rz_' . uniqid('', true) . '.jpg';
+	$qualityStart = 85;
+	$qualityMin = 60;
+	$quality = $qualityStart;
+	$scale = 1.0;
+	$attempt = 0;
+	$success = false;
+	$lastW = 0;
+	$lastH = 0;
+	try {
+		while ($attempt < 12) {
+			$attempt++;
+			$newW = (int)max(1, (int)floor($origW * $scale));
+			$newH = (int)max(1, (int)floor($origH * $scale));
+			if ($newW === $lastW && $newH === $lastH && $quality <= $qualityMin) {
+				break;
+			}
+			$lastW = $newW;
+			$lastH = $newH;
+			$dst = null;
+			if ($newW === $origW && $newH === $origH) {
+				$dst = $src;
+			} else {
+				$dst = imagecreatetruecolor($newW, $newH);
+				if ($dst === false) {
+					$error = '画像の生成に失敗しました。';
+					break;
+				}
+				imageinterlace($dst, true);
+				$ok = imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+				if (!$ok) {
+					imagedestroy($dst);
+					$error = '画像のリサイズに失敗しました。';
+					break;
+				}
+			}
+			@unlink($tmpPath);
+			if (!@imagejpeg($dst, $tmpPath, $quality)) {
+				if ($dst !== $src) {
+					imagedestroy($dst);
+				}
+				$error = 'JPEGの書き出しに失敗しました。';
+				break;
+			}
+			if ($dst !== $src) {
+				imagedestroy($dst);
+			}
+			$newSize = @filesize($tmpPath);
+			if (is_int($newSize) && $newSize > 0 && $newSize <= $maxBytes) {
+				#成功：差し替え
+				if (!@rename($tmpPath, $filePath)) {
+					#Windows等でrenameが失敗する場合のフォールバック
+					if (@copy($tmpPath, $filePath)) {
+						@unlink($tmpPath);
+					} else {
+						$error = 'リサイズ画像の差し替えに失敗しました。';
+						break;
+					}
+				}
+				$success = true;
+				break;
+			}
+			#まだ大きい：まずは品質を下げる、限界なら縮小率を下げる
+			if ($quality > $qualityMin) {
+				$quality = max($qualityMin, $quality - 7);
+			} else {
+				$scale *= 0.9;
+				$quality = $qualityStart;
+				if ($scale < 0.05) {
+					break;
+				}
+			}
+		}
+	} finally {
+		@unlink($tmpPath);
+		imagedestroy($src);
+	}
+	if (!$success) {
+		if ($error === null) {
+			$error = '画像の容量を' . (int)floor($maxBytes / 1024 / 1024) . 'MB以内にできませんでした。';
+		}
+		return false;
+	}
+	return true;
+}
 
 
 

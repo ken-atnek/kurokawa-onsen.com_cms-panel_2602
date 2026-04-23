@@ -5,5 +5,7 @@ node_modules/
 .DS_Store
 
 # build assets
+db_current_spec.txt
 assets/css/
 _maintenance_log
+_zz_specification/
