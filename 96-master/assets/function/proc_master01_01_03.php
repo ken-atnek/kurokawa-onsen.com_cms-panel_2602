@@ -105,8 +105,6 @@ switch ($action) {
       $jsTarget = json_encode($target, $jsonHex);
       $jsSelectType = json_encode($selectType, $jsonHex);
       #-------------#
-      #タグ生成
-      #表示可能リストあればループで差し込む
       #最初のフォルダ情報を保存する変数
       $firstFolderId = '';
       $firstFolderName = '';
@@ -115,7 +113,9 @@ switch ($action) {
       $selectedFolderIdRaw = '';
       $selectedFolderNameRaw = '';
       $folderNameById = array();
+      #表示可能リストあればループで差し込む
       if (!empty($folderList)) {
+        #タグ生成
         $makeTag['tag'] .= <<<HTML
     <article class="modal-select-image is-active" id="modalSelectBlock">
       <div class="inner-modal">
