@@ -12,12 +12,16 @@ function accounts_FindById($intId = null, $shopId = null)
 		if ($intId !== null) {
 			#ID指定でアカウント情報を取得
 			$strSQL = "SELECT account_id, account_type, login_id, password, password_hash FROM accounts WHERE account_id = :account_id AND (locked_until IS NULL OR locked_until < NOW()) LIMIT 1";
+			#プリペアードステートメント作成
 			$newStmt = $DB_CONNECT->prepare($strSQL);
+			#変数バインド
 			$newStmt->bindValue(':account_id', $intId, PDO::PARAM_INT);
 		} elseif ($shopId !== null) {
 			#店舗ID指定でアカウント情報を取得
 			$strSQL = "SELECT account_id, account_type, login_id, password, password_hash FROM accounts WHERE shop_id = :shop_id AND (locked_until IS NULL OR locked_until < NOW()) LIMIT 1";
+			#プリペアードステートメント作成
 			$newStmt = $DB_CONNECT->prepare($strSQL);
+			#変数バインド
 			$newStmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
 		} else {
 			#IDも店舗IDも指定されていない場合はnullを返却

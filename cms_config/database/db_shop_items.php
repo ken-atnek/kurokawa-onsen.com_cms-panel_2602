@@ -31,6 +31,7 @@ function getShopItemsData(int $shopId): array
 		$newStmt->execute();
 		#実行結果取得
 		$shops = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		#ステートメントクローズ
 		$newStmt->closeCursor();
 		#固定3枠の空データを先に用意（フォーム表示が簡単になる）
 		$data = [
