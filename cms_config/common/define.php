@@ -74,21 +74,3 @@ $DEFINE_NO_REPLY = 'noreply@kurokawa-onsen.com';
 
 #メール送信元名称
 $DEFINE_MAIL_SENDER_NAME = '黒川温泉観光協会';
-
-
-
-#===================================#
-# JSONミラー設定（プレリリース用）
-#  - ミラー元：正式ドメイン側
-#  - ミラー先：初期ドメイン側
-#  - 検証が終わったら DEFINE_DEBUGFLG を 0 に戻す（=同期OFF）
-#===================================#
-#JSONミラー同期有効フラグ (検証中だけ 1、本番は 0)
-define('DEFINE_JSON_MIRROR_FLG', 0);
-define('DEFINE_JSON_MIRROR_ENABLE', (DEFINE_JSON_MIRROR_FLG === 1));
-#ミラー元（正式ドメイン側）
-define('DEFINE_JSON_MIRROR_SRC_DB_DIR',  '/home/xbaf8039/kurokawa-onsen.com/public_html/2603/db');
-#ミラー先（初期ドメイン側）
-define('DEFINE_JSON_MIRROR_DEST_DB_DIR', '/home/xbaf8039/tuna-pic.co.jp/public_html/demo-kurokawa-onsen/2603/db');
-#rsync のパス（環境により異なる場合があるので要調整）
-define('DEFINE_RSYNC_BIN', '/usr/bin/rsync');

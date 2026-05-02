@@ -13,6 +13,8 @@ require_once dirname(__DIR__) . '/../../cms_config/common/define.php';
 #***** 定数・関数宣言ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_function.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
+#***** JSON出力ファイル：インクルード *****#
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeShopJson.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
@@ -259,7 +261,6 @@ HTML;
       }
     }
     break;
-
   #***** 登録 *****#
   case 'sendInput': {
       #----------------------------
@@ -452,12 +453,7 @@ HTML;
             #----------------------------
             # DB更新完了のJSONファイル作成
             #----------------------------
-            #shop.json
-            $cmdShop = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShops.php ' . $shopId . ' 2>&1 &';
-            exec($cmdShop, $output, $return_var);
-            #shopsIndex.json
-            $cmdShopsIndex = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShopsIndex.php 2>&1 &';
-            exec($cmdShopsIndex, $output, $return_var);
+            syncFrontendShopJson($makeTag, $shopId);
           } else {
             #失敗時はROLLBACK
             DB_Transaction(3);

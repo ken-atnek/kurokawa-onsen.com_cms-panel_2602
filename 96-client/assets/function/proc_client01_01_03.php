@@ -13,6 +13,8 @@ require_once dirname(__DIR__) . '/../../cms_config/common/define.php';
 #***** 定数・関数宣言ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_function.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
+#***** JSON出力ファイル：インクルード *****#
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeShopJson.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
@@ -277,7 +279,6 @@ HTML;
       }
     }
     break;
-
   #***** 登録 *****#
   case 'sendInput': {
       #----------------------------
@@ -341,7 +342,6 @@ HTML;
             $dbCompleteFlg = false;
           } else {
             $shopId = (int)$shopId;
-
             #---------------------------------
             # recommended は固定枠なので、一旦削除→全枠INSERT
             #（新規/編集、途中欠損データの救済も兼ねる）
@@ -364,12 +364,10 @@ HTML;
                 $descRaw = isset(${"description" . $slot}) ? trim((string)${"description" . $slot}) : '';
                 $imageRaw = isset(${"imagePath" . $slot}) ? trim((string)${"imagePath" . $slot}) : '';
                 $priceRaw = isset(${"price" . $slot}) ? trim((string)${"price" . $slot}) : '';
-
                 $titleVal = ($titleRaw === '') ? null : $titleRaw;
                 $descVal = ($descRaw === '') ? null : $descRaw;
                 $imageVal = ($imageRaw === '') ? null : $imageRaw;
                 $priceVal = ($priceRaw === '') ? null : (int)$priceRaw;
-
                 $ins = array();
                 $ins['shop_id'] = array(':shop_id', $shopId, 1);
                 $ins['item_type'] = array(':item_type', 'recommended', 0);
@@ -379,7 +377,6 @@ HTML;
                 $ins['price_yen'] = array(':price_yen', $priceVal, ($priceVal === null ? 2 : 1));
                 $ins['image_path'] = array(':image_path', $imageVal, ($imageVal === null ? 2 : 0));
                 $ins['is_active'] = array(':is_active', 1, 1);
-
                 $insFlg = SQL_Process($DB_CONNECT, 'shop_items', $ins, array(), 1, 2);
                 if ($insFlg != 1) {
                   $data = [
@@ -419,12 +416,7 @@ HTML;
             #----------------------------
             # DB更新完了のJSONファイル作成
             #----------------------------
-            #shop.json
-            ## $cmdShop = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShops.php ' . $shopId . ' 2>&1 &';
-            ## exec($cmdShop, $output, $return_var);
-            #shopsIndex.json
-            ## $cmdShopsIndex = '/usr/bin/php8.3 ' . DEFINE_JSON_FUNCTION_MASTER . '/workJson/makeShopsIndex.php 2>&1 &';
-            ## exec($cmdShopsIndex, $output, $return_var);
+            syncFrontendShopJson($makeTag, $shopId);
           } else {
             #失敗時はROLLBACK
             DB_Transaction(3);

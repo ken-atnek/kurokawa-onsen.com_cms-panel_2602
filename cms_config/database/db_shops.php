@@ -128,7 +128,7 @@ function getShops_FindById($shopId = null)
 			#SQL定義
 			$strSQL = "
 				SELECT 
-					shop_id, is_public,shop_type, shop_name, shop_name_kana, shop_name_en, 
+					shop_id, eccube_sale_type_id, is_public,shop_type, shop_name, shop_name_kana, shop_name_en, 
 					postal_code, address1, address2, address3, tel, fax, email, is_email_public, website_url, 
 					lunch_open_time, lunch_close_time, lunch_note, 
 					dinner_open_time, dinner_close_time, dinner_note, 

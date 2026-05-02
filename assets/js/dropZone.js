@@ -31,13 +31,13 @@ function initDropZone(options) {
     };
     //==============================
     // ページ離脱・リロード時のドラフト破棄
-    //  - （proc_master01_01_01.php、proc_client01_01_01.php）のみ対象
+    //  - proc_client03_03.php）のみ対象
     //  - sendBeacon でベストエフォート送信
     //==============================
     try {
         const sendPHP = getHiddenValue("send_php", "");
         const areaName = inputArea && inputArea.value ? String(inputArea.value) : "";
-        const discardTargets = ["proc_master01_01_01.php", "proc_client01_01_01.php"];
+        const discardTargets = ["proc_client03_03.php"];
         if (discardTargets.includes(sendPHP) && areaName) {
             if (!window.__rwUploadDraftDiscard) {
                 window.__rwUploadDraftDiscard = { sendPHP: sendPHP, areas: [] };
@@ -93,6 +93,8 @@ function initDropZone(options) {
     }
     //画像格納変数初期化
     let keepFiles = null;
+    const maxUploadImages = 8;
+    let draggedItem = null;
     if (alreadyInitialized) {
         //プレビュー内ボタンの再バインドだけ行う（イベント二重登録防止）
         //bindPreviewButtons() はこの後定義される
@@ -100,6 +102,13 @@ function initDropZone(options) {
     //ファイル選択ボタン
     if (!alreadyInitialized) {
         selectFileButton.addEventListener("click", () => {
+            const upImageMode = inputMode ? inputMode.value : "";
+            const liCount = previewBlock.querySelectorAll("li").length;
+            if ((upImageMode === "only" && liCount >= 1) || (upImageMode === "multiple" && liCount >= maxUploadImages)) {
+                showUploadError("画像は最大8枚までアップロードできます。");
+                updateDropZoneState();
+                return;
+            }
             fileInput.setAttribute("data-mode", "add");
             fileInput.removeAttribute("data-replace-index");
             fileInput.click();
@@ -127,6 +136,13 @@ function initDropZone(options) {
         dropZone.addEventListener("drop", (event) => {
             event.preventDefault();
             dropZone.classList.remove("dragover");
+            const upImageMode = inputMode ? inputMode.value : "";
+            const liCount = previewBlock.querySelectorAll("li").length;
+            if ((upImageMode === "only" && liCount >= 1) || (upImageMode === "multiple" && liCount >= maxUploadImages)) {
+                showUploadError("画像は最大8枚までアップロードできます。");
+                updateDropZoneState();
+                return;
+            }
             handleFiles(event.dataTransfer.files);
         });
     }
@@ -148,6 +164,7 @@ function initDropZone(options) {
         //再選択（入れ替え）
         previewBlock.querySelectorAll(".btn-change").forEach((btn, idx) => {
             btn.onclick = function () {
+                fileInput.disabled = false;
                 fileInput.setAttribute("data-mode", "replace");
                 fileInput.setAttribute("data-replace-index", idx);
                 fileInput.click();
@@ -155,13 +172,21 @@ function initDropZone(options) {
         });
         //削除
         previewBlock.querySelectorAll(".btn-delate").forEach((btn) => {
-            btn.onclick = function (e) {
+            btn.onclick = async function (e) {
                 e.preventDefault();
                 const li = btn.closest("li");
                 const img = li.querySelector("img");
                 if (!img) return;
+                const realFileName = li ? li.getAttribute("data-file-name") : "";
+                const displayName = li ? li.getAttribute("data-name") : "";
                 const src = img.getAttribute("src");
-                const fileName = src.split("/").pop();
+                const fileName = realFileName || displayName || src.split("/").pop();
+                if (typeof window.confirmProductImageDelete === "function") {
+                    const confirmed = await window.confirmProductImageDelete();
+                    if (!confirmed) {
+                        return;
+                    }
+                }
                 let sendPHP = getHiddenValue("send_php", "");
                 let facId = getHiddenValue("facId", "");
                 let jobId = getHiddenValue("jobId", "");
@@ -186,19 +211,18 @@ function initDropZone(options) {
                         if (res.status === "success") {
                             li.remove();
                             bindPreviewButtons();
-                            const liCount = previewBlock.querySelectorAll("li").length;
-                            let upImageMode = document.querySelector("input[type=hidden][name=upload_image_mode]").value;
-                            if (liCount === 0) {
-                                //previewBlock.style.display = 'none';
-                                //dropZone.style.display = '';
-                                dropZone.classList.remove("is-active");
+                            updateDropZoneState();
+                            if (previewBlock.querySelectorAll("li").length === 0) {
                                 fileInput.value = "";
-                            } else if (upImageMode === "multiple") {
-                                if (liCount < 10) {
-                                    //dropZone.style.display = '';
-                                    dropZone.classList.remove("is-active");
-                                }
                             }
+                            previewBlock.dispatchEvent(
+                                new CustomEvent("productImageDeleted", {
+                                    bubbles: true,
+                                    detail: {
+                                        fileName: fileName,
+                                    },
+                                }),
+                            );
                         } else {
                             alert("削除に失敗しました: " + (res.msg || ""));
                         }
@@ -209,12 +233,202 @@ function initDropZone(options) {
                 })();
             };
         });
+        //ドラッグ＆ドロップ並び替え
+        previewBlock.querySelectorAll("li").forEach((li) => {
+            li.setAttribute("draggable", "true");
+            li.ondragstart = function (e) {
+                draggedItem = li;
+                clearDragTargetStyles();
+                li.classList.add("is-dragging");
+                if (e.dataTransfer) {
+                    e.dataTransfer.effectAllowed = "move";
+                }
+            };
+            li.ondragover = function (e) {
+                e.preventDefault();
+                if (e.dataTransfer) {
+                    e.dataTransfer.dropEffect = "move";
+                }
+                showDragTarget(li);
+            };
+            li.ondrop = function (e) {
+                e.preventDefault();
+                if (!draggedItem || draggedItem === li) {
+                    return;
+                }
+                const items = Array.from(previewBlock.querySelectorAll("li"));
+                const draggedIndex = items.indexOf(draggedItem);
+                const targetIndex = items.indexOf(li);
+                if (draggedIndex < 0 || targetIndex < 0) {
+                    return;
+                }
+                const droppedItem = draggedItem;
+                if (draggedIndex < targetIndex) {
+                    li.after(draggedItem);
+                } else {
+                    li.before(draggedItem);
+                }
+                clearDragTargetStyles();
+                bindPreviewButtons();
+                updateDropZoneState();
+                highlightDroppedItem(droppedItem);
+                previewBlock.dispatchEvent(
+                    new CustomEvent("productImageOrderChanged", {
+                        bubbles: true,
+                    }),
+                );
+            };
+            li.ondragend = function () {
+                li.classList.remove("is-dragging");
+                clearDragTargetStyles();
+                draggedItem = null;
+            };
+        });
+    }
+    //ドラッグ移動先の装飾をクリア
+    function clearDragTargetStyles() {
+        previewBlock.querySelectorAll("li").forEach((item) => {
+            item.style.outline = "";
+            item.style.outlineOffset = "";
+            item.style.boxShadow = "";
+        });
+    }
+    //ドラッグ移動先を表示
+    function showDragTarget(li) {
+        if (!li || li === draggedItem) {
+            return;
+        }
+        clearDragTargetStyles();
+        li.style.outline = "2px dashed #f0a000";
+        li.style.outlineOffset = "4px";
+        li.style.boxShadow = "0 0 0 4px rgba(240, 160, 0, 0.18)";
+    }
+    //ドロップ完了後の一時ハイライト
+    function highlightDroppedItem(li) {
+        if (!li) {
+            return;
+        }
+        const previousTransition = li.style.transition;
+        const previousBoxShadow = li.style.boxShadow;
+        const previousBackgroundColor = li.style.backgroundColor;
+        li.style.transition = "box-shadow 0.2s ease, background-color 0.2s ease";
+        li.style.boxShadow = "0 0 0 4px rgba(240, 160, 0, 0.45)";
+        li.style.backgroundColor = "rgba(240, 160, 0, 0.12)";
+        setTimeout(() => {
+            li.style.boxShadow = previousBoxShadow;
+            li.style.backgroundColor = previousBackgroundColor;
+            setTimeout(() => {
+                li.style.transition = previousTransition;
+            }, 250);
+        }, 500);
+    }
+    //アップロードエラー表示
+    function showUploadError(message, title = "アップロード失敗") {
+        if (fileError) {
+            fileError.style.display = "flex";
+            const titleEl = fileError.querySelector("h5");
+            const messageEl = fileError.querySelector("p");
+            if (titleEl) titleEl.innerHTML = title;
+            if (messageEl) messageEl.innerHTML = message;
+        } else {
+            alert(message);
+        }
+    }
+    //アップロードエリアの表示状態更新
+    function updateDropZoneState() {
+        const liCount = previewBlock.querySelectorAll("li").length;
+        const upImageMode = inputMode ? inputMode.value : "";
+        const isDisabled = (upImageMode === "only" && liCount >= 1) || (upImageMode === "multiple" && liCount >= maxUploadImages);
+        if (isDisabled) {
+            dropZone.classList.add("is-active");
+            selectFileButton.disabled = true;
+            fileInput.disabled = true;
+            dropZone.setAttribute("aria-disabled", "true");
+        } else {
+            dropZone.classList.remove("is-active");
+            selectFileButton.disabled = false;
+            fileInput.disabled = false;
+            dropZone.removeAttribute("aria-disabled");
+        }
+    }
+    //addモード用：1ファイルずつアップロード
+    async function uploadSingleFile(file) {
+        if (!inputMode || !inputArea) {
+            showUploadError("画像アップロードの設定が正しくありません（inputModeまたはinputAreaが未設定）");
+            return false;
+        }
+        let sendPHP = getHiddenValue("send_php", "");
+        let upImageMode = inputMode.value;
+        let upImageArea = inputArea.value;
+        let facId = getHiddenValue("facId", "");
+        let jobId = getHiddenValue("jobId", "");
+        let sFd = new FormData();
+        const noUpDateKey = getHiddenValue("noUpDateKey", "");
+        if (noUpDateKey) sFd.append("noUpDateKey", noUpDateKey);
+        sFd.append("action", "preUploadImage");
+        if (facId !== "") sFd.append("facId", facId);
+        if (jobId !== "") sFd.append("jobId", jobId);
+        sFd.append("method", "new_image");
+        sFd.append("up_image_mode", upImageMode);
+        sFd.append("up_image_area[]", upImageArea);
+        sFd.append("images_tmp", file);
+        let requestURL = "./assets/function/" + sendPHP;
+        try {
+            const response = await fetch(requestURL, {
+                method: "POST",
+                body: sFd,
+            });
+            if (!response.ok) throw new Error("Network response was not ok");
+            let list = await response.json();
+            if (list["status"] == "error") {
+                showUploadError(list["msg"] || "アップロードに失敗しました。", list["title"] || "アップロード失敗");
+                return false;
+            }
+            previewBlock.style.display = "grid";
+            if (upImageMode === "only") {
+                previewBlock.innerHTML = list["tag"];
+            } else {
+                previewBlock.insertAdjacentHTML("beforeend", list["tag"]);
+            }
+            bindPreviewButtons();
+            updateDropZoneState();
+            return true;
+        } catch (error) {
+            console.error(error);
+            alert("通信エラーが発生しました。ページを再読み込みしてください。");
+            return false;
+        }
     }
     //ファイル選択・ドロップ時の処理
-    function handleFiles(files, mode = "add", replaceIndex = null) {
+    async function handleFiles(files, mode = "add", replaceIndex = null) {
         if (files.length > 0) {
             //file選択と同様に fileInput 側へも反映して必須判定を通す
             syncFileInputFiles(files);
+            if (mode === "add") {
+                const imageFiles = Array.from(files).filter((file) => file && file.type && file.type.startsWith("image/"));
+                if (imageFiles.length === 0) {
+                    showUploadError("画像ファイルを選択してください。");
+                    return;
+                }
+                const currentCount = previewBlock.querySelectorAll("li").length;
+                const availableCount = Math.max(0, maxUploadImages - currentCount);
+                if (availableCount <= 0) {
+                    showUploadError("画像は最大8枚までアップロードできます。");
+                    updateDropZoneState();
+                    return;
+                }
+                const uploadFiles = imageFiles.slice(0, availableCount);
+                if (imageFiles.length > availableCount) {
+                    showUploadError("画像は最大8枚までアップロードできます。");
+                } else if (imageFiles.length < files.length) {
+                    showUploadError("画像ファイルを選択してください。");
+                }
+                for (const file of uploadFiles) {
+                    await uploadSingleFile(file);
+                }
+                updateDropZoneState();
+                return;
+            }
             const file = files[0];
             keepFiles = files;
             if (file.type.startsWith("image/")) {
@@ -224,7 +438,7 @@ function initDropZone(options) {
                 };
                 reader.readAsDataURL(file);
             } else {
-                alert("画像ファイルを選択してください。");
+                showUploadError("画像ファイルを選択してください。");
             }
         }
     }
@@ -269,11 +483,7 @@ function initDropZone(options) {
                     if (!response.ok) throw new Error("Network response was not ok");
                     let list = await response.json();
                     if (list["status"] == "error") {
-                        if (fileError) {
-                            fileError.style.display = "flex";
-                            fileError.querySelector("h5").innerHTML = list["title"];
-                            fileError.querySelector("p").innerHTML = list["msg"];
-                        }
+                        showUploadError(list["msg"] || "アップロードに失敗しました。", list["title"] || "アップロード失敗");
                     } else {
                         previewBlock.style.display = "grid";
                         if (mode === "replace") {
@@ -285,18 +495,8 @@ function initDropZone(options) {
                                 previewBlock.insertAdjacentHTML("beforeend", list["tag"]);
                             }
                         }
-                        const liCount = previewBlock.querySelectorAll("li").length;
-                        if (upImageMode === "only" && liCount >= 1) {
-                            //dropZone.style.display = 'none';
-                            dropZone.classList.add("is-active");
-                        } else if (upImageMode === "multiple" && liCount >= 10) {
-                            //dropZone.style.display = 'none';
-                            dropZone.classList.add("is-active");
-                        } else {
-                            //dropZone.style.display = '';
-                            dropZone.classList.remove("is-active");
-                        }
                         bindPreviewButtons();
+                        updateDropZoneState();
                     }
                 } catch (error) {
                     console.error(error);
@@ -316,6 +516,7 @@ function initDropZone(options) {
     }
     //初期バインド
     bindPreviewButtons();
+    updateDropZoneState();
 }
 //既存ページの後方互換：1領域用（従来のIDで初期化）
 document.addEventListener("DOMContentLoaded", () => {

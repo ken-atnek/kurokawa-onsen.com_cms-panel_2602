@@ -7,7 +7,22 @@ const errorClassName = "error";
 //定数・クエリセレクタの重複取得を減らす
 let validationForm = document.querySelector("form[name=inputForm]");
 let requiredItem = document.querySelectorAll(".required-item");
-const sendBtn = document.querySelector(".btn-submit");
+function getSendBtn() {
+    if (validationForm) {
+        const formSendBtn = validationForm.querySelector(".btn-submit");
+        if (formSendBtn) {
+            return formSendBtn;
+        }
+    }
+    return document.querySelector(".btn-submit");
+}
+function setSendBtnDisabled(disabled) {
+    const sendBtn = getSendBtn();
+    if (sendBtn) {
+        sendBtn.disabled = disabled;
+    }
+}
+const sendBtn = getSendBtn();
 //ロード時：フォーム妥当性に基づいてボタンを初期化
 if (sendBtn && validationForm) {
     sendBtn.disabled = !validationForm.checkValidity();
@@ -28,9 +43,9 @@ if (validationForm != null) {
         //未入力時はボタン無効化
         const isRequired = validationForm.checkValidity();
         if (isRequired) {
-            sendBtn.disabled = false;
+            setSendBtnDisabled(false);
         } else {
-            sendBtn.disabled = true;
+            setSendBtnDisabled(true);
         }
     }
 }
@@ -226,7 +241,7 @@ function createError(elem, errorMessage) {
             break;
     }
     //ボタンを無効化する
-    sendBtn.disabled = true;
+    setSendBtnDisabled(true);
 }
 /**
  *「required-selectbox」クラスを指定されたセレクトボックスの入力チェック
