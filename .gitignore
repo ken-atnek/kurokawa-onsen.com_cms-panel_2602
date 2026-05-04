@@ -18,3 +18,4 @@ _zz_specification/
 cms_config/database/set_db.php
 cms_config/api/eccube/eccube_api_config.php
 tmp_upload/
+_md_docs/
