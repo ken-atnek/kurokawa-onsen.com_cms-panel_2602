@@ -92,6 +92,26 @@ function buildEccubeGraphqlString_v01($value)
   return $encoded;
 }
 /*
+ * [EC-CUBE商品連携] 税込価格から税抜価格へ変換
+ */
+if (!function_exists('convertTaxIncludedToExcludedPrice')) {
+  function convertTaxIncludedToExcludedPrice($priceIncludingTax, $taxRate)
+  {
+    $priceIncludingTax = (int)$priceIncludingTax;
+    $taxRate = (int)$taxRate;
+
+    if ($priceIncludingTax < 1) {
+      return 0;
+    }
+
+    if ($taxRate <= 0) {
+      return $priceIncludingTax;
+    }
+
+    return (int)round($priceIncludingTax / (1 + ($taxRate / 100)));
+  }
+}
+/*
  * [EC-CUBE連携warning応答設定]
  */
 function appendEccubeWarningMessage_v01(&$makeTag)
@@ -138,6 +158,10 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
   if ($eccubeSaleTypeId < 1) {
     appendEccubeWarningMessage_v01($makeTag);
     return;
+  }
+  $taxRate = isset($productData['tax_rate']) ? (int)$productData['tax_rate'] : 10;
+  if ($taxRate <= 0) {
+    $taxRate = 10;
   }
   $eccubeStatusId = (isset($productData['status']) && (int)$productData['status'] === 1) ? 1 : 2;
   $eccubeCategoryId = null;
@@ -211,7 +235,7 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
   $args[] = 'name: ' . buildEccubeGraphqlString_v01(isset($productData['name']) ? $productData['name'] : '');
   $args[] = 'sale_type_id: ' . $eccubeSaleTypeId;
   $args[] = 'status_id: ' . $eccubeStatusId;
-  $args[] = 'tax_rate: ' . (isset($productData['tax_rate']) ? (int)$productData['tax_rate'] : 10);
+  $args[] = 'tax_rate: ' . $taxRate;
   if (isset($productData['temp_type']) && $productData['temp_type'] !== null && $productData['temp_type'] !== '') {
     $args[] = 'temp_type: ' . buildEccubeGraphqlString_v01($productData['temp_type']);
   }
@@ -239,7 +263,8 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
       $variantArgs[] = 'class_category_id2: ' . (int)$gv['eccube_class_category_id2'];
     }
     $variantArgs[] = 'code: ' . buildEccubeGraphqlString_v01($gv['code']);
-    $variantArgs[] = 'price02: ' . (int)$gv['price'];
+    $variantPriceExcludingTax = convertTaxIncludedToExcludedPrice($gv['price'], $taxRate);
+    $variantArgs[] = 'price02: ' . (int)$variantPriceExcludingTax;
     if ((int)$gv['stock_unlimited'] === 1) {
       $variantArgs[] = 'stock_unlimited: true';
     } else {

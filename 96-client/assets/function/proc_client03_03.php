@@ -147,6 +147,26 @@ function buildEccubeGraphqlString($value)
   return $encoded;
 }
 /*
+ * [EC-CUBE商品連携] 税込価格から税抜価格へ変換
+ */
+if (!function_exists('convertTaxIncludedToExcludedPrice')) {
+  function convertTaxIncludedToExcludedPrice($priceIncludingTax, $taxRate)
+  {
+    $priceIncludingTax = (int)$priceIncludingTax;
+    $taxRate = (int)$taxRate;
+
+    if ($priceIncludingTax < 1) {
+      return 0;
+    }
+
+    if ($taxRate <= 0) {
+      return $priceIncludingTax;
+    }
+
+    return (int)round($priceIncludingTax / (1 + ($taxRate / 100)));
+  }
+}
+/*
  * [EC-CUBE連携warning応答設定]
  */
 function appendEccubeWarningMessage(&$makeTag)
@@ -242,7 +262,8 @@ function syncEccubeProductBasicInfo(&$makeTag, $method, $specUsageFlg, $shopId, 
       $eccubeProductClassCode = 'S' . $shopId . 'P' . $productId;
       $args = buildEccubeProductBaseArgs($productName, $eccubeSaleTypeId, $eccubeStatusId, $taxRate, $tempType, $sizeLength, $sizeWidth, $sizeHeight, $weightG, $description, $eccubeCategoryId);
       $args[] = 'code: ' . buildEccubeGraphqlString($eccubeProductClassCode);
-      $args[] = 'price02: ' . (int)$salePrice;
+      $priceExcludingTax = convertTaxIncludedToExcludedPrice($salePrice, $taxRate);
+      $args[] = 'price02: ' . (int)$priceExcludingTax;
       if ($stockUnlimited === 1) {
         $args[] = 'stock_unlimited: true';
       } else {
@@ -277,7 +298,8 @@ function syncEccubeProductBasicInfo(&$makeTag, $method, $specUsageFlg, $shopId, 
         appendEccubeWarningMessage($makeTag);
         return;
       }
-      $args[] = 'price02: ' . (int)$salePrice;
+      $priceExcludingTax = convertTaxIncludedToExcludedPrice($salePrice, $taxRate);
+      $args[] = 'price02: ' . (int)$priceExcludingTax;
       if ($stockUnlimited === 1) {
         $args[] = 'stock_unlimited: true';
       } else {
