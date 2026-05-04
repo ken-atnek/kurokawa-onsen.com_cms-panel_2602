@@ -56,9 +56,14 @@ define('DEFINE_PREVIEW_IMAGE_DIR_PATH', '../../../tmp_upload');
 define('DEFINE_FILE_DIR_PATH', DEFINE_JSON_DIR_PATH . '/images/shops');
 
 #===================================#
+#EC-CUBE API設定
+define('DEFINE_ECCUBE_WEBHOOK_SECRET', 'kurokawa-onsen-webhook-secret');
+
+#===================================#
 #管理画面URL
 $CMS_PANEL_URL = 'https://cms-panel.kurokawa-onsen.com';
 
+#===================================#
 #メールアドレス送信リスト
 $sendAddressList = array(
 	'shigetaka@a-fact.co.jp',
