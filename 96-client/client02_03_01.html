@@ -1,0 +1,96 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(クライアント)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/client02-03.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-02-03-01 status-client">
+      <section class="container-left-menu menu-color02">
+        <div class="title">サイト管理</div>
+        <nav>
+          <a href="#"><span>自由記事一覧</span></a>
+          <a href="#" class="is-active"><span>自由記事登録</span></a>
+          <a href="#"><span>自由記事並び順変更</span></a>
+        </nav>
+      </section>
+      <div class="main-contents menu-color02">
+        <div class="block_inner">
+          <h2>自由ページ 並び順変更</h2>
+          <form name="sortForm">
+            <ul>
+              <li>
+                <div>順序変更</div>
+                <div>バナータイトル</div>
+              </li>
+              <li>
+                <div class="box_btn btn_down">
+                  <button
+                    type="button"
+                    onclick="goSortDown('down', 't', 31, 38, 'sKey01_151156')"
+                  ></button>
+                </div>
+                <div class="box_btn btn_up"></div>
+                <div class="box_ban-title">雑貨ハンドメイド体験</div>
+              </li>
+              <li>
+                <div class="box_btn btn_down">
+                  <button
+                    type="button"
+                    onclick="goSortDown('down', 't', 38, 41, 'sKey01_151156')"
+                  ></button>
+                </div>
+                <div class="box_btn btn_up">
+                  <button
+                    type="button"
+                    onclick="goSortUp('up', 't', 38, 31, 'sKey01_151156')"
+                  ></button>
+                </div>
+                <div class="box_ban-title">店内にFREESPOTを設置しました</div>
+              </li>
+              <li>
+                <div class="box_btn btn_down"></div>
+                <div class="box_btn btn_up">
+                  <button
+                    type="button"
+                    onclick="goSortUp('up', 't', 41, 38, 'sKey01_151156')"
+                  ></button>
+                </div>
+                <div class="box_ban-title">
+                  フィッシュセラピー（ドクターフィッシュ）を体験してみませんか？
+                </div>
+              </li>
+            </ul>
+          </form>
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+          <a href="#" class="link_page-back_bottom">戻る</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>
