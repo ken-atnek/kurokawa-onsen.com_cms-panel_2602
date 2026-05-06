@@ -1,0 +1,1567 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(クライアント)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/client02-02.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-02-02-01 status-client">
+      <section class="container-left-menu menu-color02">
+        <div class="title">サイト管理</div>
+        <nav>
+          <a href="#"><span>自由記事一覧</span></a>
+          <a href="#" class="is-active"><span>自由記事登録</span></a>
+          <a href="#"><span>自由記事並び順変更</span></a>
+        </nav>
+      </section>
+      <div class="main-contents menu-color02">
+        <div class="block_inner">
+          <h2>自由ページ 記事登録タイプ選択</h2>
+          <form name="validationForm">
+            <h3>入力項目</h3>
+            <dl>
+              <div class="box_setting free-page">
+                <dt>公開設定</dt>
+                <dd>
+                  <div>
+                    <input type="radio" name="td31DspFlg" value="0" /><label
+                      for="td31DspFlg_01"
+                      >非公開</label
+                    >
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      name="td31DspFlg"
+                      value="1"
+                      checked=""
+                    /><label for="td31DspFlg_02">公開</label>
+                  </div>
+                </dd>
+              </div>
+              <div class="box_contents">
+                <dt>ページタイトル</dt>
+                <dd>
+                  <input type="text" name="td31Title" value="" />
+                </dd>
+              </div>
+              <div class="box_view-order">
+                <dt>表示順</dt>
+                <dd>
+                  <div><input type="text" name="td31DspSort" value="" /></div>
+                </dd>
+              </div>
+            </dl>
+            <article>
+              <div class="head">
+                <h4>段落-1</h4>
+              </div>
+              <dl id="box-dl01">
+                <div>
+                  <dt>タイトル</dt>
+                  <dd>
+                    <input type="text" name="td31Index1_title" value="" />
+                  </dd>
+                </div>
+                <div class="box_up-image">
+                  <dt>画像</dt>
+                  <dd>
+                    <div class="select-image" id="dragDropArea01">
+                      <p class="drop-message01">
+                        <em>ここにファイルをドロップ</em>または
+                      </p>
+                      <input
+                        type="file"
+                        name="td31Image_1"
+                        id="fileElem01"
+                        multiple=""
+                        accept="image/*"
+                        style="display: none"
+                      />
+                      <button type="button" id="fileSelect01">
+                        ファイルを選択
+                      </button>
+                      <p class="drop-message01">
+                        <small
+                          >※縦横サイズがオーバーしている場合は自動でリサイズされます</small
+                        >
+                      </p>
+                      <div
+                        class="preview-container"
+                        id="preview-container01"
+                        style="display: none"
+                      >
+                        <img
+                          src="../up_image/free/no-image.webp"
+                          alt=""
+                          class="preview-image"
+                          id="preview-image01"
+                        />
+                      </div>
+                    </div>
+                    <div class="item_image-delate" style="display: none">
+                      <button
+                        type="button"
+                        class="custom-button"
+                        id="reset01-button"
+                      >
+                        画像を削除する
+                      </button>
+                    </div>
+                  </dd>
+                </div>
+                <div class="box_detail">
+                  <dt>内容</dt>
+                  <dd>
+                    <div>
+                      <textarea
+                        name="td31Text_1"
+                        id="formatText_1"
+                        style="visibility: hidden; display: none"
+                      ></textarea>
+                      <div
+                        id="cke_formatText_1"
+                        class="cke_1 cke cke_reset cke_chrome cke_editor_formatText_1 cke_ltr cke_browser_webkit cke_hidpi"
+                        dir="ltr"
+                        lang="ja"
+                        role="application"
+                        aria-labelledby="cke_formatText_1_arialbl"
+                        style="width: 100%"
+                      >
+                        <span
+                          id="cke_formatText_1_arialbl"
+                          class="cke_voice_label"
+                          >リッチテキストエディタ, formatText_1</span
+                        >
+                        <div class="cke_inner cke_reset" role="presentation">
+                          <span
+                            id="cke_1_top"
+                            class="cke_top cke_reset_all"
+                            role="presentation"
+                            style="height: auto; user-select: none"
+                            ><span id="cke_17" class="cke_voice_label"
+                              >編集ツールバー</span
+                            ><span
+                              id="cke_1_toolbox"
+                              class="cke_toolbox"
+                              role="group"
+                              aria-labelledby="cke_17"
+                              onmousedown="return false;"
+                              ><span
+                                id="cke_18"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_19"
+                                    class="cke_button cke_button__source cke_button_off"
+                                    href="javascript:void('ソース')"
+                                    title="ソース"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_19_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        2,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        3,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(4, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__source_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1824px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_19_label"
+                                      class="cke_button_label cke_button__source_label"
+                                      aria-hidden="false"
+                                      >ソース</span
+                                    ></a
+                                  ></span
+                                ><span class="cke_toolbar_end"></span></span
+                              ><span
+                                id="cke_20"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_21"
+                                    class="cke_button cke_button__image cke_button_off"
+                                    href="javascript:void('イメージ')"
+                                    title="イメージ"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_21_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        5,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        6,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(7, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__image_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -936px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_21_label"
+                                      class="cke_button_label cke_button__image_label"
+                                      aria-hidden="false"
+                                      >イメージ</span
+                                    ></a
+                                  ><a
+                                    id="cke_22"
+                                    class="cke_button cke_button__link cke_button_off"
+                                    href="javascript:void('リンク挿入/編集')"
+                                    title="リンク挿入/編集"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_22_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        8,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        9,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(10, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__link_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1248px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_22_label"
+                                      class="cke_button_label cke_button__link_label"
+                                      aria-hidden="false"
+                                      >リンク挿入/編集</span
+                                    ></a
+                                  ><a
+                                    id="cke_23"
+                                    class="cke_button cke_button__unlink cke_button_disabled"
+                                    href="javascript:void('リンクを削除')"
+                                    title="リンクを削除"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_23_label"
+                                    aria-haspopup="false"
+                                    aria-disabled="true"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        11,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        12,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(13, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__unlink_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1272px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_23_label"
+                                      class="cke_button_label cke_button__unlink_label"
+                                      aria-hidden="false"
+                                      >リンクを削除</span
+                                    ></a
+                                  ></span
+                                ><span class="cke_toolbar_end"></span></span
+                              ><span
+                                id="cke_24"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_25"
+                                    class="cke_button cke_button__bold cke_button_off"
+                                    href="javascript:void('太字')"
+                                    title="太字"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_25_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        14,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        15,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(16, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__bold_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -24px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_25_label"
+                                      class="cke_button_label cke_button__bold_label"
+                                      aria-hidden="false"
+                                      >太字</span
+                                    ></a
+                                  ><a
+                                    id="cke_26"
+                                    class="cke_button cke_button__italic cke_button_off"
+                                    href="javascript:void('斜体')"
+                                    title="斜体"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_26_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        17,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        18,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(19, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__italic_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -48px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_26_label"
+                                      class="cke_button_label cke_button__italic_label"
+                                      aria-hidden="false"
+                                      >斜体</span
+                                    ></a
+                                  ></span
+                                ><span
+                                  class="cke_toolbar_end"
+                                ></span></span></span
+                          ></span>
+                          <div
+                            id="cke_1_contents"
+                            class="cke_contents cke_reset"
+                            role="presentation"
+                            style="height: 300px"
+                          >
+                            <span id="cke_31" class="cke_voice_label"
+                              >ヘルプは ALT 0 を押してください</span
+                            ><iframe
+                              src=""
+                              frameborder="0"
+                              class="cke_wysiwyg_frame cke_reset"
+                              title="リッチテキストエディタ, formatText_1"
+                              aria-describedby="cke_31"
+                              tabindex="0"
+                              allowtransparency="true"
+                              style="width: 100%; height: 100%"
+                            ></iframe>
+                          </div>
+                          <span
+                            id="cke_1_bottom"
+                            class="cke_bottom cke_reset_all"
+                            role="presentation"
+                            style="user-select: none"
+                            ><span
+                              id="cke_1_resizer"
+                              class="cke_resizer cke_resizer_vertical cke_resizer_ltr"
+                              title="ドラッグしてリサイズ"
+                              onmousedown="
+                                CKEDITOR.tools.callFunction(0, event)
+                              "
+                              >◢</span
+                            ><span id="cke_1_path_label" class="cke_voice_label"
+                              >要素パス</span
+                            ><span
+                              id="cke_1_path"
+                              class="cke_path"
+                              role="group"
+                              aria-labelledby="cke_1_path_label"
+                              ><span class="cke_path_empty">&nbsp;</span></span
+                            ></span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </dd>
+                </div>
+                <div class="box_set-link">
+                  <dt>リンク設定</dt>
+                  <dd>
+                    <div class="box_inactive">
+                      <div class="item_radio">
+                        <input
+                          type="radio"
+                          name="td31SetLink_1"
+                          value="0"
+                          checked=""
+                        /><label for="setLink1_01">リンクしない</label>
+                      </div>
+                    </div>
+                    <div class="box_active">
+                      <div class="item_radio">
+                        <input
+                          type="radio"
+                          name="td31SetLink_1"
+                          value="1"
+                        /><label for="setLInk1_02">リンクする</label>
+                      </div>
+                      <dl>
+                        <div>
+                          <dt>リンク対象テキスト</dt>
+                          <dd class="item_url">
+                            <input
+                              type="text"
+                              name="td31SetLink_1_text"
+                              value=""
+                            />
+                            <p>
+                              このテキストへリンクを張ります。（上限50文字以内）
+                            </p>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>リンク先URL</dt>
+                          <dd class="item_url">
+                            <input
+                              type="text"
+                              name="td31SetLink_1_url"
+                              value=""
+                            />
+                            <p>
+                              「http:://～」「https://～」入力してください。
+                            </p>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>リンク先ウィンドウ</dt>
+                          <dd>
+                            <div class="item_radio">
+                              <input
+                                type="radio"
+                                name="td31Link_1_window"
+                                value="1"
+                              /><label for="td31Link_1_window_01"
+                                >同じウィンドウ</label
+                              >
+                            </div>
+                            <div class="item_radio">
+                              <input
+                                type="radio"
+                                name="td31Link_1_window"
+                                value="2"
+                              /><label for="td31Link_1_window_02"
+                                >新しいウィンドウ</label
+                              >
+                            </div>
+                          </dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </dd>
+                </div>
+              </dl>
+            </article>
+            <article>
+              <div class="head">
+                <h4>段落-2</h4>
+                <button
+                  type="button"
+                  class="box-switch is-active"
+                  id="box02_switch"
+                  onclick="toggleDisplay(this, 'box-dl02')"
+                ></button>
+              </div>
+              <dl id="box-dl02" style="display: grid">
+                <div>
+                  <dt>タイトル</dt>
+                  <dd>
+                    <input type="text" name="td31Index2_title" value="" />
+                  </dd>
+                </div>
+                <div class="box_up-image">
+                  <dt>画像</dt>
+                  <dd>
+                    <div class="select-image" id="dragDropArea02">
+                      <p class="drop-message02">
+                        <em>ここにファイルをドロップ</em>または
+                      </p>
+                      <input
+                        type="file"
+                        name="td31Image_2"
+                        id="fileElem02"
+                        multiple=""
+                        accept="image/*"
+                        style="display: none"
+                      />
+                      <button type="button" id="fileSelect02">
+                        ファイルを選択
+                      </button>
+                      <p class="drop-message02">
+                        <small
+                          >※縦横サイズがオーバーしている場合は自動でリサイズされます</small
+                        >
+                      </p>
+                      <div
+                        class="preview-container"
+                        id="preview-container02"
+                        style="display: none"
+                      >
+                        <img
+                          src="../up_image/free/no-image.webp"
+                          alt=""
+                          class="preview-image"
+                          id="preview-image02"
+                        />
+                      </div>
+                    </div>
+                    <div class="item_image-delate" style="display: none">
+                      <button
+                        type="button"
+                        class="custom-button"
+                        id="reset02-button"
+                      >
+                        画像を削除する
+                      </button>
+                    </div>
+                  </dd>
+                </div>
+                <div class="box_detail">
+                  <dt>内容</dt>
+                  <dd>
+                    <div>
+                      <textarea
+                        name="td31Text_2"
+                        id="formatText_2"
+                        style="visibility: hidden; display: none"
+                      ></textarea>
+                      <div
+                        id="cke_formatText_2"
+                        class="cke_2 cke cke_reset cke_chrome cke_editor_formatText_2 cke_ltr cke_browser_webkit cke_hidpi"
+                        dir="ltr"
+                        lang="ja"
+                        role="application"
+                        aria-labelledby="cke_formatText_2_arialbl"
+                        style="width: 100%"
+                      >
+                        <span
+                          id="cke_formatText_2_arialbl"
+                          class="cke_voice_label"
+                          >リッチテキストエディタ, formatText_2</span
+                        >
+                        <div class="cke_inner cke_reset" role="presentation">
+                          <span
+                            id="cke_2_top"
+                            class="cke_top cke_reset_all"
+                            role="presentation"
+                            style="height: auto; user-select: none"
+                            ><span id="cke_41" class="cke_voice_label"
+                              >編集ツールバー</span
+                            ><span
+                              id="cke_2_toolbox"
+                              class="cke_toolbox"
+                              role="group"
+                              aria-labelledby="cke_41"
+                              onmousedown="return false;"
+                              ><span
+                                id="cke_42"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_43"
+                                    class="cke_button cke_button__source cke_button_off"
+                                    href="javascript:void('ソース')"
+                                    title="ソース"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_43_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        25,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        26,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(27, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__source_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1824px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_43_label"
+                                      class="cke_button_label cke_button__source_label"
+                                      aria-hidden="false"
+                                      >ソース</span
+                                    ></a
+                                  ></span
+                                ><span class="cke_toolbar_end"></span></span
+                              ><span
+                                id="cke_44"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_45"
+                                    class="cke_button cke_button__image cke_button_off"
+                                    href="javascript:void('イメージ')"
+                                    title="イメージ"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_45_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        28,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        29,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(30, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__image_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -936px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_45_label"
+                                      class="cke_button_label cke_button__image_label"
+                                      aria-hidden="false"
+                                      >イメージ</span
+                                    ></a
+                                  ><a
+                                    id="cke_46"
+                                    class="cke_button cke_button__link cke_button_off"
+                                    href="javascript:void('リンク挿入/編集')"
+                                    title="リンク挿入/編集"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_46_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        31,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        32,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(33, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__link_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1248px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_46_label"
+                                      class="cke_button_label cke_button__link_label"
+                                      aria-hidden="false"
+                                      >リンク挿入/編集</span
+                                    ></a
+                                  ><a
+                                    id="cke_47"
+                                    class="cke_button cke_button__unlink cke_button_disabled"
+                                    href="javascript:void('リンクを削除')"
+                                    title="リンクを削除"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_47_label"
+                                    aria-haspopup="false"
+                                    aria-disabled="true"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        34,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        35,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(36, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__unlink_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1272px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_47_label"
+                                      class="cke_button_label cke_button__unlink_label"
+                                      aria-hidden="false"
+                                      >リンクを削除</span
+                                    ></a
+                                  ></span
+                                ><span class="cke_toolbar_end"></span></span
+                              ><span
+                                id="cke_48"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_49"
+                                    class="cke_button cke_button__bold cke_button_off"
+                                    href="javascript:void('太字')"
+                                    title="太字"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_49_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        37,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        38,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(39, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__bold_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -24px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_49_label"
+                                      class="cke_button_label cke_button__bold_label"
+                                      aria-hidden="false"
+                                      >太字</span
+                                    ></a
+                                  ><a
+                                    id="cke_50"
+                                    class="cke_button cke_button__italic cke_button_off"
+                                    href="javascript:void('斜体')"
+                                    title="斜体"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_50_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        40,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        41,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(42, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__italic_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -48px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_50_label"
+                                      class="cke_button_label cke_button__italic_label"
+                                      aria-hidden="false"
+                                      >斜体</span
+                                    ></a
+                                  ></span
+                                ><span
+                                  class="cke_toolbar_end"
+                                ></span></span></span
+                          ></span>
+                          <div
+                            id="cke_2_contents"
+                            class="cke_contents cke_reset"
+                            role="presentation"
+                            style="height: 300px"
+                          >
+                            <span id="cke_54" class="cke_voice_label"
+                              >ヘルプは ALT 0 を押してください</span
+                            ><iframe
+                              src=""
+                              frameborder="0"
+                              class="cke_wysiwyg_frame cke_reset"
+                              title="リッチテキストエディタ, formatText_2"
+                              aria-describedby="cke_54"
+                              tabindex="0"
+                              allowtransparency="true"
+                              style="width: 100%; height: 100%"
+                            ></iframe>
+                          </div>
+                          <span
+                            id="cke_2_bottom"
+                            class="cke_bottom cke_reset_all"
+                            role="presentation"
+                            style="user-select: none"
+                            ><span
+                              id="cke_2_resizer"
+                              class="cke_resizer cke_resizer_vertical cke_resizer_ltr"
+                              title="ドラッグしてリサイズ"
+                              onmousedown="
+                                CKEDITOR.tools.callFunction(23, event)
+                              "
+                              >◢</span
+                            ><span id="cke_2_path_label" class="cke_voice_label"
+                              >要素パス</span
+                            ><span
+                              id="cke_2_path"
+                              class="cke_path"
+                              role="group"
+                              aria-labelledby="cke_2_path_label"
+                              ><span class="cke_path_empty">&nbsp;</span></span
+                            ></span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </dd>
+                </div>
+                <div class="box_set-link">
+                  <dt>リンク設定</dt>
+                  <dd>
+                    <div class="box_inactive">
+                      <div class="item_radio">
+                        <input
+                          type="radio"
+                          name="td31SetLink_2"
+                          value="0"
+                          checked=""
+                        /><label for="setLink2_01">リンクしない</label>
+                      </div>
+                    </div>
+                    <div class="box_active">
+                      <div class="item_radio">
+                        <input
+                          type="radio"
+                          name="td31SetLink_2"
+                          value="1"
+                        /><label for="setLInk2_02">リンクする</label>
+                      </div>
+                      <dl>
+                        <div>
+                          <dt>リンク対象テキスト</dt>
+                          <dd class="item_url">
+                            <input
+                              type="text"
+                              name="td31SetLink_2_text"
+                              value=""
+                            />
+                            <p>
+                              このテキストへリンクを張ります。（上限50文字以内）
+                            </p>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>リンク先URL</dt>
+                          <dd class="item_url">
+                            <input
+                              type="text"
+                              name="td31SetLink_2_url"
+                              value=""
+                            />
+                            <p>
+                              「http:://～」「https://～」入力してください。
+                            </p>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>リンク先ウィンドウ</dt>
+                          <dd>
+                            <div class="item_radio">
+                              <input
+                                type="radio"
+                                name="td31Link_2_window"
+                                value="1"
+                              /><label for="td31Link_2_window_01"
+                                >同じウィンドウ</label
+                              >
+                            </div>
+                            <div class="item_radio">
+                              <input
+                                type="radio"
+                                name="td31Link_2_window"
+                                value="2"
+                              /><label for="td31Link_2_window_02"
+                                >新しいウィンドウ</label
+                              >
+                            </div>
+                          </dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </dd>
+                </div>
+              </dl>
+            </article>
+            <article>
+              <div class="head">
+                <h4>段落-3</h4>
+                <button
+                  type="button"
+                  class="box-switch is-active"
+                  id="box03_switch"
+                  onclick="toggleDisplay(this, 'box-dl03')"
+                ></button>
+              </div>
+              <dl id="box-dl03" style="display: grid">
+                <div>
+                  <dt>タイトル</dt>
+                  <dd>
+                    <input type="text" name="td31Index3_title" value="" />
+                  </dd>
+                </div>
+                <div class="box_up-image">
+                  <dt>画像</dt>
+                  <dd>
+                    <div class="select-image" id="dragDropArea03">
+                      <p class="drop-message03">
+                        <em>ここにファイルをドロップ</em>または
+                      </p>
+                      <input
+                        type="file"
+                        name="td31Image_3"
+                        id="fileElem03"
+                        multiple=""
+                        accept="image/*"
+                        style="display: none"
+                      />
+                      <button type="button" id="fileSelect03">
+                        ファイルを選択
+                      </button>
+                      <p class="drop-message03">
+                        <small
+                          >※縦横サイズがオーバーしている場合は自動でリサイズされます</small
+                        >
+                      </p>
+                      <div
+                        class="preview-container"
+                        id="preview-container03"
+                        style="display: none"
+                      >
+                        <img
+                          src="../up_image/free/no-image.webp"
+                          alt=""
+                          class="preview-image"
+                          id="preview-image03"
+                        />
+                      </div>
+                    </div>
+                    <div class="item_image-delate" style="display: none">
+                      <button
+                        type="button"
+                        class="custom-button"
+                        id="reset03-button"
+                      >
+                        画像を削除する
+                      </button>
+                    </div>
+                  </dd>
+                </div>
+                <div class="box_detail">
+                  <dt>内容</dt>
+                  <dd>
+                    <div>
+                      <textarea
+                        name="td31Text_3"
+                        id="formatText_3"
+                        style="visibility: hidden; display: none"
+                      ></textarea>
+                      <div
+                        id="cke_formatText_3"
+                        class="cke_3 cke cke_reset cke_chrome cke_editor_formatText_3 cke_ltr cke_browser_webkit cke_hidpi"
+                        dir="ltr"
+                        lang="ja"
+                        role="application"
+                        aria-labelledby="cke_formatText_3_arialbl"
+                        style="width: 100%"
+                      >
+                        <span
+                          id="cke_formatText_3_arialbl"
+                          class="cke_voice_label"
+                          >リッチテキストエディタ, formatText_3</span
+                        >
+                        <div class="cke_inner cke_reset" role="presentation">
+                          <span
+                            id="cke_3_top"
+                            class="cke_top cke_reset_all"
+                            role="presentation"
+                            style="height: auto; user-select: none"
+                            ><span id="cke_63" class="cke_voice_label"
+                              >編集ツールバー</span
+                            ><span
+                              id="cke_3_toolbox"
+                              class="cke_toolbox"
+                              role="group"
+                              aria-labelledby="cke_63"
+                              onmousedown="return false;"
+                              ><span
+                                id="cke_64"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_65"
+                                    class="cke_button cke_button__source cke_button_off"
+                                    href="javascript:void('ソース')"
+                                    title="ソース"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_65_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        48,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        49,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(50, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__source_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1824px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_65_label"
+                                      class="cke_button_label cke_button__source_label"
+                                      aria-hidden="false"
+                                      >ソース</span
+                                    ></a
+                                  ></span
+                                ><span class="cke_toolbar_end"></span></span
+                              ><span
+                                id="cke_66"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_67"
+                                    class="cke_button cke_button__image cke_button_off"
+                                    href="javascript:void('イメージ')"
+                                    title="イメージ"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_67_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        51,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        52,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(53, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__image_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -936px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_67_label"
+                                      class="cke_button_label cke_button__image_label"
+                                      aria-hidden="false"
+                                      >イメージ</span
+                                    ></a
+                                  ><a
+                                    id="cke_68"
+                                    class="cke_button cke_button__link cke_button_off"
+                                    href="javascript:void('リンク挿入/編集')"
+                                    title="リンク挿入/編集"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_68_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        54,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        55,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(56, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__link_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1248px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_68_label"
+                                      class="cke_button_label cke_button__link_label"
+                                      aria-hidden="false"
+                                      >リンク挿入/編集</span
+                                    ></a
+                                  ><a
+                                    id="cke_69"
+                                    class="cke_button cke_button__unlink cke_button_disabled"
+                                    href="javascript:void('リンクを削除')"
+                                    title="リンクを削除"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_69_label"
+                                    aria-haspopup="false"
+                                    aria-disabled="true"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        57,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        58,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(59, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__unlink_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -1272px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_69_label"
+                                      class="cke_button_label cke_button__unlink_label"
+                                      aria-hidden="false"
+                                      >リンクを削除</span
+                                    ></a
+                                  ></span
+                                ><span class="cke_toolbar_end"></span></span
+                              ><span
+                                id="cke_70"
+                                class="cke_toolbar"
+                                role="toolbar"
+                                ><span class="cke_toolbar_start"></span
+                                ><span class="cke_toolgroup" role="presentation"
+                                  ><a
+                                    id="cke_71"
+                                    class="cke_button cke_button__bold cke_button_off"
+                                    href="javascript:void('太字')"
+                                    title="太字"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_71_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        60,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        61,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(62, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__bold_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -24px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_71_label"
+                                      class="cke_button_label cke_button__bold_label"
+                                      aria-hidden="false"
+                                      >太字</span
+                                    ></a
+                                  ><a
+                                    id="cke_72"
+                                    class="cke_button cke_button__italic cke_button_off"
+                                    href="javascript:void('斜体')"
+                                    title="斜体"
+                                    tabindex="-1"
+                                    hidefocus="true"
+                                    role="button"
+                                    aria-labelledby="cke_72_label"
+                                    aria-haspopup="false"
+                                    onkeydown="
+                                      return CKEDITOR.tools.callFunction(
+                                        63,
+                                        event,
+                                      );
+                                    "
+                                    onfocus="
+                                      return CKEDITOR.tools.callFunction(
+                                        64,
+                                        event,
+                                      );
+                                    "
+                                    onclick="
+                                      CKEDITOR.tools.callFunction(65, this);
+                                      return false;
+                                    "
+                                    ><span
+                                      class="cke_button_icon cke_button__italic_icon"
+                                      style="
+                                        background-image: url(https://kurokawaonsen.or.jp/cp_assets/js/ckeditor/plugins/icons_hidpi.png?t=E6FD);
+                                        background-position: 0 -48px;
+                                        background-size: 16px;
+                                      "
+                                      >&nbsp;</span
+                                    ><span
+                                      id="cke_72_label"
+                                      class="cke_button_label cke_button__italic_label"
+                                      aria-hidden="false"
+                                      >斜体</span
+                                    ></a
+                                  ></span
+                                ><span
+                                  class="cke_toolbar_end"
+                                ></span></span></span
+                          ></span>
+                          <div
+                            id="cke_3_contents"
+                            class="cke_contents cke_reset"
+                            role="presentation"
+                            style="height: 300px"
+                          >
+                            <span id="cke_76" class="cke_voice_label"
+                              >ヘルプは ALT 0 を押してください</span
+                            ><iframe
+                              src=""
+                              frameborder="0"
+                              class="cke_wysiwyg_frame cke_reset"
+                              title="リッチテキストエディタ, formatText_3"
+                              aria-describedby="cke_76"
+                              tabindex="0"
+                              allowtransparency="true"
+                              style="width: 100%; height: 100%"
+                            ></iframe>
+                          </div>
+                          <span
+                            id="cke_3_bottom"
+                            class="cke_bottom cke_reset_all"
+                            role="presentation"
+                            style="user-select: none"
+                            ><span
+                              id="cke_3_resizer"
+                              class="cke_resizer cke_resizer_vertical cke_resizer_ltr"
+                              title="ドラッグしてリサイズ"
+                              onmousedown="
+                                CKEDITOR.tools.callFunction(46, event)
+                              "
+                              >◢</span
+                            ><span id="cke_3_path_label" class="cke_voice_label"
+                              >要素パス</span
+                            ><span
+                              id="cke_3_path"
+                              class="cke_path"
+                              role="group"
+                              aria-labelledby="cke_3_path_label"
+                              ><span class="cke_path_empty">&nbsp;</span></span
+                            ></span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </dd>
+                </div>
+                <div class="box_set-link">
+                  <dt>リンク設定</dt>
+                  <dd>
+                    <div class="box_inactive">
+                      <div class="item_radio">
+                        <input
+                          type="radio"
+                          name="td31SetLink_3"
+                          value="0"
+                          checked=""
+                        /><label for="setLink3_01">リンクしない</label>
+                      </div>
+                    </div>
+                    <div class="box_active">
+                      <div class="item_radio">
+                        <input
+                          type="radio"
+                          name="td31SetLink_3"
+                          value="1"
+                        /><label for="setLInk3_02">リンクする</label>
+                      </div>
+                      <dl>
+                        <div>
+                          <dt>リンク対象テキスト</dt>
+                          <dd class="item_url">
+                            <input
+                              type="text"
+                              name="td31SetLink_3_text"
+                              value=""
+                            />
+                            <p>
+                              このテキストへリンクを張ります。（上限50文字以内）
+                            </p>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>リンク先URL</dt>
+                          <dd class="item_url">
+                            <input
+                              type="text"
+                              name="td31SetLink_3_url"
+                              value=""
+                            />
+                            <p>
+                              「http:://～」「https://～」入力してください。
+                            </p>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>リンク先ウィンドウ</dt>
+                          <dd>
+                            <div class="item_radio">
+                              <input
+                                type="radio"
+                                name="td31Link_3_window"
+                                value="1"
+                              /><label for="td31Link_3_window_01"
+                                >同じウィンドウ</label
+                              >
+                            </div>
+                            <div class="item_radio">
+                              <input
+                                type="radio"
+                                name="td31Link_3_window"
+                                value="2"
+                              /><label for="td31Link_3_window_02"
+                                >新しいウィンドウ</label
+                              >
+                            </div>
+                          </dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </dd>
+                </div>
+              </dl>
+            </article>
+            <input type="hidden" name="mode" value="send" />
+            <input type="hidden" name="t" value="n" />
+            <input type="hidden" name="sKey" value="sKey02_142228" />
+            <input type="hidden" name="intKey" value="" />
+            <button type="button" class="btn_submit" onclick="sendSubmit()">
+              登録
+            </button>
+          </form>
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+          <a href="#" class="link_page-back_bottom">戻る</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>

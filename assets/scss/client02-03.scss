@@ -1,0 +1,184 @@
+/*==========================================================
+クライアント　サイト管理　自由記事一覧
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+.link_page-back_bottom {
+    @include linkPageBack_bottom;
+}
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+@mixin layoutBoxSetLink {
+    grid-column: span 4;
+    & > dd {
+        grid-column: span 3;
+        display: flex;
+        flex-direction: column;
+        .item_radio {
+            position: relative;
+            font-size: 1em;
+            @include radioCheck;
+            margin-right: 1em;
+            width: max-content;
+            label {
+                font-size: FZ(14);
+                padding-left: 2.2em;
+            }
+        }
+        & > div {
+            font-size: inherit;
+            padding-block: 1em;
+        }
+        .box_inactive {
+            border-bottom: 1px solid #c7c7c7;
+        }
+        .box_active {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em 0;
+            padding-bottom: unset;
+            & > dl {
+                position: relative;
+                width: stretch;
+                display: grid;
+                grid-template-columns: auto 1fr;
+                font-size: inherit;
+                margin-top: 0.8em;
+                gap: 0.5em 0;
+                & > div {
+                    display: grid;
+                    font-size: inherit;
+                    grid-column: span 2;
+                    grid-template-columns: subgrid;
+                    gap: 0 3em;
+                    align-items: center;
+                    & > dt {
+                        font-size: FZ(14);
+                    }
+                    & > dd {
+                        display: flex;
+                        gap: 0 1em;
+                        flex-direction: row;
+                        font-size: inherit;
+                        input {
+                            height: 4rem;
+                            font-size: FZ(14);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+/*=========================================
+自由ページ 並び順変更
+-----------------------------------------*/
+.inner-02-03 {
+    article {
+        @include layoutContentsWhiteBlock;
+        padding: 3em;
+        gap: 3em 0;
+        h3 {
+            border-bottom: 1px solid $base-black;
+            padding-bottom: 0.5em;
+        }
+        nav {
+            position: relative;
+            font-size: inherit;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0 2em;
+            a {
+                font-size: inherit;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                border: 1px solid $confirm-blue;
+                border-radius: 6px;
+                padding-block: 3em;
+                gap: 0.5em 0;
+                h4 {
+                    font-size: FZ(20);
+                    font-weight: 700;
+                    color: $confirm-blue;
+                }
+                span {
+                    font-weight: 700;
+                    color: #646464;
+                }
+                p {
+                    font-size: FZ(12);
+                    color: #646464;
+                }
+            }
+        }
+    }
+}
+.inner-02-03-01 {
+    form {
+        @include layoutContentsWhiteBlock;
+        ul {
+            @include layout-table-list(auto auto 1fr, 3);
+            & > li {
+                border-top-left-radius: 1.2rem;
+                border-top-right-radius: 1.2rem;
+                &:first-of-type {
+                    & > div {
+                        &:first-of-type {
+                            grid-column: span 2;
+                        }
+                    }
+                }
+                .box_btn {
+                    display: grid;
+                    place-items: center;
+                    font-size: 1em;
+                    padding: 1.1em 1.8em;
+                    button {
+                        position: relative;
+                        font-size: 1em;
+                        width: 2em;
+                        aspect-ratio: 1;
+                        border-radius: 50%;
+                        background-color: rgba(#fff, 0);
+                        transition: 0.2s ease-out;
+                        &::after {
+                            content: "";
+                            position: absolute;
+                            inset: 0;
+                            margin: auto;
+                            width: 1rem;
+                            @include svg-iconArrowBottom("646464");
+                        }
+                        @include hover {
+                            background-color: rgba(#fff, 1);
+                        }
+                    }
+                    &.btn_up {
+                        button {
+                            &::after {
+                                scale: 1 -1;
+                            }
+                        }
+                    }
+                }
+                .box_ban-title {
+                    padding: 0.8em;
+                    font-size: FZ(16);
+                    display: flex;
+                    align-items: center;
+                }
+            }
+        }
+    }
+}
