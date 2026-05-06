@@ -49,10 +49,13 @@ if ($noUpDateKey === '' || isset($_SESSION[$noUpDateKey]) === false) {
 		$makeTag['status'] = 'error';
 		$makeTag['title'] = 'セッションエラー';
 		$makeTag['msg'] = 'セッションが切れました。<br>ページを再読み込みしてください。';
+		$makeTag['noUpDateKey'] = $currentNoUpDateKey;
 		echo json_encode($makeTag);
 		exit;
 	}
 }
+#応答には常に現行のキーを含め、フロント側のhiddenを更新できるようにする
+$makeTag['noUpDateKey'] = ($currentNoUpDateKey !== '' ? $currentNoUpDateKey : $noUpDateKey);
 #-------------#
 #shopId取得
 $shopId = $_SESSION['client_login']['shop_id'] ?? null;
@@ -65,6 +68,7 @@ if ($shopId === null || ctype_digit((string)$shopId) === false || (int)$shopId <
 	exit;
 }
 $shopId = (int)$shopId;
+#-------------#
 #検索・ステータス変更
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 #商品名・商品ID
@@ -146,7 +150,6 @@ switch ($action) {
 		}
 		break;
 }
-$_SESSION[$searchConditionsSessionKey] = $searchConditions;
 
 #商品数取得：検索結果
 $totalItems = countShopProductList($shopId, $searchConditions);

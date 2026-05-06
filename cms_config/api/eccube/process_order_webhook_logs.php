@@ -59,7 +59,7 @@ function fetchEccubeOrderForWebhook($eccubeOrderId)
 	if ($lastSyncedId < 0) {
 		$lastSyncedId = 0;
 	}
-	$query = "query {\n  ordersForSync(\n    last_synced_id: " . (int)$lastSyncedId . "\n    last_synced_at: " . buildProcessOrderGraphqlString('2000-01-01T00:00:00+09:00') . "\n    limit: 50\n  ) {\n    id\n    order_no\n    order_status_id\n    order_status_name\n    payment_total\n    update_date\n    zeus_order_id\n    order_items {\n      product_class_code\n      product_name\n      quantity\n      price\n    }\n  }\n}";
+	$query = "query {\n  ordersForSync(\n    last_synced_id: " . (int)$lastSyncedId . "\n    last_synced_at: " . buildProcessOrderGraphqlString('2000-01-01T00:00:00+09:00') . "\n    limit: 50\n  ) {\n    id\n    order_no\n    orderer_name\n    orderer_email\n    orderer_tel\n    orderer_postal_code\n    orderer_pref_id\n    orderer_pref_name\n    orderer_addr01\n    orderer_addr02\n    orderer_message\n    shipping_name\n    shipping_postal_code\n    shipping_pref_id\n    shipping_pref_name\n    shipping_addr01\n    shipping_addr02\n    shipping_tel\n    order_status_id\n    order_status_name\n    payment_total\n    delivery_fee_total\n    update_date\n    zeus_order_id\n    order_items {\n      product_class_code\n      product_name\n      quantity\n      price\n    }\n  }\n}";
 	$result = eccube_api_call($query);
 	$orders = isset($result['ordersForSync']) && is_array($result['ordersForSync']) ? $result['ordersForSync'] : [];
 	foreach ($orders as $order) {
@@ -152,10 +152,26 @@ foreach ($pendingLogs as $log) {
 	$orderData = [
 		'eccube_order_id' => $eccubeId,
 		'order_no' => isset($order['order_no']) ? $order['order_no'] : null,
+		'orderer_name' => isset($order['orderer_name']) ? $order['orderer_name'] : null,
+		'orderer_email' => isset($order['orderer_email']) ? $order['orderer_email'] : null,
+		'orderer_tel' => isset($order['orderer_tel']) ? $order['orderer_tel'] : null,
+		'orderer_postal_code' => isset($order['orderer_postal_code']) ? $order['orderer_postal_code'] : null,
+		'orderer_pref_id' => isset($order['orderer_pref_id']) ? $order['orderer_pref_id'] : null,
+		'orderer_pref_name' => isset($order['orderer_pref_name']) ? $order['orderer_pref_name'] : null,
+		'orderer_addr01' => isset($order['orderer_addr01']) ? $order['orderer_addr01'] : null,
+		'orderer_addr02' => isset($order['orderer_addr02']) ? $order['orderer_addr02'] : null,
+		'orderer_message' => isset($order['orderer_message']) ? $order['orderer_message'] : null,
+		'shipping_name' => isset($order['shipping_name']) ? $order['shipping_name'] : null,
+		'shipping_postal_code' => isset($order['shipping_postal_code']) ? $order['shipping_postal_code'] : null,
+		'shipping_pref_id' => isset($order['shipping_pref_id']) ? $order['shipping_pref_id'] : null,
+		'shipping_pref_name' => isset($order['shipping_pref_name']) ? $order['shipping_pref_name'] : null,
+		'shipping_addr01' => isset($order['shipping_addr01']) ? $order['shipping_addr01'] : null,
+		'shipping_addr02' => isset($order['shipping_addr02']) ? $order['shipping_addr02'] : null,
+		'shipping_tel' => isset($order['shipping_tel']) ? $order['shipping_tel'] : null,
 		'eccube_order_status_id' => $orderStatusId,
 		'eccube_order_status_name' => isset($order['order_status_name']) ? $order['order_status_name'] : null,
 		'payment_total' => isset($order['payment_total']) ? (int)$order['payment_total'] : 0,
-		'delivery_fee_total' => 0,
+		'delivery_fee_total' => isset($order['delivery_fee_total']) ? (int)$order['delivery_fee_total'] : 0,
 		'zeus_order_id' => isset($order['zeus_order_id']) ? $order['zeus_order_id'] : null,
 		'ordered_at' => isset($order['update_date']) ? $order['update_date'] : null,
 	];

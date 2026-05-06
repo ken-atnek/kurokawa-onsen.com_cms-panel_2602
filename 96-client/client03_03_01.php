@@ -177,7 +177,7 @@ print <<<HTML
       <section class="container-left-menu menu-color03">
         <div class="title">EC販売管理</div>
         <nav>
-          <a href="#"><span>受注一覧</span></a>
+          <a href="./client03_01.php" {$client03_01_active}><span>受注一覧</span></a>
           <a href="./client03_02.php" {$client03_02_active}><span>商品一覧</span></a>
           <a href="./client03_04.php" {$client03_04_active}><span>カテゴリ管理</span></a>
           <a href="./client03_05.php" {$client03_05_01_active}><span>規格管理</span></a>

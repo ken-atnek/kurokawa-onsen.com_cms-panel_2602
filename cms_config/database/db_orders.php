@@ -178,6 +178,22 @@ function upsertShopOrder($shopId, $orderData)
 		$currentOrder = $newStmt->fetch(PDO::FETCH_ASSOC);
 		$newStmt->closeCursor();
 		$orderNo = isset($orderData['order_no']) && trim((string)$orderData['order_no']) !== '' ? trim((string)$orderData['order_no']) : null;
+		$ordererName = isset($orderData['orderer_name']) && trim((string)$orderData['orderer_name']) !== '' ? trim((string)$orderData['orderer_name']) : null;
+		$ordererEmail = isset($orderData['orderer_email']) && trim((string)$orderData['orderer_email']) !== '' ? trim((string)$orderData['orderer_email']) : null;
+		$ordererTel = isset($orderData['orderer_tel']) && trim((string)$orderData['orderer_tel']) !== '' ? trim((string)$orderData['orderer_tel']) : null;
+		$ordererPostalCode = isset($orderData['orderer_postal_code']) && trim((string)$orderData['orderer_postal_code']) !== '' ? trim((string)$orderData['orderer_postal_code']) : null;
+		$ordererPrefId = isset($orderData['orderer_pref_id']) && is_numeric($orderData['orderer_pref_id']) && (int)$orderData['orderer_pref_id'] > 0 ? (int)$orderData['orderer_pref_id'] : null;
+		$ordererPrefName = isset($orderData['orderer_pref_name']) && trim((string)$orderData['orderer_pref_name']) !== '' ? trim((string)$orderData['orderer_pref_name']) : null;
+		$ordererAddr01 = isset($orderData['orderer_addr01']) && trim((string)$orderData['orderer_addr01']) !== '' ? trim((string)$orderData['orderer_addr01']) : null;
+		$ordererAddr02 = isset($orderData['orderer_addr02']) && trim((string)$orderData['orderer_addr02']) !== '' ? trim((string)$orderData['orderer_addr02']) : null;
+		$ordererMessage = isset($orderData['orderer_message']) && trim((string)$orderData['orderer_message']) !== '' ? trim((string)$orderData['orderer_message']) : null;
+		$shippingName = isset($orderData['shipping_name']) && trim((string)$orderData['shipping_name']) !== '' ? trim((string)$orderData['shipping_name']) : null;
+		$shippingPostalCode = isset($orderData['shipping_postal_code']) && trim((string)$orderData['shipping_postal_code']) !== '' ? trim((string)$orderData['shipping_postal_code']) : null;
+		$shippingPrefId = isset($orderData['shipping_pref_id']) && is_numeric($orderData['shipping_pref_id']) && (int)$orderData['shipping_pref_id'] > 0 ? (int)$orderData['shipping_pref_id'] : null;
+		$shippingPrefName = isset($orderData['shipping_pref_name']) && trim((string)$orderData['shipping_pref_name']) !== '' ? trim((string)$orderData['shipping_pref_name']) : null;
+		$shippingAddr01 = isset($orderData['shipping_addr01']) && trim((string)$orderData['shipping_addr01']) !== '' ? trim((string)$orderData['shipping_addr01']) : null;
+		$shippingAddr02 = isset($orderData['shipping_addr02']) && trim((string)$orderData['shipping_addr02']) !== '' ? trim((string)$orderData['shipping_addr02']) : null;
+		$shippingTel = isset($orderData['shipping_tel']) && trim((string)$orderData['shipping_tel']) !== '' ? trim((string)$orderData['shipping_tel']) : null;
 		$statusId = isset($orderData['eccube_order_status_id']) ? (int)$orderData['eccube_order_status_id'] : 0;
 		$statusName = isset($orderData['eccube_order_status_name']) && $orderData['eccube_order_status_name'] !== null ? (string)$orderData['eccube_order_status_name'] : null;
 		$paymentTotal = isset($orderData['payment_total']) ? (int)$orderData['payment_total'] : 0;
@@ -189,6 +205,22 @@ function upsertShopOrder($shopId, $orderData)
 				'shop_id' => [':shop_id', (int)$shopId, 1],
 				'eccube_order_id' => [':eccube_order_id', $eccubeOrderId, 1],
 				'order_no' => [':order_no', $orderNo, ($orderNo === null) ? 2 : 0],
+				'orderer_name' => [':orderer_name', $ordererName, ($ordererName === null) ? 2 : 0],
+				'orderer_email' => [':orderer_email', $ordererEmail, ($ordererEmail === null) ? 2 : 0],
+				'orderer_tel' => [':orderer_tel', $ordererTel, ($ordererTel === null) ? 2 : 0],
+				'orderer_postal_code' => [':orderer_postal_code', $ordererPostalCode, ($ordererPostalCode === null) ? 2 : 0],
+				'orderer_pref_id' => [':orderer_pref_id', $ordererPrefId, ($ordererPrefId === null) ? 2 : 1],
+				'orderer_pref_name' => [':orderer_pref_name', $ordererPrefName, ($ordererPrefName === null) ? 2 : 0],
+				'orderer_addr01' => [':orderer_addr01', $ordererAddr01, ($ordererAddr01 === null) ? 2 : 0],
+				'orderer_addr02' => [':orderer_addr02', $ordererAddr02, ($ordererAddr02 === null) ? 2 : 0],
+				'orderer_message' => [':orderer_message', $ordererMessage, ($ordererMessage === null) ? 2 : 0],
+				'shipping_name' => [':shipping_name', $shippingName, ($shippingName === null) ? 2 : 0],
+				'shipping_postal_code' => [':shipping_postal_code', $shippingPostalCode, ($shippingPostalCode === null) ? 2 : 0],
+				'shipping_pref_id' => [':shipping_pref_id', $shippingPrefId, ($shippingPrefId === null) ? 2 : 1],
+				'shipping_pref_name' => [':shipping_pref_name', $shippingPrefName, ($shippingPrefName === null) ? 2 : 0],
+				'shipping_addr01' => [':shipping_addr01', $shippingAddr01, ($shippingAddr01 === null) ? 2 : 0],
+				'shipping_addr02' => [':shipping_addr02', $shippingAddr02, ($shippingAddr02 === null) ? 2 : 0],
+				'shipping_tel' => [':shipping_tel', $shippingTel, ($shippingTel === null) ? 2 : 0],
 				'eccube_order_status_id' => [':eccube_order_status_id', $statusId, 1],
 				'eccube_order_status_name' => [':eccube_order_status_name', $statusName, ($statusName === null) ? 2 : 0],
 				'payment_total' => [':payment_total', $paymentTotal, 1],
@@ -208,6 +240,22 @@ function upsertShopOrder($shopId, $orderData)
 		$dbFiledData = [
 			'shop_id' => [':shop_id', (int)$shopId, 1],
 			'order_no' => [':order_no', $orderNo, ($orderNo === null) ? 2 : 0],
+			'orderer_name' => [':orderer_name', $ordererName, ($ordererName === null) ? 2 : 0],
+			'orderer_email' => [':orderer_email', $ordererEmail, ($ordererEmail === null) ? 2 : 0],
+			'orderer_tel' => [':orderer_tel', $ordererTel, ($ordererTel === null) ? 2 : 0],
+			'orderer_postal_code' => [':orderer_postal_code', $ordererPostalCode, ($ordererPostalCode === null) ? 2 : 0],
+			'orderer_pref_id' => [':orderer_pref_id', $ordererPrefId, ($ordererPrefId === null) ? 2 : 1],
+			'orderer_pref_name' => [':orderer_pref_name', $ordererPrefName, ($ordererPrefName === null) ? 2 : 0],
+			'orderer_addr01' => [':orderer_addr01', $ordererAddr01, ($ordererAddr01 === null) ? 2 : 0],
+			'orderer_addr02' => [':orderer_addr02', $ordererAddr02, ($ordererAddr02 === null) ? 2 : 0],
+			'orderer_message' => [':orderer_message', $ordererMessage, ($ordererMessage === null) ? 2 : 0],
+			'shipping_name' => [':shipping_name', $shippingName, ($shippingName === null) ? 2 : 0],
+			'shipping_postal_code' => [':shipping_postal_code', $shippingPostalCode, ($shippingPostalCode === null) ? 2 : 0],
+			'shipping_pref_id' => [':shipping_pref_id', $shippingPrefId, ($shippingPrefId === null) ? 2 : 1],
+			'shipping_pref_name' => [':shipping_pref_name', $shippingPrefName, ($shippingPrefName === null) ? 2 : 0],
+			'shipping_addr01' => [':shipping_addr01', $shippingAddr01, ($shippingAddr01 === null) ? 2 : 0],
+			'shipping_addr02' => [':shipping_addr02', $shippingAddr02, ($shippingAddr02 === null) ? 2 : 0],
+			'shipping_tel' => [':shipping_tel', $shippingTel, ($shippingTel === null) ? 2 : 0],
 			'payment_total' => [':payment_total', $paymentTotal, 1],
 			'delivery_fee_total' => [':delivery_fee_total', $deliveryFeeTotal, 1],
 			'ordered_at' => [':ordered_at', $orderedAt, ($orderedAt === null) ? 2 : 0],
@@ -622,6 +670,317 @@ function logOrderStockDeductionMessage($reason, $detail = [])
 	} catch (Exception $e) {
 	}
 	return true;
+}
+/*
+ * [shop_orders] 受注一覧検索条件SQL生成
+ */
+function buildShopOrderListSearchSqlParts($searchConditions = [], $fixedShopId = null)
+{
+	$where = [
+		'o.is_active = 1',
+	];
+	$params = [];
+	if ($fixedShopId !== null && is_numeric($fixedShopId) && (int)$fixedShopId > 0) {
+		$where[] = 'o.shop_id = :fixed_shop_id';
+		$params[':fixed_shop_id'] = [(int)$fixedShopId, PDO::PARAM_INT];
+	} else {
+		$shopId = isset($searchConditions['shopId']) ? trim((string)$searchConditions['shopId']) : '';
+		if ($shopId !== '' && ctype_digit($shopId) && (int)$shopId > 0) {
+			$where[] = 'o.shop_id = :shop_id';
+			$params[':shop_id'] = [(int)$shopId, PDO::PARAM_INT];
+		}
+	}
+	$orderNo = isset($searchConditions['orderNo']) ? trim((string)$searchConditions['orderNo']) : '';
+	if ($orderNo !== '') {
+		$where[] = 'o.order_no LIKE :order_no';
+		$params[':order_no'] = ['%' . $orderNo . '%', PDO::PARAM_STR];
+	}
+	$ordererName = isset($searchConditions['ordererName']) ? trim((string)$searchConditions['ordererName']) : '';
+	if ($ordererName !== '') {
+		$where[] = 'o.orderer_name LIKE :orderer_name';
+		$params[':orderer_name'] = ['%' . $ordererName . '%', PDO::PARAM_STR];
+	}
+	$ordererEmail = isset($searchConditions['ordererEmail']) ? trim((string)$searchConditions['ordererEmail']) : '';
+	if ($ordererEmail !== '') {
+		$where[] = 'o.orderer_email LIKE :orderer_email';
+		$params[':orderer_email'] = ['%' . $ordererEmail . '%', PDO::PARAM_STR];
+	}
+	$ordererTel = isset($searchConditions['ordererTel']) ? trim((string)$searchConditions['ordererTel']) : '';
+	if ($ordererTel !== '') {
+		$where[] = 'o.orderer_tel LIKE :orderer_tel';
+		$params[':orderer_tel'] = ['%' . $ordererTel . '%', PDO::PARAM_STR];
+	}
+	$statusId = isset($searchConditions['statusId']) ? trim((string)$searchConditions['statusId']) : '';
+	if ($statusId === '' && isset($searchConditions['searchStatus'])) {
+		$statusId = trim((string)$searchConditions['searchStatus']);
+	}
+	if ($statusId !== '' && ctype_digit($statusId) && in_array((int)$statusId, [1, 4, 5], true)) {
+		$where[] = 'o.eccube_order_status_id = :status_id';
+		$params[':status_id'] = [(int)$statusId, PDO::PARAM_INT];
+	}
+	$orderDateFrom = isset($searchConditions['orderDateFrom']) ? trim((string)$searchConditions['orderDateFrom']) : '';
+	if ($orderDateFrom !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $orderDateFrom)) {
+		$where[] = 'o.ordered_at >= :order_date_from';
+		$params[':order_date_from'] = [$orderDateFrom . ' 00:00:00', PDO::PARAM_STR];
+	}
+	$orderDateTo = isset($searchConditions['orderDateTo']) ? trim((string)$searchConditions['orderDateTo']) : '';
+	if ($orderDateTo !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $orderDateTo)) {
+		$where[] = 'o.ordered_at <= :order_date_to';
+		$params[':order_date_to'] = [$orderDateTo . ' 23:59:59', PDO::PARAM_STR];
+	}
+	return [
+		'where' => $where,
+		'params' => $params,
+	];
+}
+/*
+ * [shop_orders] 受注詳細取得
+ */
+function getShopOrderDetail($orderId) {}
+
+/*
+ * [shop_orders] 受注一覧検索
+ */
+function searchShopOrderList($searchConditions = [], $pageNumber = 1, $displayNumber = 10, $fixedShopId = null)
+{
+	global $DB_CONNECT;
+	try {
+		$pageNumber = (int)$pageNumber;
+		$displayNumber = (int)$displayNumber;
+		if ($pageNumber < 1) {
+			$pageNumber = 1;
+		}
+		if ($displayNumber < 1) {
+			$displayNumber = 10;
+		}
+		$offset = ($pageNumber - 1) * $displayNumber;
+		$parts = buildShopOrderListSearchSqlParts($searchConditions, $fixedShopId);
+		$strSQL = "
+			SELECT
+				o.*,
+				s.shop_name,
+				COALESCE(oi.total_quantity, 0) AS total_quantity,
+				COALESCE(oi.item_subtotal, 0) AS item_subtotal
+			FROM
+				shop_orders AS o
+				LEFT JOIN shops AS s
+					ON s.shop_id = o.shop_id
+				LEFT JOIN (
+					SELECT
+						order_id,
+						SUM(quantity) AS total_quantity,
+						SUM(subtotal) AS item_subtotal
+					FROM
+						shop_order_items
+					GROUP BY
+						order_id
+				) AS oi
+					ON oi.order_id = o.order_id
+			WHERE
+				" . implode("\n				AND ", $parts['where']) . "
+			ORDER BY
+				o.ordered_at DESC,
+				o.order_id DESC
+			LIMIT :limit OFFSET :offset
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		foreach ($parts['params'] as $key => $param) {
+			$newStmt->bindValue($key, $param[0], $param[1]);
+		}
+		$newStmt->bindValue(':limit', $displayNumber, PDO::PARAM_INT);
+		$newStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+		$newStmt->execute();
+		$rows = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $rows ?: [];
+	} catch (PDOException $e) {
+		return [];
+	}
+}
+/*
+ * [shop_orders] 受注一覧件数取得
+ */
+function countShopOrderList($searchConditions = [], $fixedShopId = null)
+{
+	global $DB_CONNECT;
+	try {
+		$parts = buildShopOrderListSearchSqlParts($searchConditions, $fixedShopId);
+		$strSQL = "
+			SELECT
+				COUNT(*) AS cnt
+			FROM
+				shop_orders AS o
+				LEFT JOIN shops AS s
+					ON s.shop_id = o.shop_id
+			WHERE
+				" . implode("\n				AND ", $parts['where']) . "
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		foreach ($parts['params'] as $key => $param) {
+			$newStmt->bindValue($key, $param[0], $param[1]);
+		}
+		$newStmt->execute();
+		$row = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return isset($row['cnt']) ? (int)$row['cnt'] : 0;
+	} catch (PDOException $e) {
+		return 0;
+	}
+}
+/*
+ * [shop_order_items] 受注ID配列から明細一覧取得
+ */
+function getShopOrderItemsByOrderIds(array $orderIds)
+{
+	global $DB_CONNECT;
+	$orderIds = array_values(array_unique(array_filter(array_map('intval', $orderIds), function ($orderId) {
+		return $orderId > 0;
+	})));
+	if (empty($orderIds)) {
+		return [];
+	}
+	try {
+		$placeholders = [];
+		foreach ($orderIds as $idx => $orderId) {
+			$placeholders[] = ':order_id_' . $idx;
+		}
+		$strSQL = "
+			SELECT
+				i.order_id,
+				i.order_item_id,
+				i.product_name,
+				i.quantity,
+				i.unit_price,
+				i.subtotal,
+				p.tax_rate
+			FROM
+				shop_order_items AS i
+				LEFT JOIN shop_products AS p
+					ON p.shop_id = i.shop_id
+					AND p.product_id = i.product_id
+			WHERE
+				i.order_id IN (" . implode(', ', $placeholders) . ")
+			ORDER BY
+				i.order_id ASC,
+				i.order_item_id ASC
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		foreach ($orderIds as $idx => $orderId) {
+			$newStmt->bindValue(':order_id_' . $idx, (int)$orderId, PDO::PARAM_INT);
+		}
+		$newStmt->execute();
+		$rows = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		$itemsByOrderId = [];
+		foreach ($rows ?: [] as $row) {
+			$key = (int)($row['order_id'] ?? 0);
+			if ($key < 1) {
+				continue;
+			}
+			if (!isset($itemsByOrderId[$key])) {
+				$itemsByOrderId[$key] = [];
+			}
+			$itemsByOrderId[$key][] = $row;
+		}
+		return $itemsByOrderId;
+	} catch (PDOException $e) {
+		return [];
+	}
+}
+
+/*
+ * [shop_orders] ステータス更新用受注取得
+ */
+function getShopOrderForStatusUpdate($orderId, $shopId = null)
+{
+	global $DB_CONNECT;
+	if ($orderId === null || is_numeric($orderId) === false || (int)$orderId < 1) {
+		return [];
+	}
+	try {
+		$where = ['order_id = :order_id', 'is_active = 1'];
+		$strSQL = "
+			SELECT
+				order_id,
+				shop_id,
+				eccube_order_id,
+				eccube_order_status_id,
+				eccube_order_status_name,
+				shipped_at
+			FROM
+				shop_orders
+			WHERE
+				" . implode("\n				AND ", $where) . "
+		";
+		if ($shopId !== null && is_numeric($shopId) && (int)$shopId > 0) {
+			$strSQL .= "\n				AND shop_id = :shop_id";
+		}
+		$strSQL .= "\n			LIMIT 1";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':order_id', (int)$orderId, PDO::PARAM_INT);
+		if ($shopId !== null && is_numeric($shopId) && (int)$shopId > 0) {
+			$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		}
+		$newStmt->execute();
+		$row = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $row ?: [];
+	} catch (PDOException $e) {
+		return [];
+	}
+}
+/*
+ * [shop_orders] カラム存在確認
+ */
+function shopOrderColumnExists($columnName)
+{
+	global $DB_CONNECT;
+	$columnName = trim((string)$columnName);
+	if ($columnName === '') {
+		return false;
+	}
+	try {
+		$newStmt = $DB_CONNECT->prepare("SHOW COLUMNS FROM shop_orders LIKE :column_name");
+		$newStmt->bindValue(':column_name', $columnName, PDO::PARAM_STR);
+		$newStmt->execute();
+		$row = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return !empty($row);
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/*
+ * [shop_orders] EC-CUBE反映後ステータス更新
+ */
+function updateShopOrderStatusAfterEccube($orderId, $statusId, $statusName, $shippedAt = null)
+{
+	global $DB_CONNECT;
+	if ($orderId === null || is_numeric($orderId) === false || (int)$orderId < 1) {
+		return false;
+	}
+	if (in_array((int)$statusId, [1, 4, 5], true) === false) {
+		return false;
+	}
+	$statusName = trim((string)$statusName);
+	if ($statusName === '') {
+		$statusName = null;
+	}
+	$now = date('Y-m-d H:i:s');
+	$dbFiledData = [
+		'eccube_order_status_id' => [':eccube_order_status_id', (int)$statusId, 1],
+		'eccube_order_status_name' => [':eccube_order_status_name', $statusName, ($statusName === null) ? 2 : 0],
+		'status_changed_at' => [':status_changed_at', $now, 0],
+		'updated_at' => [':updated_at', $now, 0],
+	];
+	if ((int)$statusId === 5 && $shippedAt !== null && trim((string)$shippedAt) !== '') {
+		$dbFiledData['shipped_at'] = [':shipped_at', trim((string)$shippedAt), 0];
+	}
+	$dbFiledValue = [
+		'order_id' => [':order_id', (int)$orderId, 1],
+	];
+	$result = SQL_Process($DB_CONNECT, 'shop_orders', $dbFiledData, $dbFiledValue, 2, 2);
+	return ($result == 1);
 }
 /*
  * [shop_orders] 受注日時文字列正規化

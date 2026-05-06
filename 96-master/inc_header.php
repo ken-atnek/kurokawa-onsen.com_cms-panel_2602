@@ -28,7 +28,7 @@ print <<<HTML
   <nav>
     <a href="./master01_01.php" class="menu-color-01"><span>店舗管理</span></a>
     <a href="#" class="menu-color-02"><span>サイト管理</span></a>
-    <a href="#" class="menu-color-03"><span>EC販売管理</span></a>
+    <a href="./master03_01.php" class="menu-color-03"><span>EC販売管理</span></a>
   </nav>
 </header>
 
