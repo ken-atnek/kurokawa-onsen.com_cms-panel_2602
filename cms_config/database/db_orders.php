@@ -145,6 +145,39 @@ function getShopIdByProductClassCode($productClassCode)
 	}
 }
 /*
+ * [shop_orders] EC-CUBE受注ID指定で受注取得
+ */
+function getShopOrderByEccubeOrderId($eccubeOrderId)
+{
+	global $DB_CONNECT;
+	if ($eccubeOrderId === null || is_numeric($eccubeOrderId) === false || (int)$eccubeOrderId < 1) {
+		return [];
+	}
+	try {
+		$strSQL = "
+			SELECT
+				order_id,
+				shop_id,
+				eccube_order_id,
+				order_mail_sent_at,
+				order_mail_error
+			FROM
+				shop_orders
+			WHERE
+				eccube_order_id = :eccube_order_id
+			LIMIT 1
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':eccube_order_id', (int)$eccubeOrderId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$row = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $row ?: [];
+	} catch (PDOException $e) {
+		return [];
+	}
+}
+/*
  * [shop_orders] EC-CUBE受注登録・更新
  */
 function upsertShopOrder($shopId, $orderData)
@@ -178,7 +211,12 @@ function upsertShopOrder($shopId, $orderData)
 		$currentOrder = $newStmt->fetch(PDO::FETCH_ASSOC);
 		$newStmt->closeCursor();
 		$orderNo = isset($orderData['order_no']) && trim((string)$orderData['order_no']) !== '' ? trim((string)$orderData['order_no']) : null;
-		$ordererName = isset($orderData['orderer_name']) && trim((string)$orderData['orderer_name']) !== '' ? trim((string)$orderData['orderer_name']) : null;
+		$ordererName01 = isset($orderData['orderer_name01']) && trim((string)$orderData['orderer_name01']) !== '' ? trim((string)$orderData['orderer_name01']) : null;
+		$ordererName02 = isset($orderData['orderer_name02']) && trim((string)$orderData['orderer_name02']) !== '' ? trim((string)$orderData['orderer_name02']) : null;
+		$ordererKana01 = isset($orderData['orderer_kana01']) && trim((string)$orderData['orderer_kana01']) !== '' ? trim((string)$orderData['orderer_kana01']) : null;
+		$ordererKana02 = isset($orderData['orderer_kana02']) && trim((string)$orderData['orderer_kana02']) !== '' ? trim((string)$orderData['orderer_kana02']) : null;
+		$ordererNameParts = trim((string)$ordererName01 . ' ' . (string)$ordererName02);
+		$ordererName = ($ordererNameParts !== '') ? $ordererNameParts : (isset($orderData['orderer_name']) && trim((string)$orderData['orderer_name']) !== '' ? trim((string)$orderData['orderer_name']) : null);
 		$ordererEmail = isset($orderData['orderer_email']) && trim((string)$orderData['orderer_email']) !== '' ? trim((string)$orderData['orderer_email']) : null;
 		$ordererTel = isset($orderData['orderer_tel']) && trim((string)$orderData['orderer_tel']) !== '' ? trim((string)$orderData['orderer_tel']) : null;
 		$ordererPostalCode = isset($orderData['orderer_postal_code']) && trim((string)$orderData['orderer_postal_code']) !== '' ? trim((string)$orderData['orderer_postal_code']) : null;
@@ -206,6 +244,10 @@ function upsertShopOrder($shopId, $orderData)
 				'eccube_order_id' => [':eccube_order_id', $eccubeOrderId, 1],
 				'order_no' => [':order_no', $orderNo, ($orderNo === null) ? 2 : 0],
 				'orderer_name' => [':orderer_name', $ordererName, ($ordererName === null) ? 2 : 0],
+				'orderer_name01' => [':orderer_name01', $ordererName01, ($ordererName01 === null) ? 2 : 0],
+				'orderer_name02' => [':orderer_name02', $ordererName02, ($ordererName02 === null) ? 2 : 0],
+				'orderer_kana01' => [':orderer_kana01', $ordererKana01, ($ordererKana01 === null) ? 2 : 0],
+				'orderer_kana02' => [':orderer_kana02', $ordererKana02, ($ordererKana02 === null) ? 2 : 0],
 				'orderer_email' => [':orderer_email', $ordererEmail, ($ordererEmail === null) ? 2 : 0],
 				'orderer_tel' => [':orderer_tel', $ordererTel, ($ordererTel === null) ? 2 : 0],
 				'orderer_postal_code' => [':orderer_postal_code', $ordererPostalCode, ($ordererPostalCode === null) ? 2 : 0],
@@ -241,6 +283,10 @@ function upsertShopOrder($shopId, $orderData)
 			'shop_id' => [':shop_id', (int)$shopId, 1],
 			'order_no' => [':order_no', $orderNo, ($orderNo === null) ? 2 : 0],
 			'orderer_name' => [':orderer_name', $ordererName, ($ordererName === null) ? 2 : 0],
+			'orderer_name01' => [':orderer_name01', $ordererName01, ($ordererName01 === null) ? 2 : 0],
+			'orderer_name02' => [':orderer_name02', $ordererName02, ($ordererName02 === null) ? 2 : 0],
+			'orderer_kana01' => [':orderer_kana01', $ordererKana01, ($ordererKana01 === null) ? 2 : 0],
+			'orderer_kana02' => [':orderer_kana02', $ordererKana02, ($ordererKana02 === null) ? 2 : 0],
 			'orderer_email' => [':orderer_email', $ordererEmail, ($ordererEmail === null) ? 2 : 0],
 			'orderer_tel' => [':orderer_tel', $ordererTel, ($ordererTel === null) ? 2 : 0],
 			'orderer_postal_code' => [':orderer_postal_code', $ordererPostalCode, ($ordererPostalCode === null) ? 2 : 0],
@@ -734,9 +780,48 @@ function buildShopOrderListSearchSqlParts($searchConditions = [], $fixedShopId =
 	];
 }
 /*
- * [shop_orders] 受注詳細取得
+ * [shop_orders] 受注詳細取得（旧互換用）
  */
 function getShopOrderDetail($orderId) {}
+
+/*
+ * [shop_orders] 受注ID・店舗ID指定で受注詳細取得
+ */
+function getShopOrderById($orderId, $shopId)
+{
+	global $DB_CONNECT;
+	if ($orderId === null || is_numeric($orderId) === false || (int)$orderId < 1) {
+		return [];
+	}
+	if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1) {
+		return [];
+	}
+	try {
+		$strSQL = "
+			SELECT
+				o.*,
+				s.shop_name
+			FROM
+				shop_orders AS o
+				INNER JOIN shops AS s
+					ON s.shop_id = o.shop_id
+			WHERE
+				o.order_id = :order_id
+				AND o.shop_id = :shop_id
+				AND o.is_active = 1
+			LIMIT 1
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':order_id', (int)$orderId, PDO::PARAM_INT);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$row = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $row ?: [];
+	} catch (PDOException $e) {
+		return [];
+	}
+}
 
 /*
  * [shop_orders] 受注一覧検索
@@ -852,6 +937,7 @@ function getShopOrderItemsByOrderIds(array $orderIds)
 				i.quantity,
 				i.unit_price,
 				i.subtotal,
+				i.current_item_status,
 				p.tax_rate
 			FROM
 				shop_order_items AS i
@@ -885,6 +971,137 @@ function getShopOrderItemsByOrderIds(array $orderIds)
 		return $itemsByOrderId;
 	} catch (PDOException $e) {
 		return [];
+	}
+}
+/*
+ * [shop_orders] 受注通知メール送信結果更新
+ */
+function updateShopOrderMailResult($orderId, $success, $errorMessage = null)
+{
+	global $DB_CONNECT;
+	if ($orderId === null || is_numeric($orderId) === false || (int)$orderId < 1) {
+		return false;
+	}
+	try {
+		if ($success === true) {
+			$dbFiledData = [
+				'order_mail_sent_at' => [':order_mail_sent_at', date('Y-m-d H:i:s'), 0],
+				'order_mail_error' => [':order_mail_error', null, 2],
+				'updated_at' => [':updated_at', date('Y-m-d H:i:s'), 0],
+			];
+		} else {
+			$errorMessage = trim((string)$errorMessage);
+			$dbFiledData = [
+				'order_mail_error' => [':order_mail_error', ($errorMessage === '') ? '受注通知メール送信失敗' : $errorMessage, 0],
+				'updated_at' => [':updated_at', date('Y-m-d H:i:s'), 0],
+			];
+		}
+		$dbFiledValue = [
+			'order_id' => [':order_id', (int)$orderId, 1],
+		];
+		return SQL_Process($DB_CONNECT, 'shop_orders', $dbFiledData, $dbFiledValue, 2, 2) == 1;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+
+/*
+ * [shop_orders] 店舗向け受注通知メール送信
+ */
+function sendOrderNotificationMail($orderId)
+{
+	global $DB_CONNECT, $DEFINE_NO_REPLY, $DEFINE_MAIL_SENDER_NAME;
+	if ($orderId === null || is_numeric($orderId) === false || (int)$orderId < 1) {
+		return false;
+	}
+	try {
+		$strSQL = "
+			SELECT
+				o.*,
+				s.shop_name,
+				s.email AS shop_email
+			FROM
+				shop_orders AS o
+				INNER JOIN shops AS s
+					ON s.shop_id = o.shop_id
+			WHERE
+				o.order_id = :order_id
+				AND o.is_active = 1
+			LIMIT 1
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':order_id', (int)$orderId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$order = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		if (empty($order)) {
+			return false;
+		}
+		if (isset($order['order_mail_sent_at']) && trim((string)$order['order_mail_sent_at']) !== '') {
+			return true;
+		}
+		$toEmail = isset($order['shop_email']) ? trim((string)$order['shop_email']) : '';
+		if ($toEmail === '') {
+			updateShopOrderMailResult((int)$orderId, false, '店舗メールアドレスが未設定です。');
+			return false;
+		}
+		$shopName = isset($order['shop_name']) && trim((string)$order['shop_name']) !== '' ? trim((string)$order['shop_name']) : '店舗';
+		$orderNo = isset($order['order_no']) && trim((string)$order['order_no']) !== '' ? trim((string)$order['order_no']) : '-';
+		$ordererName = isset($order['orderer_name']) && trim((string)$order['orderer_name']) !== '' ? trim((string)$order['orderer_name']) : '-';
+		$ordererKana = trim((string)($order['orderer_kana01'] ?? '') . ' ' . (string)($order['orderer_kana02'] ?? ''));
+		$ordererKanaText = ($ordererKana !== '') ? $ordererKana : '-';
+		$ordererEmail = isset($order['orderer_email']) && trim((string)$order['orderer_email']) !== '' ? trim((string)$order['orderer_email']) : '-';
+		$ordererTel = isset($order['orderer_tel']) && trim((string)$order['orderer_tel']) !== '' ? trim((string)$order['orderer_tel']) : '-';
+		$orderedAt = isset($order['ordered_at']) && trim((string)$order['ordered_at']) !== '' ? trim((string)$order['ordered_at']) : '-';
+		$statusName = isset($order['eccube_order_status_name']) && trim((string)$order['eccube_order_status_name']) !== '' ? trim((string)$order['eccube_order_status_name']) : '-';
+		$orderItemsByOrderId = getShopOrderItemsByOrderIds([(int)$orderId]);
+		$orderItems = $orderItemsByOrderId[(int)$orderId] ?? [];
+		$itemLines = [];
+		foreach ($orderItems as $orderItem) {
+			$productName = isset($orderItem['product_name']) && trim((string)$orderItem['product_name']) !== '' ? trim((string)$orderItem['product_name']) : '商品名未設定';
+			$quantity = isset($orderItem['quantity']) ? (int)$orderItem['quantity'] : 0;
+			$taxRate = isset($orderItem['tax_rate']) ? (int)$orderItem['tax_rate'] : 10;
+			if ($taxRate <= 0) {
+				$taxRate = 10;
+			}
+			$subtotalIncludingTax = (int)round((int)($orderItem['subtotal'] ?? 0) * (1 + ($taxRate / 100)));
+			$itemLines[] = $productName . ' × ' . number_format($quantity) . '  小計: ' . number_format($subtotalIncludingTax) . '円';
+		}
+		if (empty($itemLines)) {
+			$itemLines[] = '購入商品情報なし';
+		}
+		$mailTitle = '【受注通知】注文番号: ' . $orderNo;
+		$mailBody = $shopName . " 様\n\n";
+		$mailBody .= "新規受注がありました。\n\n";
+		$mailBody .= "■ 受注情報\n";
+		$mailBody .= "注文番号: " . $orderNo . "\n";
+		$mailBody .= "注文日時: " . $orderedAt . "\n";
+		$mailBody .= "対応ステータス: " . $statusName . "\n\n";
+		$mailBody .= "■ 注文者情報\n";
+		$mailBody .= "お名前: " . $ordererName . "（" . $ordererKanaText . "）\n";
+		$mailBody .= "メールアドレス: " . $ordererEmail . "\n";
+		$mailBody .= "電話番号: " . $ordererTel . "\n\n";
+		$mailBody .= "■ 購入商品\n";
+		$mailBody .= implode("\n", $itemLines) . "\n\n";
+		$mailBody .= "■ 金額\n";
+		$mailBody .= "送料: " . number_format((int)($order['delivery_fee_total'] ?? 0)) . "円\n";
+		$mailBody .= "お支払合計: " . number_format((int)($order['payment_total'] ?? 0)) . "円\n\n";
+		$mailBody .= "※このメールは自動送信です。\n";
+		$fromEmail = isset($DEFINE_NO_REPLY) && trim((string)$DEFINE_NO_REPLY) !== '' ? trim((string)$DEFINE_NO_REPLY) : 'noreply@kurokawa-onsen.com';
+		$fromName = isset($DEFINE_MAIL_SENDER_NAME) && trim((string)$DEFINE_MAIL_SENDER_NAME) !== '' ? trim((string)$DEFINE_MAIL_SENDER_NAME) : '黒川温泉観光協会';
+		if (function_exists('sendMail_Common')) {
+			$mailResult = sendMail_Common($toEmail, $shopName, $mailTitle, $mailBody, $fromEmail, $fromName, []);
+		} else {
+			$mailResult = @mail($toEmail, $mailTitle, $mailBody, 'From: ' . $fromEmail);
+		}
+		if ($mailResult === true) {
+			return updateShopOrderMailResult((int)$orderId, true);
+		}
+		updateShopOrderMailResult((int)$orderId, false, '受注通知メール送信に失敗しました。');
+		return false;
+	} catch (Exception $e) {
+		updateShopOrderMailResult((int)$orderId, false, $e->getMessage());
+		return false;
 	}
 }
 
