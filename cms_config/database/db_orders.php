@@ -217,6 +217,7 @@ function upsertShopOrder($shopId, $orderData)
 		$ordererKana02 = isset($orderData['orderer_kana02']) && trim((string)$orderData['orderer_kana02']) !== '' ? trim((string)$orderData['orderer_kana02']) : null;
 		$ordererNameParts = trim((string)$ordererName01 . ' ' . (string)$ordererName02);
 		$ordererName = ($ordererNameParts !== '') ? $ordererNameParts : (isset($orderData['orderer_name']) && trim((string)$orderData['orderer_name']) !== '' ? trim((string)$orderData['orderer_name']) : null);
+		$ordererCompanyName = isset($orderData['orderer_company_name']) && trim((string)$orderData['orderer_company_name']) !== '' ? trim((string)$orderData['orderer_company_name']) : null;
 		$ordererEmail = isset($orderData['orderer_email']) && trim((string)$orderData['orderer_email']) !== '' ? trim((string)$orderData['orderer_email']) : null;
 		$ordererTel = isset($orderData['orderer_tel']) && trim((string)$orderData['orderer_tel']) !== '' ? trim((string)$orderData['orderer_tel']) : null;
 		$ordererPostalCode = isset($orderData['orderer_postal_code']) && trim((string)$orderData['orderer_postal_code']) !== '' ? trim((string)$orderData['orderer_postal_code']) : null;
@@ -225,7 +226,13 @@ function upsertShopOrder($shopId, $orderData)
 		$ordererAddr01 = isset($orderData['orderer_addr01']) && trim((string)$orderData['orderer_addr01']) !== '' ? trim((string)$orderData['orderer_addr01']) : null;
 		$ordererAddr02 = isset($orderData['orderer_addr02']) && trim((string)$orderData['orderer_addr02']) !== '' ? trim((string)$orderData['orderer_addr02']) : null;
 		$ordererMessage = isset($orderData['orderer_message']) && trim((string)$orderData['orderer_message']) !== '' ? trim((string)$orderData['orderer_message']) : null;
-		$shippingName = isset($orderData['shipping_name']) && trim((string)$orderData['shipping_name']) !== '' ? trim((string)$orderData['shipping_name']) : null;
+		$shippingName01 = isset($orderData['shipping_name01']) && trim((string)$orderData['shipping_name01']) !== '' ? trim((string)$orderData['shipping_name01']) : null;
+		$shippingName02 = isset($orderData['shipping_name02']) && trim((string)$orderData['shipping_name02']) !== '' ? trim((string)$orderData['shipping_name02']) : null;
+		$shippingKana01 = isset($orderData['shipping_kana01']) && trim((string)$orderData['shipping_kana01']) !== '' ? trim((string)$orderData['shipping_kana01']) : null;
+		$shippingKana02 = isset($orderData['shipping_kana02']) && trim((string)$orderData['shipping_kana02']) !== '' ? trim((string)$orderData['shipping_kana02']) : null;
+		$shippingNameParts = trim((string)$shippingName01 . ' ' . (string)$shippingName02);
+		$shippingName = ($shippingNameParts !== '') ? $shippingNameParts : (isset($orderData['shipping_name']) && trim((string)$orderData['shipping_name']) !== '' ? trim((string)$orderData['shipping_name']) : null);
+		$shippingCompanyName = isset($orderData['shipping_company_name']) && trim((string)$orderData['shipping_company_name']) !== '' ? trim((string)$orderData['shipping_company_name']) : null;
 		$shippingPostalCode = isset($orderData['shipping_postal_code']) && trim((string)$orderData['shipping_postal_code']) !== '' ? trim((string)$orderData['shipping_postal_code']) : null;
 		$shippingPrefId = isset($orderData['shipping_pref_id']) && is_numeric($orderData['shipping_pref_id']) && (int)$orderData['shipping_pref_id'] > 0 ? (int)$orderData['shipping_pref_id'] : null;
 		$shippingPrefName = isset($orderData['shipping_pref_name']) && trim((string)$orderData['shipping_pref_name']) !== '' ? trim((string)$orderData['shipping_pref_name']) : null;
@@ -248,6 +255,7 @@ function upsertShopOrder($shopId, $orderData)
 				'orderer_name02' => [':orderer_name02', $ordererName02, ($ordererName02 === null) ? 2 : 0],
 				'orderer_kana01' => [':orderer_kana01', $ordererKana01, ($ordererKana01 === null) ? 2 : 0],
 				'orderer_kana02' => [':orderer_kana02', $ordererKana02, ($ordererKana02 === null) ? 2 : 0],
+				'orderer_company_name' => [':orderer_company_name', $ordererCompanyName, ($ordererCompanyName === null) ? 2 : 0],
 				'orderer_email' => [':orderer_email', $ordererEmail, ($ordererEmail === null) ? 2 : 0],
 				'orderer_tel' => [':orderer_tel', $ordererTel, ($ordererTel === null) ? 2 : 0],
 				'orderer_postal_code' => [':orderer_postal_code', $ordererPostalCode, ($ordererPostalCode === null) ? 2 : 0],
@@ -257,6 +265,11 @@ function upsertShopOrder($shopId, $orderData)
 				'orderer_addr02' => [':orderer_addr02', $ordererAddr02, ($ordererAddr02 === null) ? 2 : 0],
 				'orderer_message' => [':orderer_message', $ordererMessage, ($ordererMessage === null) ? 2 : 0],
 				'shipping_name' => [':shipping_name', $shippingName, ($shippingName === null) ? 2 : 0],
+				'shipping_name01' => [':shipping_name01', $shippingName01, ($shippingName01 === null) ? 2 : 0],
+				'shipping_name02' => [':shipping_name02', $shippingName02, ($shippingName02 === null) ? 2 : 0],
+				'shipping_kana01' => [':shipping_kana01', $shippingKana01, ($shippingKana01 === null) ? 2 : 0],
+				'shipping_kana02' => [':shipping_kana02', $shippingKana02, ($shippingKana02 === null) ? 2 : 0],
+				'shipping_company_name' => [':shipping_company_name', $shippingCompanyName, ($shippingCompanyName === null) ? 2 : 0],
 				'shipping_postal_code' => [':shipping_postal_code', $shippingPostalCode, ($shippingPostalCode === null) ? 2 : 0],
 				'shipping_pref_id' => [':shipping_pref_id', $shippingPrefId, ($shippingPrefId === null) ? 2 : 1],
 				'shipping_pref_name' => [':shipping_pref_name', $shippingPrefName, ($shippingPrefName === null) ? 2 : 0],
@@ -287,6 +300,7 @@ function upsertShopOrder($shopId, $orderData)
 			'orderer_name02' => [':orderer_name02', $ordererName02, ($ordererName02 === null) ? 2 : 0],
 			'orderer_kana01' => [':orderer_kana01', $ordererKana01, ($ordererKana01 === null) ? 2 : 0],
 			'orderer_kana02' => [':orderer_kana02', $ordererKana02, ($ordererKana02 === null) ? 2 : 0],
+			'orderer_company_name' => [':orderer_company_name', $ordererCompanyName, ($ordererCompanyName === null) ? 2 : 0],
 			'orderer_email' => [':orderer_email', $ordererEmail, ($ordererEmail === null) ? 2 : 0],
 			'orderer_tel' => [':orderer_tel', $ordererTel, ($ordererTel === null) ? 2 : 0],
 			'orderer_postal_code' => [':orderer_postal_code', $ordererPostalCode, ($ordererPostalCode === null) ? 2 : 0],
@@ -296,6 +310,11 @@ function upsertShopOrder($shopId, $orderData)
 			'orderer_addr02' => [':orderer_addr02', $ordererAddr02, ($ordererAddr02 === null) ? 2 : 0],
 			'orderer_message' => [':orderer_message', $ordererMessage, ($ordererMessage === null) ? 2 : 0],
 			'shipping_name' => [':shipping_name', $shippingName, ($shippingName === null) ? 2 : 0],
+			'shipping_name01' => [':shipping_name01', $shippingName01, ($shippingName01 === null) ? 2 : 0],
+			'shipping_name02' => [':shipping_name02', $shippingName02, ($shippingName02 === null) ? 2 : 0],
+			'shipping_kana01' => [':shipping_kana01', $shippingKana01, ($shippingKana01 === null) ? 2 : 0],
+			'shipping_kana02' => [':shipping_kana02', $shippingKana02, ($shippingKana02 === null) ? 2 : 0],
+			'shipping_company_name' => [':shipping_company_name', $shippingCompanyName, ($shippingCompanyName === null) ? 2 : 0],
 			'shipping_postal_code' => [':shipping_postal_code', $shippingPostalCode, ($shippingPostalCode === null) ? 2 : 0],
 			'shipping_pref_id' => [':shipping_pref_id', $shippingPrefId, ($shippingPrefId === null) ? 2 : 1],
 			'shipping_pref_name' => [':shipping_pref_name', $shippingPrefName, ($shippingPrefName === null) ? 2 : 0],
@@ -633,7 +652,6 @@ function deductStockByOrderItems($orderId, $shopId, $orderItems)
 		return false;
 	}
 }
-
 /*
  * [shop_products] 規格在庫代表値再計算
  */

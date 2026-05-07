@@ -142,8 +142,6 @@ function buildMasterOrderStatusHtml($statusId, $statusName)
   return ($statusName !== '') ? '<span>' . htmlspecialchars($statusName, ENT_QUOTES, 'UTF-8') . '</span>' : '<span>-</span>';
 }
 
-
-
 #=============#
 # 店舗一覧取得
 #-------------#
@@ -157,7 +155,6 @@ if (is_array($searchConditions) && count($searchConditions) > 0) {
 #検索フォーム（店名選択）用：公開/非公開に依存しない全件リスト
 $shopsListAll = getShopList();
 
-
 #=========#
 # 受注一覧
 #---------#
@@ -166,6 +163,8 @@ $orderIds = array_map(function ($order) {
   return (int)($order['order_id'] ?? 0);
 }, $orderList);
 $orderItemsByOrderId = getShopOrderItemsByOrderIds($orderIds);
+
+
 $orderNoHtml = htmlspecialchars($searchConditions['orderNo'], ENT_QUOTES, 'UTF-8');
 $ordererNameHtml = htmlspecialchars($searchConditions['ordererName'], ENT_QUOTES, 'UTF-8');
 $ordererEmailHtml = htmlspecialchars($searchConditions['ordererEmail'], ENT_QUOTES, 'UTF-8');

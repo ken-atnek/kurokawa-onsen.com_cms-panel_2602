@@ -59,7 +59,7 @@ function fetchEccubeOrderForWebhook($eccubeOrderId)
 	if ($lastSyncedId < 0) {
 		$lastSyncedId = 0;
 	}
-	$query = "query {\n  ordersForSync(\n    last_synced_id: " . (int)$lastSyncedId . "\n    last_synced_at: " . buildProcessOrderGraphqlString('2000-01-01T00:00:00+09:00') . "\n    limit: 50\n  ) {\n    id\n    order_no\n    orderer_name\n    orderer_name01\n    orderer_name02\n    orderer_kana01\n    orderer_kana02\n    orderer_email\n    orderer_tel\n    orderer_postal_code\n    orderer_pref_id\n    orderer_pref_name\n    orderer_addr01\n    orderer_addr02\n    orderer_message\n    shipping_name\n    shipping_postal_code\n    shipping_pref_id\n    shipping_pref_name\n    shipping_addr01\n    shipping_addr02\n    shipping_tel\n    order_status_id\n    order_status_name\n    payment_total\n    delivery_fee_total\n    update_date\n    zeus_order_id\n    order_items {\n      product_class_code\n      product_name\n      quantity\n      price\n    }\n  }\n}";
+	$query = "query {\n  ordersForSync(\n    last_synced_id: " . (int)$lastSyncedId . "\n    last_synced_at: " . buildProcessOrderGraphqlString('2000-01-01T00:00:00+09:00') . "\n    limit: 50\n  ) {\n    id\n    order_no\n    orderer_name\n    orderer_name01\n    orderer_name02\n    orderer_kana01\n    orderer_kana02\n    orderer_company_name\n    orderer_email\n    orderer_tel\n    orderer_postal_code\n    orderer_pref_id\n    orderer_pref_name\n    orderer_addr01\n    orderer_addr02\n    orderer_message\n    shipping_name\n    shipping_name01\n    shipping_name02\n    shipping_kana01\n    shipping_kana02\n    shipping_company_name\n    shipping_postal_code\n    shipping_pref_id\n    shipping_pref_name\n    shipping_addr01\n    shipping_addr02\n    shipping_tel\n    order_status_id\n    order_status_name\n    payment_total\n    delivery_fee_total\n    update_date\n    zeus_order_id\n    order_items {\n      product_class_code\n      product_name\n      quantity\n      price\n    }\n  }\n}";
 	$result = eccube_api_call($query);
 	$orders = isset($result['ordersForSync']) && is_array($result['ordersForSync']) ? $result['ordersForSync'] : [];
 	foreach ($orders as $order) {
@@ -157,6 +157,7 @@ foreach ($pendingLogs as $log) {
 		'orderer_name02' => isset($order['orderer_name02']) ? $order['orderer_name02'] : null,
 		'orderer_kana01' => isset($order['orderer_kana01']) ? $order['orderer_kana01'] : null,
 		'orderer_kana02' => isset($order['orderer_kana02']) ? $order['orderer_kana02'] : null,
+		'orderer_company_name' => isset($order['orderer_company_name']) ? $order['orderer_company_name'] : null,
 		'orderer_email' => isset($order['orderer_email']) ? $order['orderer_email'] : null,
 		'orderer_tel' => isset($order['orderer_tel']) ? $order['orderer_tel'] : null,
 		'orderer_postal_code' => isset($order['orderer_postal_code']) ? $order['orderer_postal_code'] : null,
@@ -166,6 +167,11 @@ foreach ($pendingLogs as $log) {
 		'orderer_addr02' => isset($order['orderer_addr02']) ? $order['orderer_addr02'] : null,
 		'orderer_message' => isset($order['orderer_message']) ? $order['orderer_message'] : null,
 		'shipping_name' => isset($order['shipping_name']) ? $order['shipping_name'] : null,
+		'shipping_name01' => isset($order['shipping_name01']) ? $order['shipping_name01'] : null,
+		'shipping_name02' => isset($order['shipping_name02']) ? $order['shipping_name02'] : null,
+		'shipping_kana01' => isset($order['shipping_kana01']) ? $order['shipping_kana01'] : null,
+		'shipping_kana02' => isset($order['shipping_kana02']) ? $order['shipping_kana02'] : null,
+		'shipping_company_name' => isset($order['shipping_company_name']) ? $order['shipping_company_name'] : null,
 		'shipping_postal_code' => isset($order['shipping_postal_code']) ? $order['shipping_postal_code'] : null,
 		'shipping_pref_id' => isset($order['shipping_pref_id']) ? $order['shipping_pref_id'] : null,
 		'shipping_pref_name' => isset($order['shipping_pref_name']) ? $order['shipping_pref_name'] : null,

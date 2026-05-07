@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 /*
  * [96-client/client03_01_01.php]
  *  - 【加盟店】管理画面 -
- *  受注詳細
+ *  受注詳細（閲覧モード）
  *
  * [初版]
  *  2026.5.4
@@ -24,6 +24,8 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_accounts.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shops.php';
 #店舗情報（EC関連）
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shops_ec.php';
+#受注情報
+require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_orders.php';
 
 #================#
 # SESSIONチェック
@@ -52,30 +54,25 @@ if ($_SESSION[$noUpDateKey]['clientKey'] < 1) {
 #=============#
 # POSTチェック
 #-------------#
-#新規／編集
-$method = isset($_GET['method']) ? $_GET['method'] : null;
-#モードチェック
-if ($method === null || ($method !== 'readonly')) {
-  #不正アクセス：トップページへリダイレクト
+#閲覧モード
+$method = isset($_GET['method']) ? (string)$_GET['method'] : null;
+if ($method !== 'readonly') {
   header("Location: ./client03_01.php");
   exit;
 }
-#表示スタイル
-$viewModeStyle = "";
+$viewModeStyle = '';
 if ($method === 'readonly') {
-  $viewModeStyle = 'style="pointer-events: none; opacity: 0.6;"';
+  $viewModeStyle = 'style="pointer-events: none;"';
 }
 #-------------#
-#店舗ID（編集／削除時のみ）
+#店舗ID
 $shopId = isset($_SESSION['client_login']['shop_id']) ? $_SESSION['client_login']['shop_id'] : null;
-#店舗IDがあれば店舗情報取得
 if ($shopId !== null) {
   #店舗情報
   $shopData = getShops_FindById($shopId);
   #アカウント情報
   $accountData = accounts_FindById(null, $shopId);
 } else {
-  #不正アクセス：ログインページへリダイレクト
   header("Location: ./logout.php");
   exit;
 }
@@ -85,7 +82,6 @@ if ($shopId !== null) {
 #-------#
 $headerShopName = "";
 if (!isset($shopData) || empty($shopData)) {
-  #店舗データが無い場合は不正アクセス：ログインページへリダイレクト
   header("Location: ./logout.php");
   exit;
 } else {
@@ -93,24 +89,94 @@ if (!isset($shopData) || empty($shopData)) {
 }
 
 #=============#
-# 購入商品詳細
+# 受注詳細取得
 #-------------#
-#受注ID
-$orderId = isset($_GET['orderId']) ? $_GET['orderId'] : null;
-#受注IDがあれば受注情報取得
-$orderDetail = [];
-if ($orderId !== null) {
-  #受注情報
-  $orderDetail = getShopOrderDetail($orderId);
-} else {
-  #受注ID無し：一覧ページへリダイレクト
+$orderId = isset($_GET['orderId']) ? trim((string)$_GET['orderId']) : '';
+if ($orderId === '' || ctype_digit($orderId) === false || (int)$orderId < 1) {
   header("Location: ./client03_01.php");
   exit;
 }
-#-------------#
-#受注情報があれば表示用情報生成
+$orderDetail = getShopOrderById((int)$orderId, (int)$shopId);
+$orderItemsByOrderId = [];
+$orderItems = [];
 if (!empty($orderDetail)) {
+  $orderItemsByOrderId = getShopOrderItemsByOrderIds([(int)$orderDetail['order_id']]);
+  $orderItems = $orderItemsByOrderId[(int)$orderDetail['order_id']] ?? [];
 }
+
+#===============#
+# 表示用helper
+#---------------#
+function hClientOrderDetail($value)
+{
+  $value = trim((string)$value);
+  return htmlspecialchars(($value === '') ? '-' : $value, ENT_QUOTES, 'UTF-8');
+}
+function hClientOrderDetailInput($value)
+{
+  return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
+function formatClientOrderDetailDate($value)
+{
+  $value = trim((string)$value);
+  if ($value === '') {
+    return '-';
+  }
+  $timestamp = strtotime($value);
+  if ($timestamp === false) {
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+  }
+  return htmlspecialchars(date('Y/m/d', $timestamp), ENT_QUOTES, 'UTF-8') . '<i>' . htmlspecialchars(date('H:i', $timestamp), ENT_QUOTES, 'UTF-8') . '</i>';
+}
+function formatClientOrderDetailMoney($value)
+{
+  return htmlspecialchars(number_format((int)$value), ENT_QUOTES, 'UTF-8');
+}
+
+#-------------#
+#表示用値
+$hasOrderDetail = !empty($orderDetail);
+$orderIdHtml = $hasOrderDetail ? hClientOrderDetail($orderDetail['order_id'] ?? '') : '-';
+$eccubeOrderIdHtml = $hasOrderDetail ? hClientOrderDetail($orderDetail['eccube_order_id'] ?? '') : '-';
+$orderNoHtml = $hasOrderDetail ? hClientOrderDetail($orderDetail['order_no'] ?? '') : '-';
+$statusNameHtml = $hasOrderDetail ? hClientOrderDetail($orderDetail['eccube_order_status_name'] ?? '') : '-';
+$orderedAtHtml = $hasOrderDetail ? formatClientOrderDetailDate($orderDetail['ordered_at'] ?? '') : '-';
+$stockDeductedAtHtml = $hasOrderDetail ? formatClientOrderDetailDate($orderDetail['stock_deducted_at'] ?? '') : '-';
+$shippedAtHtml = $hasOrderDetail ? formatClientOrderDetailDate($orderDetail['shipped_at'] ?? '') : '-';
+$statusChangedAtHtml = $hasOrderDetail ? formatClientOrderDetailDate($orderDetail['status_changed_at'] ?? '') : '-';
+$updatedAtHtml = $hasOrderDetail ? formatClientOrderDetailDate($orderDetail['updated_at'] ?? '') : '-';
+#注文者情報
+$ordererNameHtml = $hasOrderDetail ? hClientOrderDetail($orderDetail['orderer_name'] ?? '') : '-';
+$ordererName01Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_name01'] ?? '') : '';
+$ordererName02Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_name02'] ?? '') : '';
+$ordererKana01Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_kana01'] ?? '') : '';
+$ordererKana02Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_kana02'] ?? '') : '';
+$ordererEmailHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_email'] ?? '') : '';
+$ordererTelHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_tel'] ?? '') : '';
+$ordererCompanyNameHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_company_name'] ?? '') : '';
+$ordererPostalCodeHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_postal_code'] ?? '') : '';
+$ordererPrefIdHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_pref_id'] ?? '') : '';
+$ordererPrefNameHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_pref_name'] ?? '') : '';
+$ordererAddr01Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_addr01'] ?? '') : '';
+$ordererAddr02Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['orderer_addr02'] ?? '') : '';
+$ordererMessageHtml = $hasOrderDetail ? htmlspecialchars((string)($orderDetail['orderer_message'] ?? ''), ENT_QUOTES, 'UTF-8') : '';
+#出荷先情報
+$shippingNameHtml = $hasOrderDetail ? hClientOrderDetail($orderDetail['shipping_name'] ?? '') : '-';
+$shippingName01Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_name01'] ?? '') : '';
+$shippingName02Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_name02'] ?? '') : '';
+$shippingKana01Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_kana01'] ?? '') : '';
+$shippingKana02Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_kana02'] ?? '') : '';
+$shippingCompanyNameHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_company_name'] ?? '') : '';
+$shippingPostalCodeHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_postal_code'] ?? '') : '';
+$shippingPrefIdHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_pref_id'] ?? '') : '';
+$shippingPrefNameHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_pref_name'] ?? '') : '';
+$shippingAddr01Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_addr01'] ?? '') : '';
+$shippingAddr02Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_addr02'] ?? '') : '';
+$shippingTelHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_tel'] ?? '') : '';
+$deliveryFeeTotalHtml = $hasOrderDetail ? formatClientOrderDetailMoney($orderDetail['delivery_fee_total'] ?? 0) : '0';
+$paymentTotalHtml = $hasOrderDetail ? formatClientOrderDetailMoney($orderDetail['payment_total'] ?? 0) : '0';
+$shopNoteHtml = $hasOrderDetail ? htmlspecialchars((string)($orderDetail['note'] ?? ''), ENT_QUOTES, 'UTF-8') : '';
+$itemSubtotalTotal = 0;
 
 #-------------#
 #inline JS用エスケープ宣言
@@ -125,7 +191,7 @@ print <<<HTML
   <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
   <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://zipcloud.ibsnet.co.jp; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
   <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
   <meta name="format-detection" content="telephone=no">
   <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
@@ -155,7 +221,7 @@ print <<<HTML
     <div class="main-contents menu-color03">
       <div class="block_inner">
         <h2>受注詳細</h2>
-        <form>
+        <form name="inputForm" class="inputForm">
           <article class="block-customer-info" {$viewModeStyle}>
             <h3>注文者情報</h3>
             <section>
@@ -163,10 +229,9 @@ print <<<HTML
                 <div class="box-date">
                   <dt>注文日</dt>
                   <dd>
-                    <span>2026/04/04<i>10:30</i></span>
+                    <span>{$orderedAtHtml}</span>
                   </dd>
                 </div>
-
                 <div class="box-status">
                   <dt>対応状況</dt>
                   <dd>
@@ -187,7 +252,7 @@ $selectedStatusIdHtml = htmlspecialchars($selectedStatusId, ENT_QUOTES, 'UTF-8')
 $selectedStatusNameHtml = htmlspecialchars($selectedStatusName, ENT_QUOTES, 'UTF-8');
 $statusSelectClass = ($selectedStatusId !== '') ? ' is-selected' : '';
 print <<<HTML
-                    <div class="select-search-category  {$statusSelectClass}" data-selectbox>
+                    <div class="select-search-category  {$statusSelectClass}" data-selectbox style="pointer-events: none;">
                       <button type="button" class="selectbox__head" aria-expanded="false">
                         <input type="hidden" name="orderSelectCategory" value="{$selectedStatusIdHtml}" data-selectbox-hidden>
                         <span class="selectbox__value" data-selectbox-value>{$selectedStatusNameHtml}</span>
@@ -219,15 +284,15 @@ print <<<HTML
                 <div class="box-name">
                   <dt class="is-required">お名前</dt>
                   <dd>
-                    <input type="text" name="userFirstName" value="" id="userFirstName" placeholder="姓">
-                    <input type="text" name="userLastName" value="" id="userLastName" placeholder="名">
+                    <input type="text" name="userFirstName" value="{$ordererName01Html}" id="userFirstName" class="required-item" required placeholder="姓">
+                    <input type="text" name="userLastName" value="{$ordererName02Html}" id="userLastName" class="required-item" required placeholder="名">
                   </dd>
                 </div>
                 <div class="box-name">
                   <dt class="is-required">お名前(カナ)</dt>
                   <dd>
-                    <input type="text" name="userFirstNameKana" value="" id="userFirstNameKana" placeholder="セイ">
-                    <input type="text" name="userLastNameKana" value="" id="userLastNameKana" placeholder="メイ">
+                    <input type="text" name="userFirstNameKana" value="{$ordererKana01Html}" id="userFirstNameKana" class="required-item" required placeholder="セイ">
+                    <input type="text" name="userLastNameKana" value="{$ordererKana02Html}" id="userLastNameKana" class="required-item" required placeholder="メイ">
                   </dd>
                 </div>
                 <div class="box-address">
@@ -235,17 +300,18 @@ print <<<HTML
                   <dd>
                     <div>
                       <span>〒</span>
-                      <input type="text" name="userPostalCode" id="userPostalCode" placeholder="例：8601234">
+                      <input type="text" name="userPostalCode" value="{$ordererPostalCodeHtml}" id="userPostalCode" class="required-item" required placeholder="例：8601234">
                     </div>
-                    <input type="text" name="userAddress01" id="userAddress01" placeholder="都道府県">
-                    <input type="text" name="userAddress02" id="userAddress02" placeholder="市区町村">
-                    <input type="text" name="userAddress03" id="userAddress03" placeholder="番地・建物名など">
+                    <input type="hidden" name="ordererPrefId" value="{$ordererPrefIdHtml}" id="ordererPrefId">
+                    <input type="text" name="userAddress01" value="{$ordererPrefNameHtml}" id="userAddress01" class="required-item" required placeholder="都道府県">
+                    <input type="text" name="userAddress02" value="{$ordererAddr01Html}" id="userAddress02" class="required-item" required placeholder="市区町村">
+                    <input type="text" name="userAddress03" value="{$ordererAddr02Html}" id="userAddress03" class="required-item" required placeholder="番地・建物名など">
                   </dd>
                 </div>
                 <div>
                   <dt>会社名</dt>
                   <dd>
-                    <input type="text" name="userCompanyName" value="" id="userCompanyName" placeholder="会社名">
+                    <input type="text" name="userCompanyName" value="{$ordererCompanyNameHtml}" id="userCompanyName" placeholder="会社名">
                   </dd>
                 </div>
               </dl>
@@ -253,7 +319,7 @@ print <<<HTML
                 <div>
                   <dt>注文番号</dt>
                   <dd>
-                    <span>#000123</span>
+                    <span>{$orderIdHtml}</span>
                   </dd>
                 </div>
                 <div>
@@ -265,30 +331,30 @@ print <<<HTML
                 <div class="box-date">
                   <dt>出荷日</dt>
                   <dd>
-                    <span>2026/04/04<i>10:30</i></span>
+                    <span>{$shippedAtHtml}</span>
                   </dd>
                 </div>
                 <div class="box-date">
                   <dt>更新日</dt>
                   <dd>
-                    <span>2026/04/04<i>10:30</i></span>
+                    <span>{$updatedAtHtml}</span>
                   </dd>
                 </div>
                 <div>
                   <dt class="is-required">メールアドレス</dt>
                   <dd>
-                    <input type="text" name="userEmail" id="userEmail">
+                    <input type="text" name="userEmail" value="{$ordererEmailHtml}" id="userEmail" class="required-item" required>
                   </dd>
                 </div>
                 <div>
                   <dt class="is-required">電話番号</dt>
                   <dd>
-                    <input type="text" name="userTel" id="userTel">
+                    <input type="text" name="userTel" value="{$ordererTelHtml}" id="userTel" class="required-item" required>
                   </dd>
                 </div>
                 <div>
                   <dt>お問い合わせ</dt>
-                  <dd><textarea name="userInquiry" id="userInquiry"></textarea></dd>
+                  <dd><textarea name="userInquiry" id="userInquiry" readonly>{$ordererMessageHtml}</textarea></dd>
                 </div>
               </dl>
             </section>
@@ -303,15 +369,15 @@ print <<<HTML
                 <div class="box-name">
                   <dt class="is-required">お名前</dt>
                   <dd>
-                    <input type="text" name="sendOtherUserName" id="sendOtherUserName" placeholder="姓">
-                    <input type="text" name="sendOtherUserName" id="sendOtherUserName" placeholder="名">
+                    <input type="text" name="shippingUserFirstName" value="{$shippingName01Html}" id="shippingUserFirstName" class="required-item" required placeholder="姓">
+                    <input type="text" name="shippingUserLastName" value="{$shippingName02Html}" id="shippingUserLastName" class="required-item" required placeholder="名">
                     </dd>
                 </div>
                 <div class="box-name">
                   <dt class="is-required">お名前(カナ)</dt>
                   <dd>
-                    <input type="text" name="sendOtherUserNameKana" id="sendOtherUserNameKana" placeholder="セイ">
-                    <input type="text" name="sendOtherUserNameKana" id="sendOtherUserNameKana" placeholder="メイ">
+                    <input type="text" name="shippingUserFirstNameKana" value="{$shippingKana01Html}" id="shippingUserFirstNameKana" class="required-item" required placeholder="セイ">
+                    <input type="text" name="shippingUserLastNameKana" value="{$shippingKana02Html}" id="shippingUserLastNameKana" class="required-item" required placeholder="メイ">
                   </dd>
                 </div>
                 <div class="box-address">
@@ -319,17 +385,18 @@ print <<<HTML
                   <dd>
                     <div>
                       <span>〒</span>
-                      <input type="text" name="sendOtherUserPostalCode" id="sendOtherUserPostalCode" placeholder="例：8601234">
+                      <input type="text" name="shippingUserPostalCode" value="{$shippingPostalCodeHtml}" id="shippingUserPostalCode" class="required-item" required placeholder="例：8601234">
                     </div>
-                    <input type="text" name="sendOtherUserAddress01" id="sendOtherUserAddress01" placeholder="市区町村">
-                    <input type="text" name="sendOtherUserAddress02" id="sendOtherUserAddress02" placeholder="番地・建物名など">
-                    <input type="text" name="sendOtherUserAddress03" id="sendOtherUserAddress03" placeholder="建物名など">
+                    <input type="hidden" name="shippingPrefId" value="{$shippingPrefIdHtml}" id="shippingPrefId">
+                    <input type="text" name="shippingUserAddress01" value="{$shippingPrefNameHtml}" id="shippingUserAddress01" class="required-item" required placeholder="都道府県">
+                    <input type="text" name="shippingUserAddress02" value="{$shippingAddr01Html}" id="shippingUserAddress02" class="required-item" required placeholder="市区町村">
+                    <input type="text" name="shippingUserAddress03" value="{$shippingAddr02Html}" id="shippingUserAddress03" class="required-item" required placeholder="番地・建物名など">
                   </dd>
                 </div>
                 <div>
                   <dt>会社名</dt>
                   <dd>
-                    <input type="text" name="sendOtherUserCompanyName" id="sendOtherUserCompanyName" placeholder="会社名">
+                    <input type="text" name="shippingUserCompanyName" value="{$shippingCompanyNameHtml}" id="shippingUserCompanyName" placeholder="会社名">
                   </dd>
                 </div>
               </dl>
@@ -337,19 +404,19 @@ print <<<HTML
                 <div>
                   <dt class="is-required">電話番号</dt>
                   <dd>
-                    <input type="text" name="sendOtherUserTel" id="sendOtherUserTel">
+                    <input type="text" name="shippingUserTel" value="{$shippingTelHtml}" id="shippingUserTel" class="required-item" required placeholder="例：09012345678">
                   </dd>
                 </div>
-                <div>
+                <!-- <div>
                   <dt>お問い合わせ番号</dt>
                   <dd>
-                    <input type="text" name="sendOtherUserInquiryNumber" id="sendOtherUserInquiryNumber">
+                    <input type="text" name="shippingUserInquiryNumber" id="shippingUserInquiryNumber">
                   </dd>
                 </div>
                 <div>
                   <dt>お届け日</dt>
                   <dd>
-                    <input type="date" name="sendOtherUserDeliveryDate" id="sendOtherUserDeliveryDate">
+                    <input type="date" name="shippingUserDeliveryDate" id="shippingUserDeliveryDate">
                   </dd>
                 </div>
                 <div class="box-status">
@@ -357,36 +424,35 @@ print <<<HTML
                   <dd>
                     <div class="select-search-category" data-selectbox>
                       <button type="button" class="selectbox__head" aria-expanded="false">
-                        <input type="hidden" name="sendOtherUserDeliveryTime" value="" data-selectbox-hidden>
+                        <input type="hidden" name="shippingUserDeliveryTime" value="" data-selectbox-hidden>
                         <span class="selectbox__value" data-selectbox-value>選択してください</span>
                       </button>
                       <div class="list-wrapper">
                         <ul class="selectbox__panel">
                           <li>
-                            <input type="radio" name="sendOtherUserDeliveryTime" value="1" id="searchCategory01" checked>
+                            <input type="radio" name="shippingUserDeliveryTime" value="1" id="searchCategory01" checked>
                             <label for="searchCategory01">指定なし</label>
                           </li>
                           <li>
-                            <input type="radio" name="sendOtherUserDeliveryTime" value="2" id="searchCategory02">
+                            <input type="radio" name="shippingUserDeliveryTime" value="2" id="searchCategory02">
                             <label for="searchCategory02">午前</label>
                           </li>
                           <li>
-                            <input type="radio" name="sendOtherUserDeliveryTime" value="3" id="searchCategory03">
+                            <input type="radio" name="shippingUserDeliveryTime" value="3" id="searchCategory03">
                             <label for="searchCategory03">午後</label>
                           </li>
                         </ul>
                       </div>
                     </div>
                   </dd>
-                </div>
+                </div> -->
                 <div>
                   <dt>出荷用メモ</dt>
-                  <dd><textarea name="sendOtherUserShippingMemo" id="sendOtherUserShippingMemo"></textarea></dd>
+                  <dd><textarea name="shippingUserShippingMemo" id="shippingUserShippingMemo"></textarea></dd>
                 </div>
               </dl>
             </section>
           </article>
-
           <article class="block-product-info">
             <h3>商品情報</h3>
             <section>
@@ -399,90 +465,79 @@ print <<<HTML
                   <div>返品対象</div>
                 </li>
 
-
-
+HTML;
+#注文商品情報詳細／料金計算
+$itemSubtotalTotal = 0;
+if (!empty($orderItems)) {
+  foreach ($orderItems as $orderItem) {
+    $itemTaxRate = isset($orderItem['tax_rate']) ? (int)$orderItem['tax_rate'] : 10;
+    if ($itemTaxRate <= 0) {
+      $itemTaxRate = 10;
+    }
+    $itemNameHtml = htmlspecialchars((string)($orderItem['product_name'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $itemUnitPrice = (int)round((int)($orderItem['unit_price'] ?? 0) * (1 + ($itemTaxRate / 100)));
+    $itemSubtotal = (int)round((int)($orderItem['subtotal'] ?? 0) * (1 + ($itemTaxRate / 100)));
+    $itemSubtotalTotal += $itemSubtotal;
+    $itemUnitPriceHtml = htmlspecialchars(number_format($itemUnitPrice), ENT_QUOTES, 'UTF-8');
+    $itemQuantityHtml = htmlspecialchars(number_format((int)($orderItem['quantity'] ?? 0)), ENT_QUOTES, 'UTF-8');
+    $itemSubtotalHtml = htmlspecialchars(number_format($itemSubtotal), ENT_QUOTES, 'UTF-8');
+    print <<<HTML
                 <li>
                   <div class="item-name">
-                    <span>彩のジェラートCUBE<i>
-                        フレーバー： チョコ / サイズ： 32mm × 32mm</i></span>
+                    <span>{$itemNameHtml}</span>
                   </div>
                   <div class="item-price">
-                    <span>1200</span>
+                    <span>{$itemUnitPriceHtml}</span>
                   </div>
                   <div class="item-count">
-                    <span>12</span>
+                    <span>{$itemQuantityHtml}</span>
                   </div>
                   <div class="item-price">
-                    <span>12000</span>
+                    <span>{$itemSubtotalHtml}</span>
                   </div>
                   <div class="item-return">
                     <label>
-                      <input type="checkbox" name="sendOtherUserReturn">
-                    </label>
-                  </div>
-                </li>
-                <li>
-                  <div class="item-name">
-                    <span>彩のジェラートCUBE<i>
-                        フレーバー： チョコ / サイズ： 32mm × 32mm</i></span>
-                  </div>
-                  <div class="item-price">
-                    <span>1200</span>
-                  </div>
-                  <div class="item-count">
-                    <span>12</span>
-                  </div>
-                  <div class="item-price">
-                    <span>12000</span>
-                  </div>
-                  <div class="item-return">
-                    <label>
-                      <input type="checkbox" name="sendOtherUserReturn">
-                    </label>
-                  </div>
-                </li>
-                <li>
-                  <div class="item-name">
-                    <span>彩のジェラートCUBE<i>
-                        フレーバー： チョコ / サイズ： 32mm × 32mm</i></span>
-                  </div>
-                  <div class="item-price">
-                    <span>1200</span>
-                  </div>
-                  <div class="item-count">
-                    <span>12</span>
-                  </div>
-                  <div class="item-price">
-                    <span>12000</span>
-                  </div>
-                  <div class="item-return">
-                    <label>
-                      <input type="checkbox" name="sendOtherUserReturn">
+                      <input type="checkbox" name="orderUserReturn">
                     </label>
                   </div>
                 </li>
 
+HTML;
+  }
+} else {
+  print <<<HTML
+                <li>
+                  <div class="item-name">
+                    <span>購入商品情報なし</span>
+                  </div>
+                  <div class="item-price"><span>0</span></div>
+                  <div class="item-count"><span>0</span></div>
+                  <div class="item-price"><span>0</span></div>
+                  <div class="item-return"></div>
+                </li>
 
-
+HTML;
+}
+#料金表示用に金額をエスケープ
+$itemSubtotalTotalHtml = htmlspecialchars(number_format($itemSubtotalTotal), ENT_QUOTES, 'UTF-8');
+$deliveryFeeTotalHtml = htmlspecialchars(number_format((int)($orderDetail['delivery_fee_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
+$paymentTotalHtml = htmlspecialchars(number_format((int)($orderDetail['payment_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
+print <<<HTML
               </ul>
-
-
               <dl>
                 <div>
                   <dt>小計</dt>
-                  <dd>6,200</dd>
+                  <dd>{$itemSubtotalTotalHtml}</dd>
                 </div>
                 <div>
                   <dt>送料</dt>
-                  <dd>500</dd>
+                  <dd>{$deliveryFeeTotalHtml}</dd>
                 </div>
                 <div>
                   <dt>合計</dt>
-                  <dd>6,700</dd>
+                  <dd>{$paymentTotalHtml}</dd>
                 </div>
               </dl>
-
-
             </section>
           </article>
           <article class="block-refund-process">
@@ -504,33 +559,39 @@ print <<<HTML
           <article class="block-description" {$viewModeStyle}>
             <h3>ショップ用メモ</h3>
             <div class="block-inner">
-              <textarea name="productDescription" id="productDescription"></textarea>
+              <textarea name="productDescription" id="productDescription">{$shopNoteHtml}</textarea>
             </div>
           </article>
           <div class="box-btn">
-            <button type="button" class="btn-pdf"><span>納品書出力</span></button>
-
-HTML;
-if ($method !== 'readonly') {
-  print <<<HTML
-            <button type="button" class="btn-edit">編集する</button>
-
-HTML;
-} else {
-  print <<<HTML
-            <button type="button" class="btn-cancel">キャンセル</button>
-            <button type="button" class="btn-confirmed">保存する</button>
-
-HTML;
-}
-print <<<HTML
+            <button type="button" class="btn-pdf" id="btnPdf"><span>納品書出力</span></button>
+            <button type="button" class="btn-edit" id="btnEdit">編集する</button>
+            <button type="button" class="btn-cancel" id="btnCancel" style="display:none;">キャンセル</button>
+            <button type="button" class="btn-confirmed" id="btnSave" style="display:none;">保存する</button>
           </div>
         </form>
         <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
       </div>
     </div>
   </main>
+  <!-- NOTE 修正画面用 is-active付与でモーダル表示 -->
+  <article class="modal-alert" id="modalBlock">
+    <div class="inner-modal">
+      <div class="box-title">
+        <p>受注詳細編集</p>
+        <button type="button" onclick="closeModal()" class="btn-top-close"></button>
+      </div>
+      <div class="box-details">
+        <p></p>
+        <div class="box-btn">
+          <button type="button" class="btn-cancel" onclick="closeModal()">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </article>
   <script src="../assets/js/common.js" defer></script>
+  <script src="../assets/js/modal.js" defer></script>
+  <script src="../assets/js/form.js" defer></script>
+  <script src="./assets/js/client03_01_01.js" defer></script>
 </body>
 
 </html>

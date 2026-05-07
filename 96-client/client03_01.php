@@ -158,6 +158,8 @@ $orderIds = array_map(function ($order) {
   return (int)($order['order_id'] ?? 0);
 }, $orderList);
 $orderItemsByOrderId = getShopOrderItemsByOrderIds($orderIds);
+
+
 $orderNoHtml = htmlspecialchars($searchConditions['orderNo'], ENT_QUOTES, 'UTF-8');
 $ordererNameHtml = htmlspecialchars($searchConditions['ordererName'], ENT_QUOTES, 'UTF-8');
 $ordererEmailHtml = htmlspecialchars($searchConditions['ordererEmail'], ENT_QUOTES, 'UTF-8');
