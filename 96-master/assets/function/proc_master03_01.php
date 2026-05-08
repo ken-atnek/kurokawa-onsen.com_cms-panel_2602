@@ -106,7 +106,7 @@ $makeTag['noUpDateKey'] = ($currentNoUpDateKey !== '' ? $currentNoUpDateKey : $n
 #-------------#
 #検索・ステータス変更
 $action = isset($_POST['action']) ? (string)$_POST['action'] : '';
-$allowedListStatusIds = ['1', '4', '5'];
+$allowedListStatusIds = ['1', '4', '5', '9'];
 if ($action === 'updateStatus') {
   header('Content-Type: application/json; charset=UTF-8');
   $orderIdRaw = isset($_POST['orderId']) ? trim((string)$_POST['orderId']) : '';
@@ -319,6 +319,7 @@ if (!empty($orderList)) {
     $itemSubtotal = htmlspecialchars(number_format((int)($order['item_subtotal'] ?? 0)), ENT_QUOTES, 'UTF-8');
     $deliveryFeeTotal = htmlspecialchars(number_format((int)($order['delivery_fee_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
     $paymentTotal = htmlspecialchars(number_format((int)($order['payment_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
+    $ordererMessageHtml = htmlspecialchars((string)($order['orderer_message'] ?? ''), ENT_QUOTES, 'UTF-8');
     $orderedAt = formatMasterOrderDate($order['ordered_at'] ?? '');
     $updatedAt = formatMasterOrderDate($order['updated_at'] ?? '');
     $statusChangedAt = (array_key_exists('status_changed_at', $order)) ? formatMasterOrderDate($order['status_changed_at'] ?? '') : '-';
@@ -363,11 +364,13 @@ HTML;
         }
         $itemSubtotalIncludingTax = (int)round((int)($orderItem['subtotal'] ?? 0) * (1 + ($itemTaxRate / 100)));
         $itemSubtotal = htmlspecialchars(number_format($itemSubtotalIncludingTax), ENT_QUOTES, 'UTF-8');
+        $currentItemStatus = trim((string)($orderItem['current_item_status'] ?? ''));
+        $returnedItemStyle = ($currentItemStatus === 'returned_full') ? ' style="text-decoration: line-through; color: #979797;"' : '';
         $makeTag['tag'] .= <<<HTML
                     <li>
-                      <div class="goods-name">{$itemProductName}</div>
-                      <div class="goods-pieces">{$itemQuantity}</div>
-                      <div class="goods-price"><span>{$itemSubtotal}</span></div>
+                      <div class="goods-name"{$returnedItemStyle}>{$itemProductName}</div>
+                      <div class="goods-pieces"{$returnedItemStyle}>{$itemQuantity}</div>
+                      <div class="goods-price"{$returnedItemStyle}><span>{$itemSubtotal}</span></div>
                     </li>
 
 HTML;
@@ -382,11 +385,12 @@ HTML;
 
 HTML;
     }
+    $returnedDeliveryStyle = ((int)($order['eccube_order_status_id'] ?? 0) === 9) ? ' style="text-decoration: line-through; color: #979797;"' : '';
     $makeTag['tag'] .= <<<HTML
                   </ul>
                   <div class="item-shipping">
                     <div class="title">送料</div>
-                    <div class="shipping-price"><span>{$deliveryFeeTotal}</span></div>
+                    <div class="shipping-price"{$returnedDeliveryStyle}><span>{$deliveryFeeTotal}</span></div>
                   </div>
                   <div class="item-price">
                     <span>{$paymentTotal}</span>
@@ -402,7 +406,7 @@ HTML;
     $targetOrderStatusIdHtml = htmlspecialchars($targetOrderStatusId, ENT_QUOTES, 'UTF-8');
     $targetOrderStatusNameHtml = htmlspecialchars($targetOrderStatusName, ENT_QUOTES, 'UTF-8');
     $targetOrderStatusClass = ($targetOrderStatusId !== '') ? ' is-selected' : '';
-    $canChangeStatus = in_array((int)$targetOrderStatusId, [1, 4, 5], true);
+    $canChangeStatus = in_array((int)$targetOrderStatusId, [1, 4, 5, 9], true);
     $makeTag['tag'] .= <<<HTML
                 <div class="wrap-status">
                   <div class="apply-status{$targetOrderStatusClass}" data-selectbox data-order-id="{$orderId}" data-current-status="{$targetOrderStatusIdHtml}">
@@ -427,7 +431,6 @@ HTML;
                     <div class="list-wrapper">
                       <ul class="selectbox__panel">
 
-
 HTML;
       if (!empty($orderStatusList)) {
         foreach ($orderStatusList as $status) {
@@ -450,7 +453,7 @@ HTML;
             case '5':
               $statusClass = 'status-shipped';
               break;
-            case '99':
+            case '9':
               $statusClass = 'status-completed';
               break;
           }
@@ -481,7 +484,7 @@ HTML;
                 </div>
                 <div class="box-note">
                   <span>メモ</span>
-                  <textarea></textarea>
+                  <textarea>{$ordererMessageHtml}</textarea>
                 </div>
               </li>
 

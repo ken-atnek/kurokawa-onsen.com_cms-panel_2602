@@ -175,6 +175,7 @@ $shippingAddr02Html = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['sh
 $shippingTelHtml = $hasOrderDetail ? hClientOrderDetailInput($orderDetail['shipping_tel'] ?? '') : '';
 $deliveryFeeTotalHtml = $hasOrderDetail ? formatClientOrderDetailMoney($orderDetail['delivery_fee_total'] ?? 0) : '0';
 $paymentTotalHtml = $hasOrderDetail ? formatClientOrderDetailMoney($orderDetail['payment_total'] ?? 0) : '0';
+$paymentTotalValueHtml = htmlspecialchars((string)((int)($orderDetail['payment_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
 $shopNoteHtml = $hasOrderDetail ? htmlspecialchars((string)($orderDetail['note'] ?? ''), ENT_QUOTES, 'UTF-8') : '';
 $itemSubtotalTotal = 0;
 
@@ -222,6 +223,7 @@ print <<<HTML
       <div class="block_inner">
         <h2>受注詳細</h2>
         <form name="inputForm" class="inputForm">
+          <input type="hidden" id="paymentTotalValue" value="{$paymentTotalValueHtml}">
           <article class="block-customer-info" {$viewModeStyle}>
             <h3>注文者情報</h3>
             <section>
@@ -477,28 +479,40 @@ if (!empty($orderItems)) {
     $itemNameHtml = htmlspecialchars((string)($orderItem['product_name'] ?? ''), ENT_QUOTES, 'UTF-8');
     $itemUnitPrice = (int)round((int)($orderItem['unit_price'] ?? 0) * (1 + ($itemTaxRate / 100)));
     $itemSubtotal = (int)round((int)($orderItem['subtotal'] ?? 0) * (1 + ($itemTaxRate / 100)));
-    $itemSubtotalTotal += $itemSubtotal;
     $itemUnitPriceHtml = htmlspecialchars(number_format($itemUnitPrice), ENT_QUOTES, 'UTF-8');
     $itemQuantityHtml = htmlspecialchars(number_format((int)($orderItem['quantity'] ?? 0)), ENT_QUOTES, 'UTF-8');
     $itemSubtotalHtml = htmlspecialchars(number_format($itemSubtotal), ENT_QUOTES, 'UTF-8');
+    $orderItemId = (int)($orderItem['order_item_id'] ?? 0);
+    $orderItemIdHtml = htmlspecialchars((string)$orderItemId, ENT_QUOTES, 'UTF-8');
+    $currentItemStatus = trim((string)($orderItem['current_item_status'] ?? ''));
+    $isReturnedFull = ($currentItemStatus === 'returned_full');
+    if ($isReturnedFull === false) {
+      $itemSubtotalTotal += $itemSubtotal;
+    }
+    #$returnedItemStyle = $isReturnedFull ? ' style="text-decoration: line-through; color: #979797;"' : '';
+    $returnedItemStyle = '';
+    $returnChecked = $isReturnedFull ? ' checked' : '';
+    $returnDisabled = $isReturnedFull ? ' disabled' : '';
+    $returnedLabel = $isReturnedFull ? '<span>返品済み</span>' : '';
     print <<<HTML
                 <li>
-                  <div class="item-name">
+                  <div class="item-name" {$returnedItemStyle}>
                     <span>{$itemNameHtml}</span>
                   </div>
-                  <div class="item-price">
+                  <div class="item-price" {$returnedItemStyle}>
                     <span>{$itemUnitPriceHtml}</span>
                   </div>
-                  <div class="item-count">
+                  <div class="item-count" {$returnedItemStyle}>
                     <span>{$itemQuantityHtml}</span>
                   </div>
-                  <div class="item-price">
+                  <div class="item-price" {$returnedItemStyle}>
                     <span>{$itemSubtotalHtml}</span>
                   </div>
                   <div class="item-return">
                     <label>
-                      <input type="checkbox" name="orderUserReturn">
+                      <input type="checkbox" name="return_order_item_ids[]" value="{$orderItemIdHtml}" class="return-item-checkbox" data-order-item-id="{$orderItemIdHtml}"{$returnChecked}{$returnDisabled}>
                     </label>
+                    <!-- {$returnedLabel} -->
                   </div>
                 </li>
 
@@ -522,6 +536,7 @@ HTML;
 $itemSubtotalTotalHtml = htmlspecialchars(number_format($itemSubtotalTotal), ENT_QUOTES, 'UTF-8');
 $deliveryFeeTotalHtml = htmlspecialchars(number_format((int)($orderDetail['delivery_fee_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
 $paymentTotalHtml = htmlspecialchars(number_format((int)($orderDetail['payment_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
+$returnedDeliveryStyle = ((int)($orderDetail['eccube_order_status_id'] ?? 0) === 9) ? ' style="text-decoration: line-through; color: #979797;"' : '';
 print <<<HTML
               </ul>
               <dl>
@@ -531,7 +546,7 @@ print <<<HTML
                 </div>
                 <div>
                   <dt>送料</dt>
-                  <dd>{$deliveryFeeTotalHtml}</dd>
+                  <dd{$returnedDeliveryStyle}>{$deliveryFeeTotalHtml}</dd>
                 </div>
                 <div>
                   <dt>合計</dt>
@@ -545,15 +560,15 @@ print <<<HTML
             <div class="block-inner">
               <div class="item-check">
                 <label>
-                  <input type="checkbox">
+                  <input type="checkbox" id="executeZeusRefund" name="execute_zeus_refund" value="1">
                 </label>
                 <span>返金処理を行う</span>
               </div>
               <div class="item-price">
-                <input type="text">
+                <input type="text" id="refundTotal" name="refund_total" inputmode="numeric" autocomplete="off">
                 <span>円</span>
               </div>
-              <button type="button">返金処理を行う</button>
+              <button type="button" id="processReturnButton" disabled>返金処理を行う</button>
             </div>
           </article>
           <article class="block-description" {$viewModeStyle}>

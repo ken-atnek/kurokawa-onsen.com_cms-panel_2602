@@ -57,7 +57,160 @@ const prefIdMap = {
 let lastOrdererPostalCode = "";
 let lastShippingPostalCode = "";
 const editableBlocks = ".block-customer-info, .block-shipping-info, .block-description";
+let isReturnProcessing = false;
 
+/**
+ * 返品ボタン状態更新
+ *  未返品商品のチェック、返金金額、返金実行チェックの3条件で返金ボタン活性を切り替える。
+ */
+function updateReturnButtonState() {
+    const returnButton = document.getElementById("processReturnButton");
+    if (!returnButton) {
+        return;
+    }
+    const checkedItems = document.querySelectorAll('input[name="return_order_item_ids[]"]:checked:not(:disabled)');
+    const refundTotal = document.getElementById("refundTotal");
+    const executeZeusRefund = document.getElementById("executeZeusRefund");
+    const normalizedRefundValue = String(refundTotal?.value || "").replace(/[^\d]/g, "");
+    if (refundTotal) {
+        refundTotal.value = normalizedRefundValue;
+    }
+    const hasReturnItem = checkedItems.length > 0;
+    const hasRefundTotal = /^\d+$/.test(normalizedRefundValue) && parseInt(normalizedRefundValue, 10) > 0;
+    const canExecute = executeZeusRefund?.checked === true;
+    const paymentTotalRaw = String(document.getElementById("paymentTotalValue")?.value || "").replace(/[^\d]/g, "");
+    const paymentTotal = /^\d+$/.test(paymentTotalRaw) ? parseInt(paymentTotalRaw, 10) : 0;
+    const refundTotalValue = /^\d+$/.test(normalizedRefundValue) ? parseInt(normalizedRefundValue, 10) : 0;
+    const changeMoney = paymentTotal - refundTotalValue;
+    const canRefundByAmount = paymentTotal > 0 && refundTotalValue > 0 && refundTotalValue < paymentTotal && changeMoney >= 1;
+    if (isReturnProcessing === true) {
+        returnButton.disabled = true;
+        return;
+    }
+    returnButton.disabled = !(hasReturnItem && hasRefundTotal && canExecute && canRefundByAmount);
+}
+/**
+ * 返品未実装モーダル表示
+ *  返金ボタン押下時に、サーバー未実装の案内モーダルを表示する。
+ */
+function showReturnNotImplementedModal() {
+    const opened = setOrderDetailModal("返金処理", "返品処理のサーバー実装は未実装です。", '<button type="button" class="btn-cancel" id="btnReturnNotImplementedClose">閉じる</button>', closeOrderDetailModal);
+    if (!opened) {
+        return;
+    }
+    document.getElementById("btnReturnNotImplementedClose")?.addEventListener("click", closeOrderDetailModal);
+}
+/**
+ * 返金ボタン押下処理
+ *  返金ボタン有効時のみ未実装案内モーダルを表示する。
+ */
+function handleReturnButtonClick() {
+    const returnButton = document.getElementById("processReturnButton");
+    if (!returnButton || returnButton.disabled === true || isReturnProcessing === true) {
+        return;
+    }
+    openReturnConfirmModal();
+}
+/**
+ * 返品処理確認モーダル表示
+ *  返金ボタン押下時に確認モーダルを表示し、はい押下時のみ返品Ajax送信を実行する。
+ */
+function openReturnConfirmModal() {
+    const opened = setOrderDetailModal("返金処理確認", "選択した商品を返品し、入力した金額にて返金を行います。<br>よろしいですか？", '<button type="button" class="btn-cancel" id="btnReturnNo">いいえ</button><button type="button" class="btn-confirm" id="btnReturnYes">はい</button>', closeOrderDetailModal);
+    if (!opened) {
+        return;
+    }
+    document.getElementById("btnReturnNo")?.addEventListener("click", closeOrderDetailModal);
+    document.getElementById("btnReturnYes")?.addEventListener("click", processOrderReturn);
+}
+/**
+ * 返品処理結果モーダル表示
+ *  success/warning時に結果モーダルを表示し、閉じる操作後にページ再読み込みする。
+ */
+function openReturnResultReloadModal(title, message) {
+    const closeAndReload = () => {
+        closeOrderDetailModal();
+        window.location.reload();
+    };
+    const opened = setOrderDetailModal(title, message, '<button type="button" class="btn-cancel" id="btnReturnResultClose">閉じる</button>', closeAndReload);
+    if (!opened) {
+        window.location.reload();
+        return;
+    }
+    document.getElementById("btnReturnResultClose")?.addEventListener("click", closeAndReload);
+}
+/**
+ * 返品Ajax送信
+ *  action=processReturn をPOST送信し、success/warning/errorでモーダル表示を切り替える。
+ */
+async function processOrderReturn() {
+    closeOrderDetailModal();
+    const returnButton = document.getElementById("processReturnButton");
+    const inputForm = document.querySelector('form[name="inputForm"]');
+    if (!returnButton || !inputForm) {
+        return;
+    }
+    if (isReturnProcessing === true) {
+        return;
+    }
+    isReturnProcessing = true;
+    returnButton.disabled = true;
+    const formData = new FormData(inputForm);
+    const orderId = new URLSearchParams(window.location.search).get("orderId") || "";
+    formData.set("action", "processReturn");
+    formData.set("orderId", orderId);
+    try {
+        const response = await fetch(requestURL, {
+            method: "POST",
+            body: formData,
+        });
+        if (!response.ok) {
+            throw new Error("Network error");
+        }
+        const result = await response.json();
+        const status = String(result?.status || "").toLowerCase();
+        if (status === "success") {
+            openReturnResultReloadModal("返品処理完了", result.msg || "返品処理が完了しました。");
+            return;
+        }
+        if (status === "warning") {
+            openReturnResultReloadModal("返品処理完了（要確認）", result.msg || "返金処理は完了しましたが、EC-CUBE返品通知に失敗しました。管理者に確認してください。");
+            return;
+        }
+        isReturnProcessing = false;
+        updateReturnButtonState();
+        openOrderDetailErrorModal(result.msg || "返品処理に失敗しました。");
+    } catch (error) {
+        console.error("返品処理エラー:", error);
+        isReturnProcessing = false;
+        updateReturnButtonState();
+        openOrderDetailErrorModal("通信エラーが発生しました。ページを再読み込みしてください。");
+    }
+}
+/**
+ * 返品イベント登録
+ *  返品対象チェック、返金金額、返金実行チェック、返金ボタン押下のイベントを登録する。
+ */
+function bindReturnEvents() {
+    const returnItemCheckboxes = document.querySelectorAll('input[name="return_order_item_ids[]"]');
+    returnItemCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", updateReturnButtonState);
+    });
+    const refundTotal = document.getElementById("refundTotal");
+    if (refundTotal) {
+        refundTotal.addEventListener("input", updateReturnButtonState);
+        refundTotal.addEventListener("blur", updateReturnButtonState);
+    }
+    const executeZeusRefund = document.getElementById("executeZeusRefund");
+    if (executeZeusRefund) {
+        executeZeusRefund.addEventListener("change", updateReturnButtonState);
+    }
+    const returnButton = document.getElementById("processReturnButton");
+    if (returnButton) {
+        returnButton.addEventListener("click", handleReturnButtonClick);
+    }
+    updateReturnButtonState();
+}
 /**
  * 郵便番号正規化
  *  ハイフン・空白を除去し、7桁数字の場合のみ正規化済み郵便番号を返す。
@@ -235,6 +388,7 @@ function bindPostalCodeEvents() {
 document.addEventListener("DOMContentLoaded", () => {
     bindPostalCodeEvents();
     initializePrefIdFromPostalCode();
+    bindReturnEvents();
     document.getElementById("btnEdit")?.addEventListener("click", openOrderDetailEditConfirmModal);
     document.getElementById("btnCancel")?.addEventListener("click", () => {
         window.location.reload();
@@ -291,6 +445,23 @@ function closeOrderDetailModal() {
     document.documentElement.style.overflow = "";
 }
 /**
+ * 受注詳細モーダル本文設定
+ *  文字列内の <br>/<br />/\n を分解し、安全に改行として表示する。
+ */
+function setOrderDetailModalMessage(messageEl, message) {
+    if (!messageEl) {
+        return;
+    }
+    messageEl.textContent = "";
+    const parts = String(message || "").split(/<br\s*\/?>|\n/i);
+    parts.forEach((part, index) => {
+        if (index > 0) {
+            messageEl.appendChild(document.createElement("br"));
+        }
+        messageEl.appendChild(document.createTextNode(part));
+    });
+}
+/**
  * 受注詳細モーダル設定
  *  既存modalBlockのタイトル・本文・ボタンを差し替えて表示する。
  */
@@ -302,7 +473,7 @@ function setOrderDetailModal(title, message, buttonsHtml, topCloseHandler) {
     const titleEl = blockModal.querySelector(".box-title p");
     if (titleEl) titleEl.textContent = title;
     const messageEl = blockModal.querySelector(".box-details p");
-    if (messageEl) messageEl.textContent = message;
+    setOrderDetailModalMessage(messageEl, message);
     const btnArea = blockModal.querySelector(".box-btn");
     if (btnArea) {
         btnArea.querySelectorAll("button").forEach((button) => button.remove());
@@ -374,7 +545,7 @@ function openOrderDetailCompleteModal(message = "保存しました。") {
  *  保存失敗または通信エラーの内容を既存モーダルで表示する。
  */
 function openOrderDetailErrorModal(message = "保存に失敗しました。") {
-    const opened = setOrderDetailModal("受注情報保存エラー", message, '<button type="button" class="btn-cancel" id="btnOrderDetailErrorClose">閉じる</button>', closeOrderDetailModal);
+    const opened = setOrderDetailModal("受注情報更新失敗", message, '<button type="button" class="btn-cancel" id="btnOrderDetailErrorClose">閉じる</button>', closeOrderDetailModal);
     if (!opened) {
         alert(message);
         return;

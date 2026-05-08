@@ -122,7 +122,7 @@ foreach ($requiredKeys as $requiredKey) {
   }
 }
 $_SESSION[$searchConditionsSessionKey] = $searchConditions;
-$allowedListStatusIds = ['1', '4', '5'];
+$allowedListStatusIds = ['1', '4', '5', '9'];
 if ((string)($searchConditions['searchStatus'] ?? '') !== '' && in_array((string)$searchConditions['searchStatus'], $allowedListStatusIds, true) === false) {
   $searchConditions['searchStatus'] = '';
   $_SESSION[$searchConditionsSessionKey] = $searchConditions;
@@ -159,7 +159,7 @@ $orderIds = array_map(function ($order) {
 }, $orderList);
 $orderItemsByOrderId = getShopOrderItemsByOrderIds($orderIds);
 
-
+#検索条件のHTMLエスケープ
 $orderNoHtml = htmlspecialchars($searchConditions['orderNo'], ENT_QUOTES, 'UTF-8');
 $ordererNameHtml = htmlspecialchars($searchConditions['ordererName'], ENT_QUOTES, 'UTF-8');
 $ordererEmailHtml = htmlspecialchars($searchConditions['ordererEmail'], ENT_QUOTES, 'UTF-8');
@@ -342,6 +342,7 @@ if (!empty($orderList)) {
     $itemSubtotal = htmlspecialchars(number_format((int)($order['item_subtotal'] ?? 0)), ENT_QUOTES, 'UTF-8');
     $deliveryFeeTotal = htmlspecialchars(number_format((int)($order['delivery_fee_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
     $paymentTotal = htmlspecialchars(number_format((int)($order['payment_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
+    $ordererMessageHtml = htmlspecialchars((string)($order['orderer_message'] ?? ''), ENT_QUOTES, 'UTF-8');
     $orderedAt = formatClientOrderDate($order['ordered_at'] ?? '');
     $updatedAt = formatClientOrderDate($order['updated_at'] ?? '');
     $statusChangedAt = (array_key_exists('status_changed_at', $order)) ? formatClientOrderDate($order['status_changed_at'] ?? '') : '-';
@@ -357,7 +358,7 @@ if (!empty($orderList)) {
                 <div class="inner-customer">
                   <div class="name"><a href="./client03_01_01.php?method=readonly&orderId={$orderId}" style="font-size:inherit;">{$ordererName}</a></div>
                   <div class="address">
-                    <span>{$ordererPostalCode} {$ordererPrefName}{$ordererAddr01}</span>
+                    <span><!--{$ordererPostalCode}-->{$ordererPrefName}{$ordererAddr01}</span>
                     <span>{$ordererAddr02}</span>
                   </div>
                   <div class="tel">
@@ -384,11 +385,13 @@ HTML;
         }
         $itemSubtotalIncludingTax = (int)round((int)($orderItem['subtotal'] ?? 0) * (1 + ($itemTaxRate / 100)));
         $itemSubtotal = htmlspecialchars(number_format($itemSubtotalIncludingTax), ENT_QUOTES, 'UTF-8');
+        $currentItemStatus = trim((string)($orderItem['current_item_status'] ?? ''));
+        $returnedItemStyle = ($currentItemStatus === 'returned_full') ? ' style="text-decoration: line-through; color: #979797;"' : '';
         print <<<HTML
                   <li>
-                    <div class="goods-name">{$itemProductName}</div>
-                    <div class="goods-pieces">{$itemQuantity}</div>
-                    <div class="goods-price"><span>{$itemSubtotal}</span></div>
+                    <div class="goods-name"{$returnedItemStyle}>{$itemProductName}</div>
+                    <div class="goods-pieces"{$returnedItemStyle}>{$itemQuantity}</div>
+                    <div class="goods-price"{$returnedItemStyle}><span>{$itemSubtotal}</span></div>
                   </li>
 
 HTML;
@@ -403,11 +406,12 @@ HTML;
 
 HTML;
     }
+    $returnedDeliveryStyle = ((int)($order['eccube_order_status_id'] ?? 0) === 9) ? ' style="text-decoration: line-through; color: #979797;"' : '';
     print <<<HTML
                 </ul>
                 <div class="item-shipping">
                   <div class="title">送料</div>
-                  <div class="shipping-price"><span>{$deliveryFeeTotal}</span></div>
+                  <div class="shipping-price"{$returnedDeliveryStyle}><span>{$deliveryFeeTotal}</span></div>
                 </div>
                 <div class="item-price">
                   <span>{$paymentTotal}</span>
@@ -431,7 +435,7 @@ HTML;
     $targetOrderStatusIdHtml = htmlspecialchars($targetOrderStatusId, ENT_QUOTES, 'UTF-8');
     $targetOrderStatusNameHtml = htmlspecialchars($targetOrderStatusName, ENT_QUOTES, 'UTF-8');
     $targetOrderStatusClass = ($targetOrderStatusId !== '') ? ' is-selected' : '';
-    $canChangeStatus = in_array((int)$targetOrderStatusId, [1, 4, 5], true);
+    $canChangeStatus = in_array((int)$targetOrderStatusId, [1, 4, 5, 9], true);
     print <<<HTML
               <div class="wrap-status">
                 <div class="apply-status{$targetOrderStatusClass}" data-selectbox data-order-id="{$orderId}" data-current-status="{$targetOrderStatusIdHtml}">
@@ -447,8 +451,13 @@ HTML;
       #受注受付ステータスが選択されている場合
       #Liのz-index設定
       $zIndexStyle = 'style="z-index:' . ($zIndexNo - $orderKey) . ';"';
+      #返品ステータスは変更不可
+      $pointerEvents = '';
+      if ((int)$targetOrderStatusId === 9) {
+        $pointerEvents = 'style="pointer-events:none;"';
+      }
       print <<<HTML
-                  <button type="button" class="selectbox__head" aria-expanded="false">
+                  <button type="button" class="selectbox__head" aria-expanded="false" {$pointerEvents}>
                     <input type="hidden" name="List01Status" value="{$targetOrderStatusIdHtml}" data-selectbox-hidden>
                     <span class="selectbox__value" data-selectbox-value>{$targetOrderStatusNameHtml}</span>
                     <i></i>
@@ -478,7 +487,7 @@ HTML;
             case '5':
               $statusClass = 'status-shipped';
               break;
-            case '99':
+            case '9':
               $statusClass = 'status-completed';
               break;
           }
@@ -509,7 +518,7 @@ HTML;
               </div>
               <div class="box-note">
                 <span>メモ</span>
-                <textarea></textarea>
+                <textarea>{$ordererMessageHtml}</textarea>
               </div>
             </li>
 

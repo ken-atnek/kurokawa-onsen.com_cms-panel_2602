@@ -69,6 +69,19 @@ function fetchEccubeOrderForWebhook($eccubeOrderId)
 	}
 	return null;
 }
+/*
+ * 外部システム保存用受注ステータス正規化
+ * EC-CUBEの 6=入金済み は、外部システムでは 1=新規受付 に正規化する。
+ */
+function normalizeOrderStatusForExternalSystem($statusId, $statusName)
+{
+	$statusId = (int)$statusId;
+	$statusName = (string)$statusName;
+	if ($statusId === 6) {
+		return [1, '新規受付'];
+	}
+	return [$statusId, $statusName];
+}
 $pendingLogs = getPendingOrderWebhookLogs();
 $latestLogIdByEccubeId = [];
 foreach ($pendingLogs as $log) {
@@ -133,6 +146,8 @@ foreach ($pendingLogs as $log) {
 		continue;
 	}
 	$orderStatusId = isset($order['order_status_id']) ? (int)$order['order_status_id'] : 0;
+	$orderStatusName = isset($order['order_status_name']) ? (string)$order['order_status_name'] : null;
+	list($normalizedOrderStatusId, $normalizedOrderStatusName) = normalizeOrderStatusForExternalSystem($orderStatusId, $orderStatusName);
 	if (in_array($orderStatusId, [7, 8], true)) {
 		$reason = 'status_id=7/8 はスキップ';
 		updateWebhookLogStatus($logId, 'skipped', $reason);
@@ -141,7 +156,11 @@ foreach ($pendingLogs as $log) {
 		continue;
 	}
 	$orderItems = isset($order['order_items']) && is_array($order['order_items']) ? $order['order_items'] : [];
+	$currentOrderForMail = getShopOrderByEccubeOrderId($eccubeId);
 	$shopId = resolveShopIdFromOrderItems($orderItems);
+	if (($shopId === false || (int)$shopId < 1) && is_array($currentOrderForMail) && isset($currentOrderForMail['shop_id']) && (int)$currentOrderForMail['shop_id'] > 0) {
+		$shopId = (int)$currentOrderForMail['shop_id'];
+	}
 	if ($shopId === false || (int)$shopId < 1) {
 		$reason = 'shop_id特定失敗';
 		updateWebhookLogStatus($logId, 'failed', $reason);
@@ -178,14 +197,13 @@ foreach ($pendingLogs as $log) {
 		'shipping_addr01' => isset($order['shipping_addr01']) ? $order['shipping_addr01'] : null,
 		'shipping_addr02' => isset($order['shipping_addr02']) ? $order['shipping_addr02'] : null,
 		'shipping_tel' => isset($order['shipping_tel']) ? $order['shipping_tel'] : null,
-		'eccube_order_status_id' => $orderStatusId,
-		'eccube_order_status_name' => isset($order['order_status_name']) ? $order['order_status_name'] : null,
+		'eccube_order_status_id' => $normalizedOrderStatusId,
+		'eccube_order_status_name' => $normalizedOrderStatusName,
 		'payment_total' => isset($order['payment_total']) ? (int)$order['payment_total'] : 0,
 		'delivery_fee_total' => isset($order['delivery_fee_total']) ? (int)$order['delivery_fee_total'] : 0,
 		'zeus_order_id' => isset($order['zeus_order_id']) ? $order['zeus_order_id'] : null,
 		'ordered_at' => isset($order['update_date']) ? $order['update_date'] : null,
 	];
-	$currentOrderForMail = getShopOrderByEccubeOrderId($eccubeId);
 	$isNewOrderForMail = empty($currentOrderForMail);
 	if (DB_Transaction(1) !== true) {
 		$reason = 'DBトランザクション開始失敗';
@@ -205,7 +223,7 @@ foreach ($pendingLogs as $log) {
 		logProcessOrderWebhookLogs($reason, ['log_id' => $logId, 'eccube_id' => $eccubeId, 'shop_id' => $shopId]);
 		continue;
 	}
-	if (deleteShopOrderItems((int)$orderId) !== true) {
+	if (deleteShopOrderItemsExceptReturnedFull((int)$orderId, (int)$shopId) !== true) {
 		DB_Transaction(3);
 		$reason = 'shop_order_items削除失敗';
 		updateWebhookLogStatus($logId, 'failed', $reason);
@@ -214,12 +232,16 @@ foreach ($pendingLogs as $log) {
 		logProcessOrderWebhookLogs($reason, ['log_id' => $logId, 'eccube_id' => $eccubeId, 'order_id' => $orderId]);
 		continue;
 	}
+	$returnedProductClassCodeMap = getReturnedProductClassCodeMap((int)$orderId);
 	$itemSaveFailed = false;
 	foreach ($orderItems as $orderItem) {
 		if (is_array($orderItem) === false) {
 			continue;
 		}
 		$productClassCode = isset($orderItem['product_class_code']) && trim((string)$orderItem['product_class_code']) !== '' ? trim((string)$orderItem['product_class_code']) : null;
+		if ($productClassCode !== null && isset($returnedProductClassCodeMap[$productClassCode])) {
+			continue;
+		}
 		$unitPrice = isset($orderItem['price']) ? (int)$orderItem['price'] : 0;
 		$quantity = isset($orderItem['quantity']) ? (int)$orderItem['quantity'] : 0;
 		$itemData = [

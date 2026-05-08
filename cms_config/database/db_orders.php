@@ -321,12 +321,14 @@ function upsertShopOrder($shopId, $orderData)
 			'shipping_addr01' => [':shipping_addr01', $shippingAddr01, ($shippingAddr01 === null) ? 2 : 0],
 			'shipping_addr02' => [':shipping_addr02', $shippingAddr02, ($shippingAddr02 === null) ? 2 : 0],
 			'shipping_tel' => [':shipping_tel', $shippingTel, ($shippingTel === null) ? 2 : 0],
-			'payment_total' => [':payment_total', $paymentTotal, 1],
 			'delivery_fee_total' => [':delivery_fee_total', $deliveryFeeTotal, 1],
 			'ordered_at' => [':ordered_at', $orderedAt, ($orderedAt === null) ? 2 : 0],
 			'is_active' => [':is_active', 1, 1],
 			'updated_at' => [':updated_at', date('Y-m-d H:i:s'), 0],
 		];
+		if ((int)($currentOrder['eccube_order_status_id'] ?? 0) !== 9) {
+			$dbFiledData['payment_total'] = [':payment_total', $paymentTotal, 1];
+		}
 		if ((int)($currentOrder['eccube_order_status_id'] ?? 0) !== 9) {
 			$dbFiledData['eccube_order_status_id'] = [':eccube_order_status_id', $statusId, 1];
 			$dbFiledData['eccube_order_status_name'] = [':eccube_order_status_name', $statusName, ($statusName === null) ? 2 : 0];
@@ -439,6 +441,37 @@ function deleteShopOrderItems($orderId)
 			'order_id' => [':order_id', (int)$orderId, 1],
 		];
 		return SQL_Process($DB_CONNECT, 'shop_order_items', [], $dbFiledValue, 3, 2) == 1;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/*
+ * [shop_order_items] 返品済み明細を残して受注明細を削除
+ */
+function deleteShopOrderItemsExceptReturnedFull($orderId, $shopId)
+{
+	global $DB_CONNECT;
+	if ($orderId === null || is_numeric($orderId) === false || (int)$orderId < 1) {
+		return false;
+	}
+	if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1) {
+		return false;
+	}
+	try {
+		$strSQL = "
+			DELETE FROM
+				shop_order_items
+			WHERE
+				order_id = :order_id
+				AND shop_id = :shop_id
+				AND current_item_status <> 'returned_full'
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':order_id', (int)$orderId, PDO::PARAM_INT);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$newStmt->closeCursor();
+		return true;
 	} catch (PDOException $e) {
 		return false;
 	}
@@ -778,7 +811,7 @@ function buildShopOrderListSearchSqlParts($searchConditions = [], $fixedShopId =
 	if ($statusId === '' && isset($searchConditions['searchStatus'])) {
 		$statusId = trim((string)$searchConditions['searchStatus']);
 	}
-	if ($statusId !== '' && ctype_digit($statusId) && in_array((int)$statusId, [1, 4, 5], true)) {
+	if ($statusId !== '' && ctype_digit($statusId) && in_array((int)$statusId, [1, 4, 5, 9], true)) {
 		$where[] = 'o.eccube_order_status_id = :status_id';
 		$params[':status_id'] = [(int)$statusId, PDO::PARAM_INT];
 	}
@@ -797,11 +830,6 @@ function buildShopOrderListSearchSqlParts($searchConditions = [], $fixedShopId =
 		'params' => $params,
 	];
 }
-/*
- * [shop_orders] 受注詳細取得（旧互換用）
- */
-function getShopOrderDetail($orderId) {}
-
 /*
  * [shop_orders] 受注ID・店舗ID指定で受注詳細取得
  */
@@ -840,7 +868,6 @@ function getShopOrderById($orderId, $shopId)
 		return [];
 	}
 }
-
 /*
  * [shop_orders] 受注一覧検索
  */
@@ -1022,7 +1049,6 @@ function updateShopOrderMailResult($orderId, $success, $errorMessage = null)
 		return false;
 	}
 }
-
 /*
  * [shop_orders] 店舗向け受注通知メール送信
  */
@@ -1122,7 +1148,6 @@ function sendOrderNotificationMail($orderId)
 		return false;
 	}
 }
-
 /*
  * [shop_orders] ステータス更新用受注取得
  */
@@ -1231,5 +1256,340 @@ function normalizeShopOrderDateTime($dateTime)
 		return $date->format('Y-m-d H:i:s');
 	} catch (Exception $e) {
 		return null;
+	}
+}
+/*
+ * [return] 返品対象受注明細取得
+ */
+function getShopOrderItemsForReturn($orderId, $shopId, array $orderItemIds)
+{
+	global $DB_CONNECT;
+	if (is_numeric($orderId) === false || (int)$orderId < 1) {
+		return [];
+	}
+	if (is_numeric($shopId) === false || (int)$shopId < 1) {
+		return [];
+	}
+	if (empty($orderItemIds)) {
+		return [];
+	}
+	$normalizedIds = [];
+	foreach ($orderItemIds as $orderItemId) {
+		$id = (string)$orderItemId;
+		if (ctype_digit($id) === false || (int)$id < 1) {
+			continue;
+		}
+		$normalizedIds[(int)$id] = (int)$id;
+	}
+	if (empty($normalizedIds)) {
+		return [];
+	}
+	$placeholders = [];
+	$bindValues = [];
+	$i = 0;
+	foreach ($normalizedIds as $id) {
+		$key = ':order_item_id_' . $i;
+		$placeholders[] = $key;
+		$bindValues[$key] = (int)$id;
+		$i++;
+	}
+	try {
+		$strSQL = "
+			SELECT
+				oi.order_item_id,
+				oi.order_id,
+				oi.shop_id,
+				oi.product_id,
+				oi.eccube_product_class_code,
+				oi.product_name,
+				oi.unit_price,
+				oi.quantity,
+				oi.subtotal,
+				oi.current_item_status,
+				sp.tax_rate
+			FROM
+				shop_order_items AS oi
+				LEFT JOIN shop_products AS sp
+					ON sp.product_id = oi.product_id
+					AND sp.shop_id = oi.shop_id
+			WHERE
+				oi.order_id = :order_id
+				AND oi.shop_id = :shop_id
+				AND oi.order_item_id IN (" . implode(',', $placeholders) . ")
+			ORDER BY
+				oi.order_item_id ASC
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':order_id', (int)$orderId, PDO::PARAM_INT);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		foreach ($bindValues as $key => $value) {
+			$newStmt->bindValue($key, (int)$value, PDO::PARAM_INT);
+		}
+		$newStmt->execute();
+		$rows = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $rows ?: [];
+	} catch (PDOException $e) {
+		return [];
+	}
+}
+/*
+ * [return_snapshots] 返品スナップショット登録
+ */
+function insertReturnSnapshot($orderId, $shopId, $refundTotal, $zeusResult, $returnStatus = 'completed')
+{
+	global $DB_CONNECT;
+	if (is_numeric($orderId) === false || (int)$orderId < 1) {
+		return false;
+	}
+	if (is_numeric($shopId) === false || (int)$shopId < 1) {
+		return false;
+	}
+	$refundTotalString = trim((string)$refundTotal);
+	if ($refundTotalString === '' || preg_match('/^(0|[1-9][0-9]*)$/', $refundTotalString) !== 1) {
+		return false;
+	}
+	$allowedStatus = ['completed', 'notify_failed', 'requested', 'approved', 'rejected'];
+	if (in_array((string)$returnStatus, $allowedStatus, true) === false) {
+		return false;
+	}
+	$zeusRefundResult = null;
+	if (is_array($zeusResult)) {
+		$encoded = json_encode($zeusResult, JSON_UNESCAPED_UNICODE);
+		$zeusRefundResult = ($encoded === false) ? null : $encoded;
+	} elseif ($zeusResult !== null) {
+		$zeusRefundResult = (string)$zeusResult;
+	}
+	try {
+		$dbFiledData = [
+			'order_id' => [':order_id', (int)$orderId, 1],
+			'shop_id' => [':shop_id', (int)$shopId, 1],
+			'return_status' => [':return_status', (string)$returnStatus, 0],
+			'refund_total' => [':refund_total', (int)$refundTotalString, 1],
+			'zeus_refund_result' => [':zeus_refund_result', $zeusRefundResult, ($zeusRefundResult === null) ? 2 : 0],
+			'processed_at' => [':processed_at', date('Y-m-d H:i:s'), 0],
+		];
+		$result = SQL_Process($DB_CONNECT, 'return_snapshots', $dbFiledData, [], 1, 2);
+		if ($result != 1) {
+			return false;
+		}
+		return (int)$DB_CONNECT->lastInsertId();
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/*
+ * [return_snapshot_items] 返品明細スナップショット登録
+ */
+function insertReturnSnapshotItem($returnId, array $itemData)
+{
+	global $DB_CONNECT;
+	if (is_numeric($returnId) === false || (int)$returnId < 1) {
+		return false;
+	}
+	$orderItemId = isset($itemData['order_item_id']) ? (int)$itemData['order_item_id'] : 0;
+	if ($orderItemId < 1) {
+		return false;
+	}
+	$eccubeProductClassCode = isset($itemData['eccube_product_class_code']) && trim((string)$itemData['eccube_product_class_code']) !== '' ? trim((string)$itemData['eccube_product_class_code']) : null;
+	$productName = isset($itemData['product_name']) && trim((string)$itemData['product_name']) !== '' ? trim((string)$itemData['product_name']) : null;
+	if ($productName === null) {
+		return false;
+	}
+	$unitPrice = isset($itemData['unit_price']) ? (int)$itemData['unit_price'] : 0;
+	$quantity = isset($itemData['quantity']) ? (int)$itemData['quantity'] : 0;
+	$subtotal = isset($itemData['subtotal']) ? (int)$itemData['subtotal'] : 0;
+	$refundAmount = isset($itemData['refund_amount']) ? (int)$itemData['refund_amount'] : 0;
+	$itemStatus = isset($itemData['item_status']) && trim((string)$itemData['item_status']) !== '' ? trim((string)$itemData['item_status']) : 'completed';
+	try {
+		$dbFiledData = [
+			'return_id' => [':return_id', (int)$returnId, 1],
+			'order_item_id' => [':order_item_id', $orderItemId, 1],
+			'eccube_product_class_code' => [':eccube_product_class_code', $eccubeProductClassCode, ($eccubeProductClassCode === null) ? 2 : 0],
+			'product_name' => [':product_name', $productName, 0],
+			'unit_price' => [':unit_price', $unitPrice, 1],
+			'quantity' => [':quantity', $quantity, 1],
+			'subtotal' => [':subtotal', $subtotal, 1],
+			'refund_amount' => [':refund_amount', $refundAmount, 1],
+			'item_status' => [':item_status', $itemStatus, 0],
+		];
+		$result = SQL_Process($DB_CONNECT, 'return_snapshot_items', $dbFiledData, [], 1, 2);
+		return ($result == 1);
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/*
+ * [shop_order_items] 返品済み更新
+ */
+function updateShopOrderItemsReturnedFull($orderId, $shopId, array $orderItemIds)
+{
+	global $DB_CONNECT;
+	if (is_numeric($orderId) === false || (int)$orderId < 1) {
+		return 0;
+	}
+	if (is_numeric($shopId) === false || (int)$shopId < 1) {
+		return 0;
+	}
+	if (empty($orderItemIds)) {
+		return 0;
+	}
+	$normalizedIds = [];
+	foreach ($orderItemIds as $orderItemId) {
+		$id = (string)$orderItemId;
+		if (ctype_digit($id) === false || (int)$id < 1) {
+			continue;
+		}
+		$normalizedIds[(int)$id] = (int)$id;
+	}
+	if (empty($normalizedIds)) {
+		return 0;
+	}
+	$placeholders = [];
+	$bindValues = [];
+	$i = 0;
+	foreach ($normalizedIds as $id) {
+		$key = ':order_item_id_' . $i;
+		$placeholders[] = $key;
+		$bindValues[$key] = (int)$id;
+		$i++;
+	}
+	try {
+		$strSQL = "
+			UPDATE
+				shop_order_items
+			SET
+				current_item_status = 'returned_full',
+				updated_at = :updated_at
+			WHERE
+				order_id = :order_id
+				AND shop_id = :shop_id
+				AND order_item_id IN (" . implode(',', $placeholders) . ")
+				AND current_item_status <> 'returned_full'
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':updated_at', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+		$newStmt->bindValue(':order_id', (int)$orderId, PDO::PARAM_INT);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		foreach ($bindValues as $key => $value) {
+			$newStmt->bindValue($key, (int)$value, PDO::PARAM_INT);
+		}
+		$newStmt->execute();
+		$count = (int)$newStmt->rowCount();
+		$newStmt->closeCursor();
+		return $count;
+	} catch (PDOException $e) {
+		return 0;
+	}
+}
+/*
+ * [shop_orders] 返品状態更新
+ */
+function updateShopOrderReturned($orderId, $shopId, array $data)
+{
+	global $DB_CONNECT;
+	if (is_numeric($orderId) === false || (int)$orderId < 1) {
+		return false;
+	}
+	if (is_numeric($shopId) === false || (int)$shopId < 1) {
+		return false;
+	}
+	$changeMoney = isset($data['change_money']) ? $data['change_money'] : null;
+	$changeMoneyString = trim((string)$changeMoney);
+	if ($changeMoneyString === '' || preg_match('/^(0|[1-9][0-9]*)$/', $changeMoneyString) !== 1) {
+		return false;
+	}
+	$zeusOrderId = isset($data['zeus_order_id']) && trim((string)$data['zeus_order_id']) !== '' ? trim((string)$data['zeus_order_id']) : null;
+	try {
+		$dbFiledData = [
+			'eccube_order_status_id' => [':eccube_order_status_id', 9, 1],
+			'eccube_order_status_name' => [':eccube_order_status_name', '返品', 0],
+			'payment_total' => [':payment_total', (int)$changeMoneyString, 1],
+			'status_changed_at' => [':status_changed_at', date('Y-m-d H:i:s'), 0],
+			'updated_at' => [':updated_at', date('Y-m-d H:i:s'), 0],
+		];
+		if ($zeusOrderId !== null) {
+			$dbFiledData['zeus_order_id'] = [':zeus_order_id', $zeusOrderId, 0];
+		}
+		$dbFiledValue = [
+			'order_id' => [':order_id', (int)$orderId, 1],
+			'shop_id' => [':shop_id', (int)$shopId, 1],
+			'is_active' => [':is_active', 1, 1],
+		];
+		return SQL_Process($DB_CONNECT, 'shop_orders', $dbFiledData, $dbFiledValue, 2, 2) == 1;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/*
+ * [return_snapshots] 返品ステータス更新
+ */
+function updateReturnSnapshotStatus($returnId, $shopId, $returnStatus)
+{
+	global $DB_CONNECT;
+	if (is_numeric($returnId) === false || (int)$returnId < 1) {
+		return false;
+	}
+	if (is_numeric($shopId) === false || (int)$shopId < 1) {
+		return false;
+	}
+	$returnStatus = trim((string)$returnStatus);
+	$allowedStatus = ['completed', 'notify_failed', 'requested', 'approved', 'rejected'];
+	if ($returnStatus === '' || in_array($returnStatus, $allowedStatus, true) === false) {
+		return false;
+	}
+	try {
+		$dbFiledData = [
+			'return_status' => [':return_status', $returnStatus, 0],
+			'processed_at' => [':processed_at', date('Y-m-d H:i:s'), 0],
+		];
+		$dbFiledValue = [
+			'return_id' => [':return_id', (int)$returnId, 1],
+			'shop_id' => [':shop_id', (int)$shopId, 1],
+		];
+		return SQL_Process($DB_CONNECT, 'return_snapshots', $dbFiledData, $dbFiledValue, 2, 2) == 1;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/*
+ * [return] 返品済み商品コードマップ取得（再同期引継ぎ用）
+ */
+function getReturnedProductClassCodeMap($orderId)
+{
+	global $DB_CONNECT;
+	if (is_numeric($orderId) === false || (int)$orderId < 1) {
+		return [];
+	}
+	try {
+		$strSQL = "
+			SELECT
+				rsi.eccube_product_class_code
+			FROM
+				return_snapshot_items AS rsi
+				INNER JOIN return_snapshots AS rs
+					ON rs.return_id = rsi.return_id
+			WHERE
+				rs.order_id = :order_id
+				AND rs.return_status IN ('completed', 'notify_failed')
+				AND rsi.eccube_product_class_code IS NOT NULL
+				AND rsi.eccube_product_class_code <> ''
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':order_id', (int)$orderId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$rows = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		$map = [];
+		foreach ($rows ?: [] as $row) {
+			$code = trim((string)($row['eccube_product_class_code'] ?? ''));
+			if ($code === '') {
+				continue;
+			}
+			$map[$code] = true;
+		}
+		return $map;
+	} catch (PDOException $e) {
+		return [];
 	}
 }

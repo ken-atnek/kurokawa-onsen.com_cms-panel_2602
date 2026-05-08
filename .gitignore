@@ -17,5 +17,6 @@ _maintenance_log
 _zz_specification/
 cms_config/database/set_db.php
 cms_config/api/eccube/eccube_api_config.php
+cms_config/api/zeus/zeus_api_config.php
 tmp_upload/
-_md_docs/
+logs/
