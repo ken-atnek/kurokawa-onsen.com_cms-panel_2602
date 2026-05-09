@@ -90,6 +90,43 @@ function updateReturnButtonState() {
     returnButton.disabled = !(hasReturnItem && hasRefundTotal && canExecute && canRefundByAmount);
 }
 /**
+ * 返金参考額表示更新
+ *  返品対象商品の税込小計合計と送料を使って「返金額」を表示し、全商品チェック時は警告表示へ切り替える
+ */
+function updateReturnEstimate() {
+    const amountRow = document.getElementById("returnEstimateAmountRow");
+    const amountText = document.getElementById("returnEstimateAmountText");
+    const allErrorRow = document.getElementById("returnEstimateAllErrorRow");
+    if (!amountRow || !amountText || !allErrorRow) {
+        return;
+    }
+    const allCheckboxes = Array.from(document.querySelectorAll('input[name="return_order_item_ids[]"]:not(:disabled)'));
+    const checkedCheckboxes = allCheckboxes.filter((checkbox) => checkbox.checked === true);
+    if (checkedCheckboxes.length < 1) {
+        amountRow.style.display = "none";
+        allErrorRow.style.display = "none";
+        amountText.textContent = "";
+        return;
+    }
+    if (allCheckboxes.length > 0 && checkedCheckboxes.length === allCheckboxes.length) {
+        amountRow.style.display = "none";
+        allErrorRow.style.display = "";
+        amountText.textContent = "";
+        return;
+    }
+    const itemSubtotalTotal = checkedCheckboxes.reduce((sum, checkbox) => {
+        const value = String(checkbox.dataset.itemSubtotal || "").replace(/[^\d]/g, "");
+        const subtotal = /^\d+$/.test(value) ? parseInt(value, 10) : 0;
+        return sum + subtotal;
+    }, 0);
+    const deliveryFeeValue = String(document.getElementById("deliveryFeeTotalDisplay")?.dataset.deliveryFeeTotal || "").replace(/[^\d]/g, "");
+    const deliveryFee = /^\d+$/.test(deliveryFeeValue) ? parseInt(deliveryFeeValue, 10) : 0;
+    const estimateTotal = itemSubtotalTotal + deliveryFee;
+    amountText.textContent = `${itemSubtotalTotal.toLocaleString("ja-JP")} + ${deliveryFee.toLocaleString("ja-JP")} = ${estimateTotal.toLocaleString("ja-JP")}`;
+    amountRow.style.display = "";
+    allErrorRow.style.display = "none";
+}
+/**
  * 返品未実装モーダル表示
  *  返金ボタン押下時に、サーバー未実装の案内モーダルを表示する。
  */
@@ -194,7 +231,10 @@ async function processOrderReturn() {
 function bindReturnEvents() {
     const returnItemCheckboxes = document.querySelectorAll('input[name="return_order_item_ids[]"]');
     returnItemCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", updateReturnButtonState);
+        checkbox.addEventListener("change", () => {
+            updateReturnEstimate();
+            updateReturnButtonState();
+        });
     });
     const refundTotal = document.getElementById("refundTotal");
     if (refundTotal) {
@@ -209,6 +249,7 @@ function bindReturnEvents() {
     if (returnButton) {
         returnButton.addEventListener("click", handleReturnButtonClick);
     }
+    updateReturnEstimate();
     updateReturnButtonState();
 }
 /**
@@ -394,6 +435,15 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.reload();
     });
     document.getElementById("btnSave")?.addEventListener("click", openOrderDetailSaveConfirmModal);
+    //納品書PDF出力ボタン
+    const btnPdf = document.getElementById("btnPdf");
+    if (btnPdf) {
+        btnPdf.addEventListener("click", function () {
+            const shopId = btnPdf.dataset.shopId;
+            const orderId = btnPdf.dataset.orderId;
+            checkDeliverySlipPdf(shopId, orderId);
+        });
+    }
 });
 /**
  * 編集モード切替

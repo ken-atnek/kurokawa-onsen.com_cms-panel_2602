@@ -178,6 +178,15 @@ $paymentTotalHtml = $hasOrderDetail ? formatClientOrderDetailMoney($orderDetail[
 $paymentTotalValueHtml = htmlspecialchars((string)((int)($orderDetail['payment_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
 $shopNoteHtml = $hasOrderDetail ? htmlspecialchars((string)($orderDetail['note'] ?? ''), ENT_QUOTES, 'UTF-8') : '';
 $itemSubtotalTotal = 0;
+$hasNonReturnedItemForPdf = false;
+if (!empty($orderItems)) {
+  foreach ($orderItems as $orderItem) {
+    if (trim((string)($orderItem['current_item_status'] ?? '')) !== 'returned_full') {
+      $hasNonReturnedItemForPdf = true;
+      break;
+    }
+  }
+}
 
 #-------------#
 #inline JS用エスケープ宣言
@@ -192,13 +201,15 @@ print <<<HTML
   <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
   <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://zipcloud.ibsnet.co.jp; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://zipcloud.ibsnet.co.jp https://cdn.jsdelivr.net; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net;">
   <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
   <meta name="format-detection" content="telephone=no">
   <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon/apple-touch-icon.png">
   <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
   <link rel="stylesheet" href="../assets/css/master03-01.css">
+  <link rel="stylesheet" href="../assets/lib/jsPDF/css/jspdf_app.css">
+  <link rel="stylesheet" href="../assets/css/recipt.css">
 </head>
 
 <body>
@@ -470,6 +481,7 @@ print <<<HTML
 HTML;
 #注文商品情報詳細／料金計算
 $itemSubtotalTotal = 0;
+$returnedSubtotalTotal = 0;
 if (!empty($orderItems)) {
   foreach ($orderItems as $orderItem) {
     $itemTaxRate = isset($orderItem['tax_rate']) ? (int)$orderItem['tax_rate'] : 10;
@@ -482,15 +494,17 @@ if (!empty($orderItems)) {
     $itemUnitPriceHtml = htmlspecialchars(number_format($itemUnitPrice), ENT_QUOTES, 'UTF-8');
     $itemQuantityHtml = htmlspecialchars(number_format((int)($orderItem['quantity'] ?? 0)), ENT_QUOTES, 'UTF-8');
     $itemSubtotalHtml = htmlspecialchars(number_format($itemSubtotal), ENT_QUOTES, 'UTF-8');
+    $itemSubtotalValueHtml = htmlspecialchars((string)$itemSubtotal, ENT_QUOTES, 'UTF-8');
     $orderItemId = (int)($orderItem['order_item_id'] ?? 0);
     $orderItemIdHtml = htmlspecialchars((string)$orderItemId, ENT_QUOTES, 'UTF-8');
     $currentItemStatus = trim((string)($orderItem['current_item_status'] ?? ''));
     $isReturnedFull = ($currentItemStatus === 'returned_full');
     if ($isReturnedFull === false) {
       $itemSubtotalTotal += $itemSubtotal;
+    } else {
+      $returnedSubtotalTotal += $itemSubtotal;
     }
-    #$returnedItemStyle = $isReturnedFull ? ' style="text-decoration: line-through; color: #979797;"' : '';
-    $returnedItemStyle = '';
+    $returnedItemStyle = $isReturnedFull ? ' style="text-decoration: line-through; color: #979797;"' : '';
     $returnChecked = $isReturnedFull ? ' checked' : '';
     $returnDisabled = $isReturnedFull ? ' disabled' : '';
     $returnedLabel = $isReturnedFull ? '<span>返品済み</span>' : '';
@@ -509,10 +523,22 @@ if (!empty($orderItems)) {
                     <span>{$itemSubtotalHtml}</span>
                   </div>
                   <div class="item-return">
+
+HTML;
+    if ($isReturnedFull === false) {
+      print <<<HTML
                     <label>
-                      <input type="checkbox" name="return_order_item_ids[]" value="{$orderItemIdHtml}" class="return-item-checkbox" data-order-item-id="{$orderItemIdHtml}"{$returnChecked}{$returnDisabled}>
+                      <input type="checkbox" name="return_order_item_ids[]" value="{$orderItemIdHtml}" class="return-item-checkbox" data-order-item-id="{$orderItemIdHtml}" data-item-subtotal="{$itemSubtotalValueHtml}"{$returnChecked}{$returnDisabled}>
                     </label>
-                    <!-- {$returnedLabel} -->
+
+HTML;
+    } else {
+      print <<<HTML
+                    {$returnedLabel}
+
+HTML;
+    }
+    print <<<HTML
                   </div>
                 </li>
 
@@ -534,8 +560,13 @@ HTML;
 }
 #料金表示用に金額をエスケープ
 $itemSubtotalTotalHtml = htmlspecialchars(number_format($itemSubtotalTotal), ENT_QUOTES, 'UTF-8');
-$deliveryFeeTotalHtml = htmlspecialchars(number_format((int)($orderDetail['delivery_fee_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
+$deliveryFeeTotalValue = (int)($orderDetail['delivery_fee_total'] ?? 0);
+$deliveryFeeTotalHtml = htmlspecialchars(number_format($deliveryFeeTotalValue), ENT_QUOTES, 'UTF-8');
+$deliveryFeeTotalValueHtml = htmlspecialchars((string)$deliveryFeeTotalValue, ENT_QUOTES, 'UTF-8');
 $paymentTotalHtml = htmlspecialchars(number_format((int)($orderDetail['payment_total'] ?? 0)), ENT_QUOTES, 'UTF-8');
+$returnedRefundTotal = $returnedSubtotalTotal + $deliveryFeeTotalValue;
+$returnedSubtotalTotalHtml = htmlspecialchars(number_format($returnedSubtotalTotal), ENT_QUOTES, 'UTF-8');
+$returnedRefundTotalHtml = htmlspecialchars(number_format($returnedRefundTotal), ENT_QUOTES, 'UTF-8');
 $returnedDeliveryStyle = ((int)($orderDetail['eccube_order_status_id'] ?? 0) === 9) ? ' style="text-decoration: line-through; color: #979797;"' : '';
 print <<<HTML
               </ul>
@@ -546,13 +577,38 @@ print <<<HTML
                 </div>
                 <div>
                   <dt>送料</dt>
-                  <dd{$returnedDeliveryStyle}>{$deliveryFeeTotalHtml}</dd>
+                  <dd {$returnedDeliveryStyle} id="deliveryFeeTotalDisplay" data-delivery-fee-total="{$deliveryFeeTotalValueHtml}">{$deliveryFeeTotalHtml}</dd>
                 </div>
                 <div>
                   <dt>合計</dt>
                   <dd>{$paymentTotalHtml}</dd>
                 </div>
               </dl>
+              <!--返金額を自動計算して表示-->
+              <dl style="margin-top:0;" id="returnEstimateBlock">
+HTML;
+if ($returnedSubtotalTotal > 0) {
+  print <<<HTML
+                <div style="padding:0;" id="returnEstimateCompletedRow">
+                  <dt style="font-size:12px;font-weight:normal;">(返金済み額)</dt>
+                  <dd style="font-size:12px;font-weight:normal;">{$returnedSubtotalTotalHtml} + {$deliveryFeeTotalHtml} = {$returnedRefundTotalHtml}</dd>
+                </div>
+
+HTML;
+}
+print <<<HTML
+                <!--返品対象商品チェックの場合-->
+                <div style="padding:0; display:none;" id="returnEstimateAmountRow">
+                  <dt style="font-size:12px;font-weight:normal;">(返金額)</dt>
+                  <dd style="font-size:12px;font-weight:normal;" id="returnEstimateAmountText"></dd>
+                </div>
+                <!--全商品チェックの場合-->
+                <div style="padding:0; display:none;" id="returnEstimateAllErrorRow">
+                  <dt style="font-size:12px;font-weight:normal;">(返金額)</dt>
+                  <span style="font-size:12px;font-weight:bold;color:#FF0000;">全額返金はできません</span>
+                </div>
+              </dl>
+              <!--返金額を自動計算して表示-->
             </section>
           </article>
           <article class="block-refund-process">
@@ -578,7 +634,17 @@ print <<<HTML
             </div>
           </article>
           <div class="box-btn">
-            <button type="button" class="btn-pdf" id="btnPdf"><span>納品書出力</span></button>
+
+HTML;
+if ($hasNonReturnedItemForPdf === true) {
+  $shopIdHtml = htmlspecialchars((string)$shopId, ENT_QUOTES, 'UTF-8');
+  $orderIdDataHtml = htmlspecialchars((string)$orderId, ENT_QUOTES, 'UTF-8');
+  print <<<HTML
+            <button type="button" class="btn-pdf" id="btnPdf" data-shop-id="{$shopIdHtml}" data-order-id="{$orderIdDataHtml}"><span>納品書出力</span></button>
+
+HTML;
+}
+print <<<HTML
             <button type="button" class="btn-edit" id="btnEdit">編集する</button>
             <button type="button" class="btn-cancel" id="btnCancel" style="display:none;">キャンセル</button>
             <button type="button" class="btn-confirmed" id="btnSave" style="display:none;">保存する</button>
@@ -606,6 +672,10 @@ print <<<HTML
   <script src="../assets/js/common.js" defer></script>
   <script src="../assets/js/modal.js" defer></script>
   <script src="../assets/js/form.js" defer></script>
+  <!-- 必須：html2canvas + jsPDF（defer + 順番重要） -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+  <script src="../assets/lib/jsPDF/js/jspdf_app.js" defer></script>
   <script src="./assets/js/client03_01_01.js" defer></script>
 </body>
 

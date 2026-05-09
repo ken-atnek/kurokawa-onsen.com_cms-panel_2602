@@ -17,13 +17,18 @@
     width: 210mm;
     display: flex;
     flex-direction: column;
-    padding: 2em;
+    padding: 8em 10em;
     font-size: inherit;
     --main-gray: #5e5b5a;
+    font-family:
+        "Hiragino Kaku Gothic ProN", "Helvetica Neue", Arial, "Hiragino Sans",
+        Meiryo, sans-serif;
     h2 {
-        font-size: FZ(20);
+        font-size: 20px;
         text-align: center;
-        padding-block: 0.5em;
+        // padding-block: 0.5em;
+        padding-top: 0.2em;
+        padding-bottom: 0.9em;
         font-weight: 700;
         border: 1px solid;
     }
@@ -40,7 +45,7 @@
             display: flex;
             flex-direction: column;
             .post-number {
-                font-size: FZ(16);
+                font-size: 16px;
                 margin-bottom: 0.2em;
                 &::before {
                     content: "〒";
@@ -48,12 +53,12 @@
             }
             address {
                 font-size: inherit;
-                font-size: FZ(16);
+                font-size: 16px;
                 display: flex;
                 flex-direction: column;
             }
             h3 {
-                font-size: FZ(20);
+                font-size: 20px;
                 font-weight: 700;
                 margin-top: 0.5em;
                 letter-spacing: 0.12em;
@@ -62,40 +67,46 @@
                     margin-left: 0.3em;
                 }
             }
+            span {
+                font-size: 16px;
+            }
         }
         .box-right {
             position: relative;
-            font-size: inherit;
+            font-size: 1em;
             display: flex;
             flex-direction: column;
             ul {
-                font-size: inherit;
+                font-size: 1em;
                 display: flex;
                 flex-direction: column;
-                gap: 1em 0;
+                gap: 20px 0;
                 li {
                     display: flex;
                     flex-direction: column;
                     align-items: flex-end;
-                    font-size: inherit;
+                    font-size: 1em;
                     h4 {
-                        font-size: 1.2rem;
+                        font-size: 12px;
                     }
                     h5 {
-                        font-size: 1.4rem;
+                        font-size: 14px;
                         font-weight: 600;
                     }
                     address {
                         display: flex;
-                        font-size: 1.2rem;
+                        font-size: 12px;
                         gap: 0 0.5em;
+                    }
+                    span {
+                        font-size: 12px;
                     }
                 }
             }
         }
     }
     .announce {
-        font-size: FZ(14);
+        font-size: 14px;
         line-height: 1.4em;
         letter-spacing: 0.08em;
     }
@@ -110,13 +121,13 @@
             padding: 1em;
             display: flex;
             align-items: center;
-            gap: 0 1em;
+            gap: 0 10px;
             p {
-                font-size: FZ(18);
+                font-size: 18px;
             }
             span {
                 font-weight: 700;
-                font-size: FZ(26);
+                font-size: 26px;
                 &::before {
                     content: "¥";
                     font-size: 0.8em;
@@ -126,9 +137,12 @@
         }
         h3 {
             background-color: #efefef;
-            padding: 0.5em;
+            // padding: 0.5em;
+            padding-top: 0.2em;
+            padding-bottom: 1em;
+            padding-left: 0.5em;
             margin-top: 1rem;
-            font-size: FZ(18);
+            font-size: 18px;
         }
         dl {
             position: relative;
@@ -137,7 +151,7 @@
             font-size: inherit;
             align-self: flex-start;
             padding: 1em;
-            gap: 0 2em;
+            gap: 0 20px;
             div {
                 display: grid;
                 grid-template-rows: subgrid;
@@ -162,15 +176,18 @@
             border-right: 1px solid var(--main-gray);
             display: grid;
             grid-template-columns: 1fr auto auto auto auto;
+            margin-top: 0.5em;
             li {
                 grid-column: span 5;
                 display: grid;
                 grid-template-columns: subgrid;
-                padding: 1rem;
+                // padding: 1rem;
+                padding-top: 0.2em;
+                padding-bottom: 1.8em;
                 border-bottom: 1px solid var(--main-gray);
                 font-size: inherit;
                 & > div {
-                    font-size: FZ(14);
+                    font-size: 14px;
                     text-align: center;
                     min-width: 10rem;
                     &.item-name {
@@ -188,7 +205,6 @@
                         }
                     }
                 }
-
                 &:first-of-type {
                     background-color: #efefef;
                     div {
@@ -226,8 +242,12 @@
 
                 dt,
                 dd {
-                    font-size: FZ(14);
-                    padding: 0.8rem 1rem;
+                    font-size: 14px;
+                    // padding: 0.8rem 1rem;
+                    padding-top: 0.1em;
+                    padding-bottom: 0.9em;
+                    padding-left: 0.8em;
+                    padding-right: 0.8em;
                     em {
                         font-weight: 700;
                         font-size: 1.2em;
@@ -245,7 +265,7 @@
             }
         }
         p {
-            font-size: FZ(12);
+            font-size: 12px;
             align-self: center;
             align-self: flex-end;
             line-height: 1.6em;

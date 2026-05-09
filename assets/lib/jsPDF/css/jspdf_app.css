@@ -1,0 +1,17 @@
+/* PDF領収書（ここから） */
+.pdf-target{
+  width: 210mm;
+  max-width: none;
+  background:#fff;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: "Hiragino Kaku Gothic ProN", "Helvetica Neue", Arial, "Hiragino Sans", Meiryo, sans-serif;
+  /* color:#111827; */
+  font-size: inherit;
+}
+/* PDF生成用：クローンに付与して“常にA4/PC体裁”に固定 */
+.pdf-mode{
+  width: 210mm !important;
+  max-width: none !important;
+}
