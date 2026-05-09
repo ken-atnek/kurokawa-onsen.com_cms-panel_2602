@@ -376,7 +376,7 @@ print <<<HTML
             <h3>出荷情報</h3>
             <section>
               <div class="box-copy">
-                <button type="button"><span>注文者情報をコピー</span></button>
+                <button type="button" id="copyOrdererToShippingButton" style="display:none;"><span>注文者情報をコピー</span></button>
               </div>
               <dl class="inner-left">
                 <div class="box-name">

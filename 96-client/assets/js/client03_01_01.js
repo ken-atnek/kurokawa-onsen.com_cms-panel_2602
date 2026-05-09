@@ -58,6 +58,60 @@ let lastOrdererPostalCode = "";
 let lastShippingPostalCode = "";
 const editableBlocks = ".block-customer-info, .block-shipping-info, .block-description";
 let isReturnProcessing = false;
+/**
+ * 入力イベント発火
+ *  既存の入力監視へ値変更を通知する
+ */
+function triggerInputAndChange(element) {
+    if (!element) return;
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+}
+/**
+ * 注文者情報を配送先へコピー
+ *  注文者側フィールド値を配送先側フィールドへ反映する
+ */
+function copyOrdererInfoToShipping() {
+    const mapList = [
+        ["userFirstName", "shippingUserFirstName"],
+        ["userLastName", "shippingUserLastName"],
+        ["userFirstNameKana", "shippingUserFirstNameKana"],
+        ["userLastNameKana", "shippingUserLastNameKana"],
+        ["userCompanyName", "shippingUserCompanyName"],
+        ["userTel", "shippingUserTel"],
+        ["userPostalCode", "shippingUserPostalCode"],
+        ["userAddress01", "shippingUserAddress01"],
+        ["userAddress02", "shippingUserAddress02"],
+        ["userAddress03", "shippingUserAddress03"],
+        ["ordererPrefId", "shippingPrefId"],
+    ];
+    mapList.forEach(([fromId, toId]) => {
+        const fromElement = document.getElementById(fromId);
+        const toElement = document.getElementById(toId);
+        if (!fromElement || !toElement) return;
+        toElement.value = fromElement.value;
+        triggerInputAndChange(toElement);
+    });
+}
+/**
+ * 注文者情報コピーボタン表示制御
+ *  editモード時のみ表示・有効化する
+ */
+function syncCopyOrdererButtonState(isEditMode) {
+    const copyButton = document.getElementById("copyOrdererToShippingButton");
+    if (!copyButton) return;
+    copyButton.style.display = isEditMode === true ? "" : "none";
+    copyButton.disabled = isEditMode !== true;
+}
+/**
+ * 注文者情報コピーボタンイベント登録
+ *  ボタン押下時にコピー処理を実行する
+ */
+function bindCopyOrdererToShippingButton() {
+    const copyButton = document.getElementById("copyOrdererToShippingButton");
+    if (!copyButton) return;
+    copyButton.addEventListener("click", copyOrdererInfoToShipping);
+}
 
 /**
  * 返品ボタン状態更新
@@ -430,6 +484,8 @@ document.addEventListener("DOMContentLoaded", () => {
     bindPostalCodeEvents();
     initializePrefIdFromPostalCode();
     bindReturnEvents();
+    bindCopyOrdererToShippingButton();
+    syncCopyOrdererButtonState(false);
     document.getElementById("btnEdit")?.addEventListener("click", openOrderDetailEditConfirmModal);
     document.getElementById("btnCancel")?.addEventListener("click", () => {
         window.location.reload();
@@ -461,6 +517,7 @@ function switchToEditMode() {
     if (btnEdit) btnEdit.style.display = "none";
     if (btnCancel) btnCancel.style.display = "";
     if (btnSave) btnSave.style.display = "";
+    syncCopyOrdererButtonState(true);
 }
 /**
  * 閲覧モード切替
@@ -478,6 +535,7 @@ function switchToReadonlyMode() {
     if (btnEdit) btnEdit.style.display = "";
     if (btnCancel) btnCancel.style.display = "none";
     if (btnSave) btnSave.style.display = "none";
+    syncCopyOrdererButtonState(false);
 }
 /**
  * 受注詳細モーダル閉じる
