@@ -1593,3 +1593,66 @@ function getReturnedProductClassCodeMap($orderId)
 		return [];
 	}
 }
+/**
+ * 指定年月の全店舗受注集計を取得する
+ *  マスター側集計ページ用。受注0件の店舗も含めて返す
+ */
+function getMasterShopsOrderSummaryByMonth($year, $month)
+{
+	global $DB_CONNECT;
+	if (is_numeric($year) === false || (int)$year < 2026) {
+		return [];
+	}
+	if (is_numeric($month) === false || (int)$month < 1 || (int)$month > 12) {
+		return [];
+	}
+	$targetYear = (int)$year;
+	$targetMonth = (int)$month;
+	$startDate = sprintf('%04d-%02d-01 00:00:00', $targetYear, $targetMonth);
+	$endDate = date('Y-m-d H:i:s', strtotime($startDate . ' +1 month'));
+	try {
+		$strSQL = "
+			SELECT
+				s.shop_id,
+				s.shop_name,
+				COUNT(DISTINCT o.order_id) AS order_count,
+				COALESCE(SUM(COALESCE(o.payment_total, 0)), 0) AS sales_total,
+				COALESCE(SUM(COALESCE(o.delivery_fee_total, 0)), 0) AS delivery_fee_total,
+				COALESCE(SUM(COALESCE(o.payment_total, 0) - COALESCE(o.delivery_fee_total, 0)), 0) AS product_total
+			FROM
+				shops AS s
+				LEFT JOIN shop_orders AS o
+					ON o.shop_id = s.shop_id
+					AND o.is_active = 1
+					AND o.eccube_order_status_id IN (1, 4, 5, 9)
+					AND o.ordered_at >= :start_date
+					AND o.ordered_at < :end_date
+			WHERE
+				s.is_active = 1
+				AND EXISTS (
+					SELECT
+						1
+					FROM
+						shop_products AS p
+					WHERE
+						p.shop_id = s.shop_id
+						AND p.is_active = 1
+						AND p.status = 1
+				)
+			GROUP BY
+				s.shop_id,
+				s.shop_name
+			ORDER BY
+				s.shop_id ASC
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
+		$newStmt->bindValue(':end_date', $endDate, PDO::PARAM_STR);
+		$newStmt->execute();
+		$rows = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $rows ?: [];
+	} catch (PDOException $e) {
+		return [];
+	}
+}
