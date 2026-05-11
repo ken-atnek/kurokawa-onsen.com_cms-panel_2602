@@ -349,7 +349,7 @@ print <<<HTML
               </div>
             </div>
             <button type="button" class="btn_submit" onclick="searchConditions('search')">表示</button>
-            <button type="button" class="btn_print">
+            <button type="button" class="btn_print" onclick="openPrintHtml()">
               <span>印刷用HTML</span>
             </button>
           </div>

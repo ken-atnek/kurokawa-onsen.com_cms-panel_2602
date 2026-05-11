@@ -47,3 +47,20 @@ async function searchConditions(action) {
         alert("通信エラーが発生しました。ページを再読み込みしてください。");
     }
 }
+/**
+ * 印刷用HTML表示
+ * 現在選択中の年月を引き継いで印刷用HTMLを別タブで開く
+ */
+function openPrintHtml() {
+    const searchForm = document.querySelector('form[name="searchForm"]');
+    const yearInput = searchForm?.querySelector('input[name="searchYear"][data-selectbox-hidden]');
+    const monthInput = searchForm?.querySelector('input[name="searchMonth"][data-selectbox-hidden]');
+    const url = new URL("../assets/lib/printHTML/master_order_list.php", window.location.href);
+    if (yearInput && yearInput.value) {
+        url.searchParams.set("searchYear", yearInput.value);
+    }
+    if (monthInput && monthInput.value) {
+        url.searchParams.set("searchMonth", monthInput.value);
+    }
+    window.open(url.toString(), "_blank", "noopener");
+}

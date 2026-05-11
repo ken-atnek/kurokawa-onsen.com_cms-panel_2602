@@ -77,3 +77,25 @@ async function searchConditions(action, pageNumber = 1) {
 function movePage(pageNumber) {
     searchConditions("search", pageNumber);
 }
+/**
+ * 印刷用HTML表示
+ * 現在選択中の店舗・年月を引き継いで印刷用HTMLを別タブで開く
+ */
+function openPrintHtml() {
+    const searchForm = document.querySelector('form[name="searchForm"]');
+    const shopIdInput = searchForm?.querySelector('input[name="shopId"]');
+    const yearInput = searchForm?.querySelector('input[name="searchYear"][data-selectbox-hidden]');
+    const monthInput = searchForm?.querySelector('input[name="searchMonth"][data-selectbox-hidden]');
+    const url = new URL("../assets/lib/printHTML/shop_order_detail.php", window.location.href);
+    url.searchParams.set("printMode", "master");
+    if (shopIdInput && shopIdInput.value) {
+        url.searchParams.set("shopId", shopIdInput.value);
+    }
+    if (yearInput && yearInput.value) {
+        url.searchParams.set("searchYear", yearInput.value);
+    }
+    if (monthInput && monthInput.value) {
+        url.searchParams.set("searchMonth", monthInput.value);
+    }
+    window.open(url.toString(), "_blank", "noopener");
+}
