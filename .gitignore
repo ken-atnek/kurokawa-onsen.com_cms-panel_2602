@@ -20,3 +20,4 @@ cms_config/api/eccube/eccube_api_config.php
 cms_config/api/zeus/zeus_api_config.php
 tmp_upload/
 logs/
+docs/

@@ -37,8 +37,7 @@ async function searchConditions(action) {
             document.querySelector(".inner-head").insertAdjacentHTML("afterend", list["tag"]);
         }
         if (list && list["target_month_label"]) {
-            const targetMonthLabel = document.getElementById("aggregateTargetMonthLabel")
-                || document.querySelector('form[name="searchForm"] h3 span');
+            const targetMonthLabel = document.getElementById("aggregateTargetMonthLabel") || document.querySelector('form[name="searchForm"] h3 span');
             if (targetMonthLabel) targetMonthLabel.textContent = list["target_month_label"];
         }
         const areaMaster = document.querySelector("main");

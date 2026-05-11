@@ -182,7 +182,7 @@ print <<<HTML
           <a href="./client03_04.php" {$client03_04_active}><span>カテゴリ管理</span></a>
           <a href="./client03_05.php" {$client03_05_01_active}><span>規格管理</span></a>
           <a href="./client03_03.php?method=new" {$client03_03_active}><span>商品登録</span></a>
-          <a href="#"><span>集計</span></a>
+          <a href="./client03_06.php" {$client03_06_active}><span>集計</span></a>
         </nav>
       </section>
       <div class="main-contents menu-color03">

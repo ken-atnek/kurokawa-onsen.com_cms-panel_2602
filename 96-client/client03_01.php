@@ -224,6 +224,7 @@ print <<<HTML
         <a href="./client03_04.php" {$client03_04_active}><span>カテゴリ管理</span></a>
         <a href="./client03_05.php" {$client03_05_active}><span>規格管理</span></a>
         <a href="./client03_03.php?method=new" {$client03_03_active}><span>商品登録</span></a>
+        <a href="./client03_06.php" {$client03_06_active}><span>集計</span></a>
       </nav>
     </section>
     <div class="main-contents menu-color03">
@@ -438,7 +439,7 @@ HTML;
     $canChangeStatus = in_array((int)$targetOrderStatusId, [1, 4, 5, 9], true);
     print <<<HTML
               <div class="wrap-status">
-                <div class="apply-status{$targetOrderStatusClass}" data-selectbox data-order-id="{$orderId}" data-current-status="{$targetOrderStatusIdHtml}">
+                <div class="apply-status {$targetOrderStatusClass}" data-selectbox data-order-id="{$orderId}" data-current-status="{$targetOrderStatusIdHtml}">
 
 HTML;
     if ($canChangeStatus === false) {

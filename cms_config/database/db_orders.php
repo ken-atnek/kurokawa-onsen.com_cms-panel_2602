@@ -1656,3 +1656,177 @@ function getMasterShopsOrderSummaryByMonth($year, $month)
 		return [];
 	}
 }
+/**
+ *  店舗別・年月別の月合計（注文件数/売上合計/送料合計/商品合計）を取得する
+ */
+function getShopMonthlyOrderSummaryByShopId($shopId, $year, $month)
+{
+	global $DB_CONNECT;
+	if (is_numeric($shopId) === false || (int)$shopId < 1) {
+		return [];
+	}
+	if (is_numeric($year) === false || (int)$year < 2026) {
+		return [];
+	}
+	if (is_numeric($month) === false || (int)$month < 1 || (int)$month > 12) {
+		return [];
+	}
+	$targetYear = (int)$year;
+	$targetMonth = (int)$month;
+	$startDate = sprintf('%04d-%02d-01 00:00:00', $targetYear, $targetMonth);
+	$endDate = date('Y-m-d H:i:s', strtotime($startDate . ' +1 month'));
+	try {
+		$strSQL = "
+			SELECT
+				COUNT(DISTINCT o.order_id) AS order_count,
+				COALESCE(SUM(COALESCE(o.payment_total, 0)), 0) AS sales_total,
+				COALESCE(SUM(COALESCE(o.delivery_fee_total, 0)), 0) AS delivery_fee_total,
+				COALESCE(SUM(COALESCE(o.payment_total, 0) - COALESCE(o.delivery_fee_total, 0)), 0) AS product_total
+			FROM
+				shop_orders AS o
+			WHERE
+				o.shop_id = :shop_id
+				AND o.is_active = 1
+				AND o.eccube_order_status_id IN (1, 4, 5, 9)
+				AND o.ordered_at >= :start_date
+				AND o.ordered_at < :end_date
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
+		$newStmt->bindValue(':end_date', $endDate, PDO::PARAM_STR);
+		$newStmt->execute();
+		$row = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $row ?: [
+			'order_count' => 0,
+			'sales_total' => 0,
+			'delivery_fee_total' => 0,
+			'product_total' => 0,
+		];
+	} catch (PDOException $e) {
+		return [];
+	}
+}
+/**
+ *  店舗別・年月別の注文総件数を取得する（ページャー用）
+ */
+function countShopMonthlyOrdersByShopId($shopId, $year, $month)
+{
+	global $DB_CONNECT;
+	if (is_numeric($shopId) === false || (int)$shopId < 1) {
+		return 0;
+	}
+	if (is_numeric($year) === false || (int)$year < 2026) {
+		return 0;
+	}
+	if (is_numeric($month) === false || (int)$month < 1 || (int)$month > 12) {
+		return 0;
+	}
+	$targetYear = (int)$year;
+	$targetMonth = (int)$month;
+	$startDate = sprintf('%04d-%02d-01 00:00:00', $targetYear, $targetMonth);
+	$endDate = date('Y-m-d H:i:s', strtotime($startDate . ' +1 month'));
+	try {
+		$strSQL = "
+			SELECT
+				COUNT(*) AS cnt
+			FROM
+				shop_orders AS o
+			WHERE
+				o.shop_id = :shop_id
+				AND o.is_active = 1
+				AND o.eccube_order_status_id IN (1, 4, 5, 9)
+				AND o.ordered_at >= :start_date
+				AND o.ordered_at < :end_date
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
+		$newStmt->bindValue(':end_date', $endDate, PDO::PARAM_STR);
+		$newStmt->execute();
+		$row = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return (int)($row['cnt'] ?? 0);
+	} catch (PDOException $e) {
+		return 0;
+	}
+}
+/**
+ *  店舗別・年月別の注文一覧をページング指定で取得する
+ */
+function searchShopMonthlyOrdersByShopId($shopId, $year, $month, $limit = 10, $offset = 0)
+{
+	global $DB_CONNECT;
+	if (is_numeric($shopId) === false || (int)$shopId < 1) {
+		return [];
+	}
+	if (is_numeric($year) === false || (int)$year < 2026) {
+		return [];
+	}
+	if (is_numeric($month) === false || (int)$month < 1 || (int)$month > 12) {
+		return [];
+	}
+	$limit = (is_numeric($limit) && (int)$limit > 0) ? (int)$limit : 10;
+	if ($limit > 100) {
+		$limit = 100;
+	}
+	$offset = (is_numeric($offset) && (int)$offset >= 0) ? (int)$offset : 0;
+	$targetYear = (int)$year;
+	$targetMonth = (int)$month;
+	$startDate = sprintf('%04d-%02d-01 00:00:00', $targetYear, $targetMonth);
+	$endDate = date('Y-m-d H:i:s', strtotime($startDate . ' +1 month'));
+	try {
+		$strSQL = "
+			SELECT
+				o.order_id,
+				o.eccube_order_id,
+				o.order_no,
+				o.ordered_at,
+				o.orderer_name,
+				o.orderer_name01,
+				o.orderer_name02,
+				o.orderer_kana01,
+				o.orderer_kana02,
+				o.orderer_email,
+				o.orderer_tel,
+				o.orderer_postal_code,
+				o.orderer_pref_name,
+				o.orderer_addr01,
+				o.orderer_addr02,
+				o.eccube_order_status_id,
+				o.eccube_order_status_name,
+				o.status_changed_at,
+				o.shipped_at,
+				o.delivery_fee_total,
+				o.payment_total,
+				(COALESCE(o.payment_total, 0) - COALESCE(o.delivery_fee_total, 0)) AS product_total,
+				o.zeus_order_id
+			FROM
+				shop_orders AS o
+			WHERE
+				o.shop_id = :shop_id
+				AND o.is_active = 1
+				AND o.eccube_order_status_id IN (1, 4, 5, 9)
+				AND o.ordered_at >= :start_date
+				AND o.ordered_at < :end_date
+			ORDER BY
+				o.ordered_at DESC,
+				o.order_id DESC
+			LIMIT :limit
+			OFFSET :offset
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':start_date', $startDate, PDO::PARAM_STR);
+		$newStmt->bindValue(':end_date', $endDate, PDO::PARAM_STR);
+		$newStmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+		$newStmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+		$newStmt->execute();
+		$rows = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $rows ?: [];
+	} catch (PDOException $e) {
+		return [];
+	}
+}

@@ -53,7 +53,6 @@ if ($_SESSION[$noUpDateKey]['masterKey'] < 1) {
 #==============#
 # 表示開始年月日
 #--------------#
-$nowTime = time();
 $startYear = date('Y', time());
 $startMonth = date('m', time());
 #-------------#
@@ -308,7 +307,7 @@ if (!empty($shopsOrderList)) {
                 <span>{$shopId}</span>
               </div>
               <div class="item-name">
-                <a href="./master03_01_01.php?shopId={$shopId}&searchYear={$searchConditions['searchYear']}&searchMonth={$searchConditions['searchMonth']}"></a>
+                <a href="./master03_06_01.php?shopId={$shopId}&searchYear={$searchConditions['searchYear']}&searchMonth={$searchConditions['searchMonth']}"></a>
                 <span>{$statusNameHtml}</span>
               </div>
               <div class="item-count">

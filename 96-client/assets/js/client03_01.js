@@ -255,7 +255,9 @@ async function searchConditions(action, pageNumber = 1) {
         alert("通信エラーが発生しました。ページを再読み込みしてください。");
     }
 }
-
+/**
+ * ページャー遷移
+ */
 function movePage(pageNumber) {
     searchConditions("search", pageNumber);
 }

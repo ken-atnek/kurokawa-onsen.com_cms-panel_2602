@@ -221,6 +221,7 @@ print <<<HTML
         <div class="title">EC販売管理</div>
         <nav>
           <a href="./master03_01.php" {$master03_01_active}><span>受注一覧</span></a>
+          <a href="./master03_06.php" {$master03_06_active}><span>集計</span></a>
         </nav>
       </section>
       <div class="main-contents menu-color03">
