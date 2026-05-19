@@ -61,8 +61,6 @@ if ($method === null || ($method !== 'new' && $method !== 'edit')) {
   exit;
 }
 #-------------#
-#店舗ID（編集／削除時のみ）
-$shopId = isset($_SESSION['client_login']['shop_id']) ? $_SESSION['client_login']['shop_id'] : null;
 #商品ID（編集／削除時のみ）
 $productId = null;
 if ($method === 'edit') {
@@ -78,6 +76,9 @@ $productData = array();
 $productVariantCount = 0;
 $productVariantDisplayList = array();
 $productImages = array();
+#-------------#
+#店舗ID（編集／削除時のみ）
+$shopId = isset($_SESSION['client_login']['shop_id']) ? $_SESSION['client_login']['shop_id'] : null;
 #店舗IDがあれば店舗情報取得
 if ($shopId !== null) {
   #店舗情報

@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../database/db_shop_items.php';
 require_once __DIR__ . '/../../database/db_shops_ec.php';
 require_once __DIR__ . '/../../database/db_folders.php';
 require_once __DIR__ . '/../../database/db_photos.php';
+require_once __DIR__ . '/../../database/db_shop_articles.php';
 require_once __DIR__ . '/makeShopIndexJson.php';
 
 /*
@@ -201,6 +202,16 @@ function generateShopJson($shopId): bool
 		$onlineProductsCount = countShopProductList($shopId, ['displayFlg' => '1']);
 	}
 	$onlineProductsCount = (int)$onlineProductsCount;
+	$articleRows = getPublicShopArticlesForJson($shopId);
+	$articles = [];
+	foreach ($articleRows as $row) {
+		$articles[] = [
+			'articleId'      => (int)$row['article_id'],
+			'articleType'    => (int)$row['article_type'],
+			'title'          => (string)$row['title'],
+			'detailJsonPath' => '/db/shops/articles/' . $sId . '/' . (int)$row['article_id'] . '/article.json',
+		];
+	}
 	$writeData = [
 		'id' => $sId,
 		'slug' => $shopNameEng,
@@ -214,6 +225,7 @@ function generateShopJson($shopId): bool
 		'recommendedProducts' => $recommendedProducts,
 		'onlineShopUrl' => null,
 		'onlineProductsCount' => $onlineProductsCount,
+		'articles' => $articles,
 	];
 	$json = json_encode($writeData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 	if ($json === false) {

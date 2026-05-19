@@ -129,6 +129,7 @@
         @include layoutContentsWhiteBlock;
         ul {
             @include layout-table-list(auto auto 1fr, 3);
+            border-top: unset;
             & > li {
                 border-top-left-radius: 1.2rem;
                 border-top-right-radius: 1.2rem;

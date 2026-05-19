@@ -184,7 +184,6 @@ function formatClientOrderDate($value)
   return htmlspecialchars(date('Y/m/d', $timestamp), ENT_QUOTES, 'UTF-8');
 }
 
-#***** タグ生成開始 *****#
 function getOrderStatusNameForList($statusId, $orderStatusList)
 {
   foreach ($orderStatusList as $status) {
@@ -195,11 +194,12 @@ function getOrderStatusNameForList($statusId, $orderStatusList)
   return '';
 }
 
+#***** タグ生成開始 *****#
 print <<<HTML
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>黒川温泉観光旅館協同組合｜コントロールパネル(加盟店)</title>
+  <title>黒川温泉観光協会｜コントロールパネル(加盟店)</title>
   <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';">
