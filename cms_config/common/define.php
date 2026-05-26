@@ -57,7 +57,7 @@ define('DEFINE_FILE_DIR_PATH', DEFINE_JSON_DIR_PATH . '/images/shops');
 
 #===================================#
 #EC-CUBE API設定
-define('DEFINE_ECCUBE_WEBHOOK_SECRET', 'kurokawa-onsen-webhook-secret');
+define('DEFINE_ECCUBE_WEBHOOK_SECRET', '9p074pf94G2063x1Hktsr6275SBf7KxD977i4mz0ca347etkdL7rK34Oao1e7mk0');
 
 #===================================#
 #管理画面URL

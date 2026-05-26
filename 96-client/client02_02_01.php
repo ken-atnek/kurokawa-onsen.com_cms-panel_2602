@@ -904,7 +904,7 @@ print <<<HTML
           <button type="button" class="btn_submit" onclick="sendInput();">{$submitButtonText}</button>
         </form>
         <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
-        <a href="#" class="link_page-back_bottom">戻る</a>
+        <a href="./client02_01.php" class="link_page-back_bottom">戻る</a>
       </div>
     </div>
   </main>

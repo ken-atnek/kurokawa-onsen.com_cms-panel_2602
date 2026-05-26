@@ -135,6 +135,18 @@ function formatPdfTel($value): string
   return hPdfValue($raw);
 }
 /**
+ * 納品書 規格名接頭辞除去
+ *  【sid:{shop_id}】 形式の接頭辞が混入した場合に除去する
+ */
+function deliverySlipStripShopClassNameNamespace(string $value): string
+{
+  $value = trim($value);
+  if ($value === '') {
+    return '';
+  }
+  return preg_replace('/^【sid:\d+】/u', '', $value) ?? '';
+}
+/**
  * 納品書HTMLを生成
  */
 function buildDeliverySlipPdfHtml(array $orderDetail, array $orderItems, array $shopData): string
@@ -178,6 +190,20 @@ function buildDeliverySlipPdfHtml(array $orderDetail, array $orderItems, array $
       $tax10Total += $subtotalTaxIn;
     }
     $itemProductName = hPdfValue($orderItem['product_name'] ?? '');
+    $standardParts = [];
+    $className1 = deliverySlipStripShopClassNameNamespace((string)($orderItem['class_name1'] ?? ''));
+    $classCategory1 = deliverySlipStripShopClassNameNamespace((string)($orderItem['class_category1'] ?? ''));
+    $className2 = deliverySlipStripShopClassNameNamespace((string)($orderItem['class_name2'] ?? ''));
+    $classCategory2 = deliverySlipStripShopClassNameNamespace((string)($orderItem['class_category2'] ?? ''));
+    if ($className1 !== '' && $classCategory1 !== '') {
+      $standardParts[] = $className1 . ': ' . $classCategory1;
+    }
+    if ($className2 !== '' && $classCategory2 !== '') {
+      $standardParts[] = $className2 . ': ' . $classCategory2;
+    }
+    if (!empty($standardParts)) {
+      $itemProductName .= '<br>' . hPdfValue(implode(' / ', $standardParts));
+    }
     $itemTaxRate = hPdfValue((string)$taxRate);
     $itemQuantity = hPdfValue((string)$quantity);
     $itemUnitPrice = hPdfValue(number_format($unitPriceTaxIn));
@@ -185,7 +211,7 @@ function buildDeliverySlipPdfHtml(array $orderDetail, array $orderItems, array $
     $itemRowsHtml .= <<<HTML
       <li>
         <div class="item-name">{$itemProductName}</div>
-        <div><span>{$itemTaxRate}%</span></div>
+        <div><span>{$itemTaxRate}</span></div>
         <div>{$itemQuantity}</div>
         <div class="item-price">{$itemUnitPrice}</div>
         <div class="item-price">{$itemSubtotal}</div>

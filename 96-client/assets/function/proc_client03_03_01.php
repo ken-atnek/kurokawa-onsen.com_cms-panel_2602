@@ -129,6 +129,57 @@ function buildEccubeProductMutationArgs_v01($args)
   return implode("\n    ", $args);
 }
 /*
+ * [EC-CUBE商品連携] 規格あり商品の variants GraphQL 引数を組み立てる
+ *  実機互換用に ProductVariantInput の価格フィールド名を切り替え可能にする
+ */
+function buildEccubeVariantParts_v01($graphqlVariants, $taxRate, $priceFieldName = 'price')
+{
+  $variantParts = array();
+  $priceFieldName = ($priceFieldName === 'price02') ? 'price02' : 'price';
+  foreach ($graphqlVariants as $gv) {
+    $variantArgs = array();
+    $variantArgs[] = 'class_category_id1: ' . (int)$gv['eccube_class_category_id1'];
+    if ($gv['eccube_class_category_id2'] !== null) {
+      $variantArgs[] = 'class_category_id2: ' . (int)$gv['eccube_class_category_id2'];
+    }
+    $variantArgs[] = 'code: ' . buildEccubeGraphqlString_v01($gv['code']);
+    $variantPriceExcludingTax = convertTaxIncludedToExcludedPrice($gv['price'], $taxRate);
+    $variantArgs[] = $priceFieldName . ': ' . (int)$variantPriceExcludingTax;
+    if ((int)$gv['stock_unlimited'] === 1) {
+      $variantArgs[] = 'stock_unlimited: true';
+    } else {
+      $variantArgs[] = 'stock: ' . (int)$gv['stock'];
+    }
+    $variantParts[] = "{\n      " . implode("\n      ", $variantArgs) . "\n    }";
+  }
+  return $variantParts;
+}
+/*
+ * [EC-CUBE商品連携] 規格あり商品の Mutation を実行する
+ *  実機互換用に ProductVariantInput の価格フィールド名を切り替える
+ */
+function callEccubeProductVariantsMutation_v01($baseArgs, $graphqlVariants, $taxRate, $mutationName, $priceFieldName = 'price')
+{
+  $args = $baseArgs;
+  $variantParts = buildEccubeVariantParts_v01($graphqlVariants, $taxRate, $priceFieldName);
+  $args[] = "variants: [\n    " . implode(",\n    ", $variantParts) . "\n  ]";
+  $query = "mutation {\n  " . $mutationName . "(\n    " . buildEccubeProductMutationArgs_v01($args) . "\n  ) {\n    id\n  }\n}";
+  return eccube_api_call($query);
+}
+/*
+ * [EC-CUBE商品連携] 規格あり商品の価格フィールド失敗時に別名再試行対象か判定する
+ */
+function shouldRetryVariantPriceField_v01($errorMessage)
+{
+  $errorMessage = (string)$errorMessage;
+  return (
+    strpos($errorMessage, 'price') !== false
+    || strpos($errorMessage, 'price02') !== false
+    || strpos($errorMessage, 'ProductVariantInput') !== false
+    || strpos($errorMessage, 'variants') !== false
+  );
+}
+/*
  * [EC-CUBE商品連携] shop_products EC-CUBE商品ID更新
  */
 function updateShopProductEccubeProductId_v01($shopId, $productId, $eccubeProductId)
@@ -149,6 +200,12 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
 {
   $productData = getShopProductData_FindById($shopId, $productId);
   if (empty($productData)) {
+    makeLog([
+      'pageName' => 'proc_client03_03_01',
+      'reason' => 'product not found before EC-CUBE variants sync',
+      'shop_id' => $shopId,
+      'product_id' => $productId,
+    ]);
     appendEccubeWarningMessage_v01($makeTag);
     return;
   }
@@ -156,6 +213,12 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
   $shopData = getShops_FindById($shopId);
   $eccubeSaleTypeId = isset($shopData['eccube_sale_type_id']) ? (int)$shopData['eccube_sale_type_id'] : 0;
   if ($eccubeSaleTypeId < 1) {
+    makeLog([
+      'pageName' => 'proc_client03_03_01',
+      'reason' => 'eccube_sale_type_id missing',
+      'shop_id' => $shopId,
+      'product_id' => $productId,
+    ]);
     appendEccubeWarningMessage_v01($makeTag);
     return;
   }
@@ -170,12 +233,25 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
     $categoryData = getShopItemCategoryDetails($shopId, $outerCategoryId);
     $eccubeCategoryId = isset($categoryData['eccube_category_id']) ? (int)$categoryData['eccube_category_id'] : 0;
     if ($eccubeCategoryId < 1) {
+      makeLog([
+        'pageName' => 'proc_client03_03_01',
+        'reason' => 'eccube_category_id missing',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'category_id' => $outerCategoryId,
+      ]);
       appendEccubeWarningMessage_v01($makeTag);
       return;
     }
   }
   $variantDisplayList = getShopProductVariantDisplayList($shopId, $productId);
   if (empty($variantDisplayList)) {
+    makeLog([
+      'pageName' => 'proc_client03_03_01',
+      'reason' => 'active variants empty',
+      'shop_id' => $shopId,
+      'product_id' => $productId,
+    ]);
     appendEccubeWarningMessage_v01($makeTag);
     return;
   }
@@ -186,23 +262,53 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
     $classCategoryId2 = (isset($variant['class_category_id2']) && $variant['class_category_id2'] !== null) ? (int)$variant['class_category_id2'] : null;
     $localVariantId = isset($variant['variant_id']) ? (int)$variant['variant_id'] : 0;
     if ($localVariantId < 1) {
+      makeLog([
+        'pageName' => 'proc_client03_03_01',
+        'reason' => 'variant_id invalid',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'variant' => $variant,
+      ]);
       $eccubeVariantError = true;
       break;
     }
     $price = isset($variant['price']) ? (int)$variant['price'] : 0;
     if ($price < 1) {
+      makeLog([
+        'pageName' => 'proc_client03_03_01',
+        'reason' => 'variant price invalid',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'variant_id' => $localVariantId,
+        'price' => $price,
+      ]);
       $eccubeVariantError = true;
       break;
     }
     $stock = (isset($variant['stock']) && $variant['stock'] !== null) ? (int)$variant['stock'] : null;
     $stockUnlimited = (isset($variant['stock_unlimited']) && (int)$variant['stock_unlimited'] === 1) ? 1 : 0;
     if ($stockUnlimited !== 1 && $stock === null) {
+      makeLog([
+        'pageName' => 'proc_client03_03_01',
+        'reason' => 'variant stock missing',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'variant_id' => $localVariantId,
+      ]);
       $eccubeVariantError = true;
       break;
     }
     $classify1 = getShopItemClassifyDetails($shopId, $classCategoryId1);
     $eccubeClassCategoryId1 = isset($classify1['eccube_class_category_id']) ? (int)$classify1['eccube_class_category_id'] : 0;
     if ($eccubeClassCategoryId1 < 1) {
+      makeLog([
+        'pageName' => 'proc_client03_03_01',
+        'reason' => 'eccube_class_category_id1 missing',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'variant_id' => $localVariantId,
+        'class_category_id1' => $classCategoryId1,
+      ]);
       $eccubeVariantError = true;
       break;
     }
@@ -211,6 +317,14 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
       $classify2 = getShopItemClassifyDetails($shopId, $classCategoryId2);
       $eccubeClassCategoryId2 = isset($classify2['eccube_class_category_id']) ? (int)$classify2['eccube_class_category_id'] : 0;
       if ($eccubeClassCategoryId2 < 1) {
+        makeLog([
+          'pageName' => 'proc_client03_03_01',
+          'reason' => 'eccube_class_category_id2 missing',
+          'shop_id' => $shopId,
+          'product_id' => $productId,
+          'variant_id' => $localVariantId,
+          'class_category_id2' => $classCategoryId2,
+        ]);
         $eccubeVariantError = true;
         break;
       }
@@ -255,42 +369,64 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
   if ($eccubeCategoryId !== null) {
     $args[] = 'category_id: ' . (int)$eccubeCategoryId;
   }
-  $variantParts = array();
-  foreach ($graphqlVariants as $gv) {
-    $variantArgs = array();
-    $variantArgs[] = 'class_category_id1: ' . (int)$gv['eccube_class_category_id1'];
-    if ($gv['eccube_class_category_id2'] !== null) {
-      $variantArgs[] = 'class_category_id2: ' . (int)$gv['eccube_class_category_id2'];
-    }
-    $variantArgs[] = 'code: ' . buildEccubeGraphqlString_v01($gv['code']);
-    $variantPriceExcludingTax = convertTaxIncludedToExcludedPrice($gv['price'], $taxRate);
-    $variantArgs[] = 'price02: ' . (int)$variantPriceExcludingTax;
-    if ((int)$gv['stock_unlimited'] === 1) {
-      $variantArgs[] = 'stock_unlimited: true';
-    } else {
-      $variantArgs[] = 'stock: ' . (int)$gv['stock'];
-    }
-    $variantParts[] = "{\n      " . implode("\n      ", $variantArgs) . "\n    }";
-  }
-  $args[] = "variants: [\n    " . implode(",\n    ", $variantParts) . "\n  ]";
   try {
     if ($eccubeCurrentProductId < 1) {
-      $query = "mutation {\n  CreateProductMutation(\n    " . buildEccubeProductMutationArgs_v01($args) . "\n  ) {\n    id\n  }\n}";
-      $result = eccube_api_call($query);
+      try {
+        $result = callEccubeProductVariantsMutation_v01($args, $graphqlVariants, $taxRate, 'CreateProductMutation', 'price02');
+      } catch (Exception $e) {
+        if (!shouldRetryVariantPriceField_v01($e->getMessage())) {
+          throw $e;
+        }
+        makeLog([
+          'pageName' => 'proc_client03_03_01',
+          'reason' => 'CreateProductMutation variants.price02 failed, retry price',
+          'errorMessage' => $e->getMessage(),
+        ]);
+        $result = callEccubeProductVariantsMutation_v01($args, $graphqlVariants, $taxRate, 'CreateProductMutation', 'price');
+      }
       $eccubeNewProductId = $result['CreateProductMutation']['id'] ?? null;
       if ($eccubeNewProductId === null || (int)$eccubeNewProductId < 1) {
+        makeLog([
+          'pageName' => 'proc_client03_03_01',
+          'reason' => 'CreateProductMutation id missing',
+          'result' => $result,
+        ]);
         appendEccubeWarningMessage_v01($makeTag);
         return;
       }
       if (updateShopProductEccubeProductId_v01($shopId, $productId, (int)$eccubeNewProductId) != 1) {
+        makeLog([
+          'pageName' => 'proc_client03_03_01',
+          'reason' => 'shop_products.eccube_product_id update failed',
+          'shop_id' => $shopId,
+          'product_id' => $productId,
+          'eccube_product_id' => (int)$eccubeNewProductId,
+        ]);
         appendEccubeWarningMessage_v01($makeTag);
         return;
       }
     } else {
       array_unshift($args, 'product_id: ' . $eccubeCurrentProductId);
-      $query = "mutation {\n  UpdateProductMutation(\n    " . buildEccubeProductMutationArgs_v01($args) . "\n  ) {\n    id\n  }\n}";
-      $result = eccube_api_call($query);
+      try {
+        $result = callEccubeProductVariantsMutation_v01($args, $graphqlVariants, $taxRate, 'UpdateProductMutation', 'price02');
+      } catch (Exception $e) {
+        if (!shouldRetryVariantPriceField_v01($e->getMessage())) {
+          throw $e;
+        }
+        makeLog([
+          'pageName' => 'proc_client03_03_01',
+          'reason' => 'UpdateProductMutation variants.price02 failed, retry price',
+          'errorMessage' => $e->getMessage(),
+        ]);
+        $result = callEccubeProductVariantsMutation_v01($args, $graphqlVariants, $taxRate, 'UpdateProductMutation', 'price');
+      }
       if (is_array($result) === false || array_key_exists('UpdateProductMutation', $result) === false) {
+        makeLog([
+          'pageName' => 'proc_client03_03_01',
+          'reason' => 'UpdateProductMutation result invalid',
+          'result' => $result,
+          'eccube_product_id' => $eccubeCurrentProductId,
+        ]);
         appendEccubeWarningMessage_v01($makeTag);
         return;
       }
@@ -298,12 +434,98 @@ function syncEccubeProductVariants_v01(&$makeTag, $shopId, $productId)
     foreach ($graphqlVariants as $gv) {
       if ((int)$gv['local_variant_id'] > 0) {
         if (updateShopProductVariant((int)$gv['local_variant_id'], $shopId, ['eccube_product_class_code' => $gv['code']]) === false) {
+          makeLog([
+            'pageName' => 'proc_client03_03_01',
+            'reason' => 'shop_product_variants.eccube_product_class_code update failed',
+            'shop_id' => $shopId,
+            'product_id' => $productId,
+            'variant_id' => (int)$gv['local_variant_id'],
+          ]);
           appendEccubeWarningMessage_v01($makeTag);
           return;
         }
       }
     }
   } catch (Exception $e) {
+    makeLog([
+      'pageName' => 'proc_client03_03_01',
+      'reason' => 'EC-CUBE規格あり商品連携失敗',
+      'errorMessage' => $e->getMessage(),
+    ]);
+    appendEccubeWarningMessage_v01($makeTag);
+  }
+}
+
+/*
+ * [EC-CUBE商品連携] 規格あり商品の各バリアントに ProductClass.id を補完保存する
+ *  shop_product_variants.eccube_product_class_code と ProductClass.code を突合し、
+ *  一致したバリアントにのみ eccube_product_class_id を保存する
+ *  失敗時は warning のみ設定し、規格保存は成功扱いを維持する
+ */
+function syncEccubeVariantClassIds_v01(&$makeTag, $shopId, $productId)
+{
+  $productData = getShopProductData_FindById($shopId, $productId);
+  if (empty($productData)) {
+    return;
+  }
+  $eccubeProductId = isset($productData['eccube_product_id']) ? (int)$productData['eccube_product_id'] : 0;
+  if ($eccubeProductId < 1) {
+    return;
+  }
+  $productClasses = fetchEccubeProductClasses($eccubeProductId);
+  if (empty($productClasses)) {
+    makeLog([
+      'pageName' => 'proc_client03_03_01',
+      'reason' => 'fetchEccubeProductClasses empty',
+      'shop_id' => $shopId,
+      'product_id' => $productId,
+      'eccube_product_id' => $eccubeProductId,
+    ]);
+    appendEccubeWarningMessage_v01($makeTag);
+    return;
+  }
+  $codeToClassId = [];
+  foreach ($productClasses as $pc) {
+    $pcCode = trim((string)($pc['code'] ?? ''));
+    if ($pcCode !== '' && $pc['id'] > 0) {
+      $codeToClassId[$pcCode] = (int)$pc['id'];
+    }
+  }
+  $variants = getShopProductVariants($shopId, $productId);
+  $hasError = false;
+  foreach ($variants as $variant) {
+    $variantId = isset($variant['variant_id']) ? (int)$variant['variant_id'] : 0;
+    $variantActive = isset($variant['is_active']) ? (int)$variant['is_active'] : 0;
+    $variantCode = (isset($variant['eccube_product_class_code']) && $variant['eccube_product_class_code'] !== null)
+      ? trim((string)$variant['eccube_product_class_code']) : '';
+    if ($variantActive !== 1 || $variantId < 1 || $variantCode === '') {
+      continue;
+    }
+    if (!isset($codeToClassId[$variantCode])) {
+      makeLog([
+        'pageName' => 'proc_client03_03_01',
+        'reason' => 'ProductClass.code not matched',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'variant_id' => $variantId,
+        'variant_code' => $variantCode,
+      ]);
+      $hasError = true;
+      continue;
+    }
+    if (updateShopProductVariant($variantId, $shopId, ['eccube_product_class_id' => $codeToClassId[$variantCode]]) === false) {
+      makeLog([
+        'pageName' => 'proc_client03_03_01',
+        'reason' => 'shop_product_variants.eccube_product_class_id update failed',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'variant_id' => $variantId,
+        'eccube_product_class_id' => $codeToClassId[$variantCode],
+      ]);
+      $hasError = true;
+    }
+  }
+  if ($hasError) {
     appendEccubeWarningMessage_v01($makeTag);
   }
 }
@@ -534,6 +756,7 @@ switch ($action) {
           $makeTag['product_id'] = $productId;
           $makeTag['variant_count'] = $savedCount;
           syncEccubeProductVariants_v01($makeTag, $shopId, $productId);
+          syncEccubeVariantClassIds_v01($makeTag, $shopId, $productId);
           syncFrontendProductJson($makeTag, $shopId, $productId);
         } else {
           DB_Transaction(3);

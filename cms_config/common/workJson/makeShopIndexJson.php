@@ -63,6 +63,7 @@ function generateShopIndexJson(): bool
 				'category' => $shop['shop_type'] ?? '',
 				'name' => formatTextareaForDB((string)($shop['shop_name'] ?? '')),
 				'tel' => $shop['tel'] ?? '',
+				'fax' => $shop['fax'] ?? '',
 				'thumb' => $shopDetailsData['main_image_path'] ?? '',
 				'leadCopy' => formatTextareaForDB((string)($shopDetailsData['intro_body'] ?? '')),
 			];

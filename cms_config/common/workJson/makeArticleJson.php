@@ -14,7 +14,6 @@ function buildArticleDetailJsonDir($shopId, $articleId)
 {
 	return rtrim(DEFINE_JSON_DIR_PATH, '/\\') . '/shops/articles/' . sprintf('%03d', (int)$shopId) . '/' . (int)$articleId;
 }
-
 /*
  * [記事JSON] 記事詳細JSONファイル書き出し（active / inactive 共通）
  */
@@ -35,7 +34,6 @@ function writeArticleJsonFile($shopId, $articleId, array $writeData): bool
 	@chmod($filePath, octdec('0666'));
 	return true;
 }
-
 /*
  * [記事JSON] サムネイル画像パス変換
  *  image_storage_path を /db/images/... 形式に変換する。空なら null。
@@ -48,7 +46,6 @@ function buildArticleJsonThumbnailPath($storagePath)
 	}
 	return '/db/images/' . ltrim($storagePath, '/');
 }
-
 /*
  * [記事JSON] link_target DB値 → JSON値変換
  *  DB値 2 → '_blank'、それ以外 → '_self'
@@ -57,7 +54,6 @@ function buildArticleJsonLinkTarget($linkTarget)
 {
 	return ((int)$linkTarget === 2) ? '_blank' : '_self';
 }
-
 /*
  * [記事JSON] 定型タイプ段落配列生成
  *  paragraphs を 1〜3 固定で出力する。DBに存在しない段落は null 含む空構造で出力する。
@@ -103,7 +99,6 @@ function buildArticleJsonParagraphs($shopId, $articleId)
 	}
 	return $paragraphs;
 }
-
 /*
  * [記事JSON] 記事詳細JSON active 生成
  *  公開中記事の詳細JSONをファイルへ書き出す。
@@ -128,6 +123,7 @@ function generateArticleDetailJson($shopId, $articleId): bool
 		'shopId'      => (int)$row['shop_id'],
 		'articleType' => $articleType,
 		'title'       => (string)$row['title'],
+		'createdAt'   => (string)$row['created_at'],
 	];
 	if ($articleType === 1) {
 		$writeData['paragraphs'] = buildArticleJsonParagraphs($shopId, $articleId);
@@ -139,7 +135,6 @@ function generateArticleDetailJson($shopId, $articleId): bool
 	}
 	return writeArticleJsonFile($shopId, $articleId, $writeData);
 }
-
 /*
  * [記事JSON] 記事詳細JSON inactive 書き出し
  *  非公開・削除時に inactive JSON でファイルを上書きする。
@@ -159,7 +154,6 @@ function writeInactiveArticleJson($shopId, $articleId): bool
 	];
 	return writeArticleJsonFile($shopId, $articleId, $writeData);
 }
-
 /*
  * [記事JSON] 記事詳細JSON・店舗詳細JSON同期書き出し
  *  記事登録・編集・公開切替・削除の各procから呼ぶ共通sync関数。
@@ -186,7 +180,6 @@ function syncFrontendArticleJson(&$makeTag, $shopId, $articleId): bool
 	}
 	return true;
 }
-
 /*
  * [記事JSON] 店舗詳細JSON articles 更新
  *  表示順変更時など、店舗詳細JSONの articles 順序だけ更新する。

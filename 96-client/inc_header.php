@@ -7,7 +7,8 @@
  * [初版]
  *  2026.2.23
  */
-$previewUrl = DOMAIN_NAME;
+$previewShopId = sprintf('%03d', $shopId);
+$previewUrl = DOMAIN_NAME . '/shops/detail/?id=' . $previewShopId;
 #***** タグ生成開始 *****#
 print <<<HTML
 <header class="cp-client">

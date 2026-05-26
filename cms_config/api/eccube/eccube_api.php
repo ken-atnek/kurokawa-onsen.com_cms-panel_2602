@@ -159,3 +159,37 @@ function eccube_api_call(string $query): array
 	}
 	return $responseData['data'];
 }
+/**
+ * EC-CUBE product Query で ProductClasses 一覧を取得する
+ *  失敗時は空配列を返す
+ */
+function fetchEccubeProductClasses(int $eccubeProductId): array
+{
+	if ($eccubeProductId < 1) {
+		return [];
+	}
+	$query = "query {\n  product(id: " . $eccubeProductId . ") {\n    id\n    ProductClasses {\n      id\n      code\n      ClassCategory1 {\n        id\n      }\n      ClassCategory2 {\n        id\n      }\n    }\n  }\n}";
+	try {
+		$result = eccube_api_call($query);
+		$productClasses = isset($result['product']['ProductClasses']) ? $result['product']['ProductClasses'] : null;
+		if (!is_array($productClasses)) {
+			return [];
+		}
+		$list = [];
+		foreach ($productClasses as $pc) {
+			$pcId = isset($pc['id']) ? (int)$pc['id'] : 0;
+			if ($pcId < 1) {
+				continue;
+			}
+			$list[] = [
+				'id'                 => $pcId,
+				'code'               => isset($pc['code']) ? (string)$pc['code'] : '',
+				'class_category_id1' => isset($pc['ClassCategory1']['id']) ? (int)$pc['ClassCategory1']['id'] : null,
+				'class_category_id2' => isset($pc['ClassCategory2']['id']) ? (int)$pc['ClassCategory2']['id'] : null,
+			];
+		}
+		return $list;
+	} catch (Exception $e) {
+		return [];
+	}
+}

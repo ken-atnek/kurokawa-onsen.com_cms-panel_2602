@@ -46,6 +46,15 @@ function buildProcessOrderGraphqlString($value)
 	}
 	return $encoded;
 }
+/**
+ * 受注明細 nullable 文字列正規化
+ *  空文字・空白のみは null に変換する
+ */
+function normalizeNullableOrderItemText($value)
+{
+	$value = trim((string)$value);
+	return $value === '' ? null : $value;
+}
 /*
  * EC-CUBE受注詳細取得
  */
@@ -59,7 +68,7 @@ function fetchEccubeOrderForWebhook($eccubeOrderId)
 	if ($lastSyncedId < 0) {
 		$lastSyncedId = 0;
 	}
-	$query = "query {\n  ordersForSync(\n    last_synced_id: " . (int)$lastSyncedId . "\n    last_synced_at: " . buildProcessOrderGraphqlString('2000-01-01T00:00:00+09:00') . "\n    limit: 50\n  ) {\n    id\n    order_no\n    orderer_name\n    orderer_name01\n    orderer_name02\n    orderer_kana01\n    orderer_kana02\n    orderer_company_name\n    orderer_email\n    orderer_tel\n    orderer_postal_code\n    orderer_pref_id\n    orderer_pref_name\n    orderer_addr01\n    orderer_addr02\n    orderer_message\n    shipping_name\n    shipping_name01\n    shipping_name02\n    shipping_kana01\n    shipping_kana02\n    shipping_company_name\n    shipping_postal_code\n    shipping_pref_id\n    shipping_pref_name\n    shipping_addr01\n    shipping_addr02\n    shipping_tel\n    order_status_id\n    order_status_name\n    payment_total\n    delivery_fee_total\n    update_date\n    zeus_order_id\n    order_items {\n      product_class_code\n      product_name\n      quantity\n      price\n    }\n  }\n}";
+	$query = "query {\n  ordersForSync(\n    last_synced_id: " . (int)$lastSyncedId . "\n    last_synced_at: " . buildProcessOrderGraphqlString('2000-01-01T00:00:00+09:00') . "\n    limit: 50\n  ) {\n    id\n    order_no\n    orderer_name\n    orderer_name01\n    orderer_name02\n    orderer_kana01\n    orderer_kana02\n    orderer_company_name\n    orderer_email\n    orderer_tel\n    orderer_postal_code\n    orderer_pref_id\n    orderer_pref_name\n    orderer_addr01\n    orderer_addr02\n    orderer_message\n    shipping_name\n    shipping_name01\n    shipping_name02\n    shipping_kana01\n    shipping_kana02\n    shipping_company_name\n    shipping_postal_code\n    shipping_pref_id\n    shipping_pref_name\n    shipping_addr01\n    shipping_addr02\n    shipping_tel\n    order_status_id\n    order_status_name\n    payment_total\n    delivery_fee_total\n    update_date\n    zeus_order_id\n    order_items {\n      product_class_code\n      product_name\n      quantity\n      price\n      class_name1\n      class_category1\n      class_name2\n      class_category2\n    }\n  }\n}";
 	$result = eccube_api_call($query);
 	$orders = isset($result['ordersForSync']) && is_array($result['ordersForSync']) ? $result['ordersForSync'] : [];
 	foreach ($orders as $order) {
@@ -252,10 +261,10 @@ foreach ($pendingLogs as $log) {
 			'quantity' => $quantity,
 			'subtotal' => $unitPrice * $quantity,
 			'temp_type' => null,
-			'class_name1' => null,
-			'class_category1' => null,
-			'class_name2' => null,
-			'class_category2' => null,
+			'class_name1' => normalizeNullableOrderItemText($orderItem['class_name1'] ?? null),
+			'class_category1' => normalizeNullableOrderItemText($orderItem['class_category1'] ?? null),
+			'class_name2' => normalizeNullableOrderItemText($orderItem['class_name2'] ?? null),
+			'class_category2' => normalizeNullableOrderItemText($orderItem['class_category2'] ?? null),
 			'current_item_status' => 'normal',
 		];
 		$orderItemId = insertShopOrderItem((int)$orderId, (int)$shopId, $itemData);

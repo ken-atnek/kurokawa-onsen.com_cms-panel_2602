@@ -328,10 +328,12 @@ function getShopProductVariantsForJson($shopId, $productId)
 		$strSQL = "
 			SELECT
 				v.variant_id,
-				v.eccube_product_class_code,
+				v.eccube_product_class_id,
 				v.class_category_id1,
+				cn1.name AS class_name1,
 				c1.name AS class_category_name1,
 				v.class_category_id2,
+				cn2.name AS class_name2,
 				c2.name AS class_category_name2,
 				v.price,
 				v.stock,
@@ -344,6 +346,12 @@ function getShopProductVariantsForJson($shopId, $productId)
 				LEFT JOIN shop_class_categories AS c2
 					ON v.class_category_id2 = c2.class_category_id
 					AND v.shop_id = c2.shop_id
+				LEFT JOIN shop_class_names AS cn1
+					ON c1.class_name_id = cn1.class_name_id
+					AND v.shop_id = cn1.shop_id
+				LEFT JOIN shop_class_names AS cn2
+					ON c2.class_name_id = cn2.class_name_id
+					AND v.shop_id = cn2.shop_id
 			WHERE
 				v.product_id = :product_id
 				AND v.shop_id = :shop_id
@@ -1522,6 +1530,49 @@ function deleteShopProductVariantsByProductId($shopId, $productId)
 		#プリペアードステートメント作成
 		$newStmt = $DB_CONNECT->prepare($strSQL);
 		#変数バインド
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':product_id', (int)$productId, PDO::PARAM_INT);
+		#SQL実行
+		$newStmt->execute();
+		#ステートメントクローズ
+		$newStmt->closeCursor();
+		return true;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/*
+ * [shop_products] 規格なし商品の EC-CUBE ProductClass.id を更新する
+ *  引数
+ *   $shopId               ：店舗ID
+ *   $productId            ：商品ID
+ *   $eccubeProductClassId ：EC-CUBE ProductClass.id（正の整数のみ許可）
+ *  応答
+ *   true  ：更新成功
+ *   false ：更新失敗または不正値
+ */
+function updateShopProductEccubeClassId($shopId, $productId, $eccubeProductClassId)
+{
+	global $DB_CONNECT;
+	if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1) return false;
+	if ($productId === null || is_numeric($productId) === false || (int)$productId < 1) return false;
+	if ($eccubeProductClassId === null || is_numeric($eccubeProductClassId) === false || (int)$eccubeProductClassId < 1) return false;
+	try {
+		#SQL定義
+		$strSQL = "
+			UPDATE
+				shop_products
+			SET
+				eccube_product_class_id = :eccube_product_class_id,
+				updated_at = NOW()
+			WHERE
+				shop_id = :shop_id
+				AND product_id = :product_id
+		";
+		#プリペアードステートメント作成
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		#変数バインド
+		$newStmt->bindValue(':eccube_product_class_id', (int)$eccubeProductClassId, PDO::PARAM_INT);
 		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
 		$newStmt->bindValue(':product_id', (int)$productId, PDO::PARAM_INT);
 		#SQL実行

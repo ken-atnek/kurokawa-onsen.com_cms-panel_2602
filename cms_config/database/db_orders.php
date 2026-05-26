@@ -983,6 +983,10 @@ function getShopOrderItemsByOrderIds(array $orderIds)
 				i.unit_price,
 				i.subtotal,
 				i.current_item_status,
+				i.class_name1,
+				i.class_category1,
+				i.class_name2,
+				i.class_category2,
 				p.tax_rate
 			FROM
 				shop_order_items AS i
@@ -1017,6 +1021,18 @@ function getShopOrderItemsByOrderIds(array $orderIds)
 	} catch (PDOException $e) {
 		return [];
 	}
+}
+/**
+ * 受注通知メール用 規格名接頭辞除去
+ *  【sid:{shop_id}】 形式の接頭辞が混入した場合に除去する
+ */
+function stripShopClassNameNamespaceForOrderMail($value)
+{
+	$value = trim((string)$value);
+	if ($value === '') {
+		return '';
+	}
+	return preg_replace('/^【sid:\d+】/u', '', $value);
 }
 /*
  * [shop_orders] 受注通知メール送信結果更新
@@ -1101,6 +1117,7 @@ function sendOrderNotificationMail($orderId)
 		$orderItemsByOrderId = getShopOrderItemsByOrderIds([(int)$orderId]);
 		$orderItems = $orderItemsByOrderId[(int)$orderId] ?? [];
 		$itemLines = [];
+		$productTotal = 0;
 		foreach ($orderItems as $orderItem) {
 			$productName = isset($orderItem['product_name']) && trim((string)$orderItem['product_name']) !== '' ? trim((string)$orderItem['product_name']) : '商品名未設定';
 			$quantity = isset($orderItem['quantity']) ? (int)$orderItem['quantity'] : 0;
@@ -1109,7 +1126,21 @@ function sendOrderNotificationMail($orderId)
 				$taxRate = 10;
 			}
 			$subtotalIncludingTax = (int)round((int)($orderItem['subtotal'] ?? 0) * (1 + ($taxRate / 100)));
-			$itemLines[] = $productName . ' × ' . number_format($quantity) . '  小計: ' . number_format($subtotalIncludingTax) . '円';
+			$unitPriceIncludingTax = ($quantity > 0) ? (int)round($subtotalIncludingTax / $quantity) : 0;
+			$productTotal += $subtotalIncludingTax;
+			$standardParts = [];
+			$className1 = stripShopClassNameNamespaceForOrderMail($orderItem['class_name1'] ?? '');
+			$classCategory1 = stripShopClassNameNamespaceForOrderMail($orderItem['class_category1'] ?? '');
+			$className2 = stripShopClassNameNamespaceForOrderMail($orderItem['class_name2'] ?? '');
+			$classCategory2 = stripShopClassNameNamespaceForOrderMail($orderItem['class_category2'] ?? '');
+			if ($className1 !== '' && $classCategory1 !== '') {
+				$standardParts[] = $className1 . ': ' . $classCategory1;
+			}
+			if ($className2 !== '' && $classCategory2 !== '') {
+				$standardParts[] = $className2 . ': ' . $classCategory2;
+			}
+			$displayProductName = empty($standardParts) ? $productName : $productName . '（' . implode(' / ', $standardParts) . '）';
+			$itemLines[] = $displayProductName . ' × ' . number_format($quantity) . '  単価: ' . number_format($unitPriceIncludingTax) . '円  小計: ' . number_format($subtotalIncludingTax) . '円';
 		}
 		if (empty($itemLines)) {
 			$itemLines[] = '購入商品情報なし';
@@ -1128,6 +1159,7 @@ function sendOrderNotificationMail($orderId)
 		$mailBody .= "■ 購入商品\n";
 		$mailBody .= implode("\n", $itemLines) . "\n\n";
 		$mailBody .= "■ 金額\n";
+		$mailBody .= "商品金額: " . number_format($productTotal) . "円\n";
 		$mailBody .= "送料: " . number_format((int)($order['delivery_fee_total'] ?? 0)) . "円\n";
 		$mailBody .= "お支払合計: " . number_format((int)($order['payment_total'] ?? 0)) . "円\n\n";
 		$mailBody .= "※このメールは自動送信です。\n";

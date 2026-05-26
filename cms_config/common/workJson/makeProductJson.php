@@ -73,6 +73,69 @@ function normalizeProductClassCategoryNameForJson($name)
   return preg_replace('/^【sid:\d+】/u', '', (string)$name);
 }
 /*
+ * [フロントJSON] 規格ありstandard構造生成
+ */
+function buildProductStandardObjectForJson($variants)
+{
+  $label1 = null;
+  $label2 = null;
+  $options1 = [];
+  $options2 = [];
+  $optionIds1 = [];
+  $optionIds2 = [];
+  $items = [];
+  foreach ($variants as $v) {
+    $className1 = normalizeProductClassCategoryNameForJson($v['class_name1'] ?? null);
+    $className2 = normalizeProductClassCategoryNameForJson($v['class_name2'] ?? null);
+    if ($label1 === null && trim((string)$className1) !== '') {
+      $label1 = $className1;
+    }
+    if ($label2 === null && trim((string)$className2) !== '') {
+      $label2 = $className2;
+    }
+    $classCategoryId1 = isset($v['class_category_id1']) && $v['class_category_id1'] !== null ? (int)$v['class_category_id1'] : null;
+    $classCategoryId2 = isset($v['class_category_id2']) && $v['class_category_id2'] !== null ? (int)$v['class_category_id2'] : null;
+    $classCategoryName1 = normalizeProductClassCategoryNameForJson($v['class_category_name1'] ?? null);
+    $classCategoryName2 = normalizeProductClassCategoryNameForJson($v['class_category_name2'] ?? null);
+    if ($classCategoryId1 !== null && $classCategoryId1 > 0 && trim((string)$classCategoryName1) !== '' && !isset($optionIds1[$classCategoryId1])) {
+      $options1[] = [
+        'id' => $classCategoryId1,
+        'label' => $classCategoryName1,
+      ];
+      $optionIds1[$classCategoryId1] = true;
+    }
+    if ($classCategoryId2 !== null && $classCategoryId2 > 0 && trim((string)$classCategoryName2) !== '' && !isset($optionIds2[$classCategoryId2])) {
+      $options2[] = [
+        'id' => $classCategoryId2,
+        'label' => $classCategoryName2,
+      ];
+      $optionIds2[$classCategoryId2] = true;
+    }
+    $vStockUnlimited = (int)($v['stock_unlimited'] ?? 0) === 1;
+    $ecClassId = isset($v['eccube_product_class_id']) && is_numeric($v['eccube_product_class_id']) && (int)$v['eccube_product_class_id'] > 0 ? (int)$v['eccube_product_class_id'] : null;
+    $items[] = [
+      'variantId' => (int)($v['variant_id'] ?? 0),
+      'ecClassId' => $ecClassId,
+      'classCategoryId1' => $classCategoryId1,
+      'classCategoryId2' => $classCategoryId2,
+      'price' => (int)($v['price'] ?? 0),
+      'stock' => $vStockUnlimited ? 999 : (int)($v['stock'] ?? 0),
+      'stockUnlimited' => $vStockUnlimited,
+    ];
+  }
+  return [
+    'className' => [
+      'label1' => $label1,
+      'label2' => $label2,
+    ],
+    'classCategory' => [
+      'options1' => $options1,
+      'options2' => $options2,
+    ],
+    'items' => $items,
+  ];
+}
+/*
  * [フロントJSON] 商品個別JSON生成
  */
 function generateProductJsonFile($shopId, $productId)
@@ -96,34 +159,25 @@ function generateProductJsonFile($shopId, $productId)
   if (count($variants) > 0) {
     $price = 0;
     $stock = 0;
-    $standard = [];
-    foreach ($variants as $v) {
-      $vStockUnlimited = (int)($v['stock_unlimited'] ?? 0) === 1;
-      $standard[] = [
-        'variantId' => (int)($v['variant_id'] ?? 0),
-        'productClassCode' => isset($v['eccube_product_class_code']) ? (string)$v['eccube_product_class_code'] : null,
-        'classCategoryId1' => isset($v['class_category_id1']) ? (int)$v['class_category_id1'] : null,
-        'classCategoryName1' => normalizeProductClassCategoryNameForJson($v['class_category_name1'] ?? null),
-        'classCategoryId2' => isset($v['class_category_id2']) && $v['class_category_id2'] !== null ? (int)$v['class_category_id2'] : null,
-        'classCategoryName2' => normalizeProductClassCategoryNameForJson($v['class_category_name2'] ?? null),
-        'price' => (int)($v['price'] ?? 0),
-        'stock' => $vStockUnlimited ? 999 : (int)($v['stock'] ?? 0),
-        'stockUnlimited' => $vStockUnlimited,
-      ];
-    }
+    $stockUnlimited = false;
+    $ecClassId = null;
+    $standard = buildProductStandardObjectForJson($variants);
   } else {
     $stockUnlimited = (int)($productData['stock_unlimited'] ?? 0) === 1;
     $price = (int)($productData['price'] ?? 0);
     $stock = $stockUnlimited ? 999 : (int)($productData['stock'] ?? 0);
+    $ecClassId = isset($productData['eccube_product_class_id']) && $productData['eccube_product_class_id'] !== null ? (int)$productData['eccube_product_class_id'] : null;
     $standard = [];
   }
   $data = [
     'id' => $productJsonId,
     'ecId' => $eccubeProductId,
+    'ecClassId' => $ecClassId,
     'shopId' => $shopId3,
     'title' => isset($productData['name']) ? (string)$productData['name'] : '',
     'price' => $price,
     'stock' => $stock,
+    'stockUnlimited' => $stockUnlimited,
     'standard' => $standard,
     'images' => buildProductImageUrlsForJson($shopId, $productId),
     'comment' => splitProductDescriptionForJson($productData['description'] ?? ''),

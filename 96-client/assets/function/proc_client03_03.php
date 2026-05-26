@@ -244,6 +244,13 @@ function syncEccubeProductBasicInfo(&$makeTag, $method, $specUsageFlg, $shopId, 
   $shopData = getShops_FindById($shopId);
   $eccubeSaleTypeId = isset($shopData['eccube_sale_type_id']) ? (int)$shopData['eccube_sale_type_id'] : 0;
   if ($eccubeSaleTypeId < 1) {
+    makeLog([
+      'pageName' => 'proc_client03_03',
+      'reason' => 'eccube_sale_type_id missing',
+      'shop_id' => $shopId,
+      'product_id' => $productId,
+      'spec_usage_flg' => $specUsageFlg,
+    ]);
     appendEccubeWarningMessage($makeTag);
     return;
   }
@@ -253,6 +260,14 @@ function syncEccubeProductBasicInfo(&$makeTag, $method, $specUsageFlg, $shopId, 
     $categoryData = getShopItemCategoryDetails($shopId, $categoryId);
     $eccubeCategoryId = isset($categoryData['eccube_category_id']) ? (int)$categoryData['eccube_category_id'] : null;
     if ($eccubeCategoryId < 1) {
+      makeLog([
+        'pageName' => 'proc_client03_03',
+        'reason' => 'eccube_category_id missing',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'category_id' => $categoryId,
+        'spec_usage_flg' => $specUsageFlg,
+      ]);
       appendEccubeWarningMessage($makeTag);
       return;
     }
@@ -283,6 +298,13 @@ function syncEccubeProductBasicInfo(&$makeTag, $method, $specUsageFlg, $shopId, 
     }
     $currentProductData = getShopProductData_FindById($shopId, $productId);
     if (empty($currentProductData)) {
+      makeLog([
+        'pageName' => 'proc_client03_03',
+        'reason' => 'product not found before EC-CUBE product sync',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'spec_usage_flg' => $specUsageFlg,
+      ]);
       appendEccubeWarningMessage($makeTag);
       return;
     }
@@ -308,7 +330,13 @@ function syncEccubeProductBasicInfo(&$makeTag, $method, $specUsageFlg, $shopId, 
     } else {
       $eccubeProductId = isset($currentProductData['eccube_product_id']) ? (int)$currentProductData['eccube_product_id'] : 0;
       if ($eccubeProductId < 1) {
-        appendEccubeWarningMessage($makeTag);
+        makeLog([
+          'pageName' => 'proc_client03_03',
+          'reason' => 'eccube_product_id missing for spec product basic update, defer until variant save',
+          'shop_id' => $shopId,
+          'product_id' => $productId,
+          'spec_usage_flg' => $specUsageFlg,
+        ]);
         return;
       }
       array_unshift($args, 'product_id: ' . $eccubeProductId);
@@ -316,9 +344,72 @@ function syncEccubeProductBasicInfo(&$makeTag, $method, $specUsageFlg, $shopId, 
     $query = "mutation {\n  UpdateProductMutation(\n    " . buildEccubeProductMutationArgs($args) . "\n  ) {\n    id\n  }\n}";
     $result = eccube_api_call($query);
     if (is_array($result) === false || array_key_exists('UpdateProductMutation', $result) === false) {
+      makeLog([
+        'pageName' => 'proc_client03_03',
+        'reason' => 'UpdateProductMutation result invalid',
+        'shop_id' => $shopId,
+        'product_id' => $productId,
+        'spec_usage_flg' => $specUsageFlg,
+        'result' => $result,
+      ]);
       appendEccubeWarningMessage($makeTag);
     }
   } catch (Exception $e) {
+    makeLog([
+      'pageName' => 'proc_client03_03',
+      'reason' => 'EC-CUBE商品基本情報連携失敗',
+      'shop_id' => $shopId,
+      'product_id' => $productId,
+      'spec_usage_flg' => $specUsageFlg,
+      'errorMessage' => $e->getMessage(),
+    ]);
+    appendEccubeWarningMessage($makeTag);
+  }
+}
+/*
+ * [EC-CUBE商品連携] 規格なし商品の ProductClass.id を補完保存する
+ *  eccube_product_class_code が一致する ProductClass を優先し、
+ *  codeが空の場合のみ ClassCategory null の ProductClass へフォールバックする
+ *  失敗時は warning のみ設定し、商品保存は成功扱いを維持する
+ */
+function syncEccubeProductClassIdForSimple(&$makeTag, $shopId, $productId)
+{
+  $productData = getShopProductData_FindById($shopId, $productId);
+  if (empty($productData)) {
+    return;
+  }
+  $eccubeProductId = isset($productData['eccube_product_id']) ? (int)$productData['eccube_product_id'] : 0;
+  if ($eccubeProductId < 1) {
+    return;
+  }
+  $eccubeProductClassCode = isset($productData['eccube_product_class_code']) ? trim((string)$productData['eccube_product_class_code']) : '';
+  $productClasses = fetchEccubeProductClasses($eccubeProductId);
+  if (empty($productClasses)) {
+    appendEccubeWarningMessage($makeTag);
+    return;
+  }
+  $matchedClassId = null;
+  if ($eccubeProductClassCode !== '') {
+    foreach ($productClasses as $pc) {
+      if (trim((string)($pc['code'] ?? '')) === $eccubeProductClassCode && $pc['id'] > 0) {
+        $matchedClassId = (int)$pc['id'];
+        break;
+      }
+    }
+  }
+  if ($matchedClassId === null && $eccubeProductClassCode === '') {
+    foreach ($productClasses as $pc) {
+      if ($pc['class_category_id1'] === null && $pc['class_category_id2'] === null && $pc['id'] > 0) {
+        $matchedClassId = (int)$pc['id'];
+        break;
+      }
+    }
+  }
+  if ($matchedClassId === null) {
+    appendEccubeWarningMessage($makeTag);
+    return;
+  }
+  if (updateShopProductEccubeClassId($shopId, $productId, $matchedClassId) === false) {
     appendEccubeWarningMessage($makeTag);
   }
 }
@@ -1302,6 +1393,9 @@ switch ($action) {
               $makeTag['spec_usage_flg'] = $specUsageFlg;
               if ($savedProductId !== null && (int)$savedProductId > 0) {
                 syncEccubeProductBasicInfo($makeTag, $method, $specUsageFlg, $shopId, (int)$savedProductId, $productName, $displayFlg, $salePrice, $stockQuantity, $stockUnlimited, $taxRate, $tempType, $sizeLength, $sizeWidth, $sizeHeight, $weightG, $description, $categoryId);
+                if ($specUsageFlg === 1) {
+                  syncEccubeProductClassIdForSimple($makeTag, $shopId, (int)$savedProductId);
+                }
                 if ($specUsageFlg !== 2) {
                   syncEccubeProductImages($makeTag, $shopId, (int)$savedProductId);
                 }
@@ -1314,7 +1408,14 @@ switch ($action) {
               $makeTag['product_id'] = $productId;
               $makeTag['spec_usage_flg'] = $specUsageFlg;
               syncEccubeProductBasicInfo($makeTag, $method, $specUsageFlg, $shopId, $productId, $productName, $displayFlg, $salePrice, $stockQuantity, $stockUnlimited, $taxRate, $tempType, $sizeLength, $sizeWidth, $sizeHeight, $weightG, $description, $categoryId);
-              syncEccubeProductImages($makeTag, $shopId, $productId);
+              if ($specUsageFlg === 1) {
+                syncEccubeProductClassIdForSimple($makeTag, $shopId, $productId);
+              }
+              $imageSyncProductData = getShopProductData_FindById($shopId, $productId);
+              $imageSyncEccubeProductId = isset($imageSyncProductData['eccube_product_id']) ? (int)$imageSyncProductData['eccube_product_id'] : 0;
+              if ($specUsageFlg !== 2 || $imageSyncEccubeProductId > 0) {
+                syncEccubeProductImages($makeTag, $shopId, $productId);
+              }
               syncFrontendProductJson($makeTag, $shopId, $productId);
               syncFrontendShopDetailJson($makeTag, $shopId);
             }

@@ -132,6 +132,18 @@ function formatClientOrderDetailMoney($value)
 {
   return htmlspecialchars(number_format((int)$value), ENT_QUOTES, 'UTF-8');
 }
+/**
+ * 受注詳細 規格名接頭辞除去
+ *  【sid:{shop_id}】 形式の接頭辞が混入した場合に除去する
+ */
+function client030101StripShopClassNameNamespace($value)
+{
+  $value = trim((string)$value);
+  if ($value === '') {
+    return '';
+  }
+  return preg_replace('/^【sid:\d+】/u', '', $value);
+}
 
 #-------------#
 #表示用値
@@ -489,6 +501,21 @@ if (!empty($orderItems)) {
       $itemTaxRate = 10;
     }
     $itemNameHtml = htmlspecialchars((string)($orderItem['product_name'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $standardParts = [];
+    $className1 = client030101StripShopClassNameNamespace($orderItem['class_name1'] ?? '');
+    $classCategory1 = client030101StripShopClassNameNamespace($orderItem['class_category1'] ?? '');
+    $className2 = client030101StripShopClassNameNamespace($orderItem['class_name2'] ?? '');
+    $classCategory2 = client030101StripShopClassNameNamespace($orderItem['class_category2'] ?? '');
+    if ($className1 !== '' && $classCategory1 !== '') {
+      $standardParts[] = $className1 . ': ' . $classCategory1;
+    }
+    if ($className2 !== '' && $classCategory2 !== '') {
+      $standardParts[] = $className2 . ': ' . $classCategory2;
+    }
+    if (!empty($standardParts)) {
+      $standardText = implode(' / ', $standardParts);
+      $itemNameHtml .= '<br><i class="item-standard">' . htmlspecialchars($standardText, ENT_QUOTES, 'UTF-8') . '</i>';
+    }
     $itemUnitPrice = (int)round((int)($orderItem['unit_price'] ?? 0) * (1 + ($itemTaxRate / 100)));
     $itemSubtotal = (int)round((int)($orderItem['subtotal'] ?? 0) * (1 + ($itemTaxRate / 100)));
     $itemUnitPriceHtml = htmlspecialchars(number_format($itemUnitPrice), ENT_QUOTES, 'UTF-8');
