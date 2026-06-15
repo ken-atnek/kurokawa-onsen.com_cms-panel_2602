@@ -62,10 +62,13 @@ function generateShopIndexJson(): bool
 				'slug' => $shopNameEng,
 				'category' => $shop['shop_type'] ?? '',
 				'name' => formatTextareaForDB((string)($shop['shop_name'] ?? '')),
+				'kana' => formatTextareaForDB((string)($shop['shop_name_kana'] ?? '')),
 				'tel' => $shop['tel'] ?? '',
 				'fax' => $shop['fax'] ?? '',
 				'thumb' => $shopDetailsData['main_image_path'] ?? '',
 				'leadCopy' => formatTextareaForDB((string)($shopDetailsData['intro_body'] ?? '')),
+				'name_en' => formatTextareaForDB((string)($shop['shop_name_en'] ?? '')),
+				'leadCopy_en' => formatTextareaForDB((string)($shopDetailsData['intro_body_en'] ?? '')),
 			];
 		}
 		$json = json_encode($shopIndexList, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
