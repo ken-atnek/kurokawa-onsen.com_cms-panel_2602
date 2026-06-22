@@ -13,6 +13,8 @@ require_once dirname(__DIR__) . '/../../cms_config/common/define.php';
 #***** 定数・関数宣言ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_function.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
+#***** JSON出力ファイル：インクルード *****#
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeShopJson.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
@@ -499,6 +501,10 @@ switch ($action) {
                 }
                 break;
             }
+            #----------------------------
+            # DB更新完了のJSONファイル作成
+            #----------------------------
+            syncFrontendShopJson($makeTag, $shopId);
           } else {
             #失敗時はROLLBACK
             DB_Transaction(3);

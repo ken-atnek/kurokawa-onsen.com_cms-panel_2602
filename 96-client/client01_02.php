@@ -290,7 +290,7 @@ print <<<HTML
                             <ul class="selectbox__panel">
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopOpenHourList) && is_array($shopOpenHourList) && count($shopOpenHourList) > 0) {
   foreach ($shopOpenHourList as $hourValue => $hourLabel) {
     $checked = (isset($open08_01TimeParts[0]) && (int)$open08_01TimeParts[0] === (int)$hourValue) ? 'checked' : '';
@@ -317,7 +317,7 @@ print <<<HTML
                             <ul class="selectbox__panel">
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopMinuteList) && is_array($shopMinuteList) && count($shopMinuteList) > 0) {
   foreach ($shopMinuteList as $minuteValue => $minuteLabel) {
     $checked = (isset($open08_01TimeParts[1]) && (int)$open08_01TimeParts[1] === (int)$minuteLabel) ? 'checked' : '';
@@ -372,7 +372,7 @@ print <<<HTML
                             <ul class="selectbox__panel">
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopCloseHourList) && is_array($shopCloseHourList) && count($shopCloseHourList) > 0) {
   foreach ($shopCloseHourList as $hourValue => $hourLabel) {
     $checked = (isset($close08_01TimeParts[0]) && (int)$close08_01TimeParts[0] === (int)$hourValue) ? 'checked' : '';
@@ -399,7 +399,7 @@ print <<<HTML
                             <ul class="selectbox__panel">
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopMinuteList) && is_array($shopMinuteList) && count($shopMinuteList) > 0) {
   foreach ($shopMinuteList as $minuteValue => $minuteLabel) {
     $checked = (isset($close08_01TimeParts[1]) && (int)$close08_01TimeParts[1] === (int)$minuteLabel) ? 'checked' : '';
@@ -457,7 +457,7 @@ print <<<HTML
                             <ul class="selectbox__panel">
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopOpenHourList) && is_array($shopOpenHourList) && count($shopOpenHourList) > 0) {
   foreach ($shopOpenHourList as $hourValue => $hourLabel) {
     $checked = (isset($open08_02TimeParts[0]) && (int)$open08_02TimeParts[0] === (int)$hourValue) ? 'checked' : '';
@@ -484,7 +484,7 @@ print <<<HTML
                             <ul class="selectbox__panel">
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopMinuteList) && is_array($shopMinuteList) && count($shopMinuteList) > 0) {
   foreach ($shopMinuteList as $minuteValue => $minuteLabel) {
     $checked = (isset($open08_02TimeParts[1]) && (int)$open08_02TimeParts[1] === (int)$minuteLabel) ? 'checked' : '';
@@ -539,7 +539,7 @@ print <<<HTML
                             <ul class="selectbox__panel">
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopCloseHourList) && is_array($shopCloseHourList) && count($shopCloseHourList) > 0) {
   foreach ($shopCloseHourList as $hourValue => $hourLabel) {
     $checked = (isset($close08_02TimeParts[0]) && (int)$close08_02TimeParts[0] === (int)$hourValue) ? 'checked' : '';
@@ -566,7 +566,7 @@ print <<<HTML
                             <ul class="selectbox__panel">
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopMinuteList) && is_array($shopMinuteList) && count($shopMinuteList) > 0) {
   foreach ($shopMinuteList as $minuteValue => $minuteLabel) {
     $checked = (isset($close08_02TimeParts[1]) && (int)$close08_02TimeParts[1] === (int)$minuteLabel) ? 'checked' : '';
@@ -598,7 +598,7 @@ print <<<HTML
                   <dd>
 
 HTML;
-#表示可能リストあればループ処理
+#表示可能リストあればループで差し込む
 if (isset($shopCloseWeekList) && is_array($shopCloseWeekList) && count($shopCloseWeekList) > 0) {
   #closed_weekdays は「DB取得時: JSON文字列」「新規初期値: 配列」の両方があり得る
   $closedWeekdays = array();
@@ -669,11 +669,7 @@ print <<<HTML
       <div class="inner-modal">
         <div class="box-title">
           <p>店舗基本情報</p>
-          <button
-            type="button"
-            onclick="closeModal()"
-            class="btn-top-close"
-          ></button>
+          <button type="button" onclick="closeModal()" class="btn-top-close"></button>
         </div>
         <div class="box-details">
           <p></p>

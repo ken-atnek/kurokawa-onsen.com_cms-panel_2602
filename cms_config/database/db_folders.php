@@ -9,6 +9,7 @@ function getFolderList($shopId = null)
 	global $DB_CONNECT;
 	try {
 		if ($shopId !== null) {
+			#SQL定義
 			$strSQL = "SELECT folder_id, shop_id, folder_name, is_active, created_at FROM shops_folders WHERE shop_id = :value AND is_active = 1 ORDER BY created_at DESC";
 		} else {
 			#店舗IDが指定されていない場合

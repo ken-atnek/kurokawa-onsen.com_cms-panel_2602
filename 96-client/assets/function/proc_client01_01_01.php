@@ -568,8 +568,8 @@ switch ($action) {
 			if (isset($_FILES['images_tmp']) && is_uploaded_file($_FILES['images_tmp']['tmp_name'])) {
 				$file = $_FILES['images_tmp'];
 				$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-				$allowed = ['jpg', 'jpeg', 'png', 'gif'];
-				if (!in_array($ext, $allowed)) {
+				$allowed = ['jpg', 'jpeg'];
+				if (!in_array($ext, $allowed, true)) {
 					$makeTag['status'] = 'error';
 					$makeTag['msg'] = '許可されていないファイル形式です。';
 				} else {
@@ -580,6 +580,17 @@ switch ($action) {
 					$savePath = $tmpDir . $uniqueName;
 					$previewUrl = '/tmp_upload/' . $uniqueName;
 					if (move_uploaded_file($file['tmp_name'], $savePath)) {
+						$imgInfo = @getimagesize($savePath);
+						$imgMime = is_array($imgInfo) && isset($imgInfo['mime']) && is_string($imgInfo['mime']) ? (string)$imgInfo['mime'] : '';
+						if (!in_array($imgMime, ['image/jpeg', 'image/pjpeg'], true)) {
+							@unlink($savePath);
+							$makeTag['status'] = 'error';
+							$makeTag['title'] = 'アップロード失敗';
+							$makeTag['msg'] = '登録できるファイル形式はJPEGのみです。';
+							header('Content-Type: application/json');
+							echo json_encode($makeTag);
+							exit;
+						}
 						#セッションにファイル情報を保存
 						# - onlyモードは「1枠」のため、成功時に既存を掃除して置換する
 						if (!isset($_SESSION[$targetImageUploadSessionKey]) || !is_array($_SESSION[$targetImageUploadSessionKey])) {
@@ -614,12 +625,6 @@ switch ($action) {
 							case 'jpg':
 							case 'jpeg':
 								$mimeType = 'image/jpeg';
-								break;
-							case 'png':
-								$mimeType = 'image/png';
-								break;
-							case 'gif':
-								$mimeType = 'image/gif';
 								break;
 							default:
 								$mimeType = '';
@@ -665,7 +670,7 @@ HTML;
 			$makeTag['file_name'] = '';
 			$file = isset($_FILES['images_tmp']) ? $_FILES['images_tmp'] : null;
 			$ext = $file ? strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) : '';
-			$allowed = ['jpg', 'jpeg', 'png', 'gif'];
+			$allowed = ['jpg', 'jpeg'];
 			if ($replaceIndex === null || !$file || !is_uploaded_file($file['tmp_name']) || !in_array($ext, $allowed, true)) {
 				$makeTag['status'] = 'error';
 				$makeTag['title'] = 'アップロード失敗';
@@ -685,6 +690,17 @@ HTML;
 				$makeTag['status'] = 'error';
 				$makeTag['title'] = 'アップロード失敗';
 				$makeTag['msg'] = 'ファイルの保存に失敗しました。';
+				header('Content-Type: application/json');
+				echo json_encode($makeTag);
+				exit;
+			}
+			$imgInfo = @getimagesize($savePath);
+			$imgMime = is_array($imgInfo) && isset($imgInfo['mime']) && is_string($imgInfo['mime']) ? (string)$imgInfo['mime'] : '';
+			if (!in_array($imgMime, ['image/jpeg', 'image/pjpeg'], true)) {
+				@unlink($savePath);
+				$makeTag['status'] = 'error';
+				$makeTag['title'] = 'アップロード失敗';
+				$makeTag['msg'] = '登録できるファイル形式はJPEGのみです。';
 				header('Content-Type: application/json');
 				echo json_encode($makeTag);
 				exit;
@@ -1034,16 +1050,8 @@ HTML;
 				}
 				switch ((string)$mimeType) {
 					case 'image/jpeg':
+					case 'image/pjpeg':
 						$ext = 'jpg';
-						break;
-					case 'image/png':
-						$ext = 'png';
-						break;
-					case 'image/gif':
-						$ext = 'gif';
-						break;
-					case 'image/webp':
-						$ext = 'webp';
 						break;
 					default:
 						$ext = '';
@@ -1051,8 +1059,28 @@ HTML;
 				}
 				if ($ext === '') {
 					$makeTag['status'] = 'error';
-					$makeTag['msg'] = '許可されていない画像形式です。';
+					$makeTag['msg'] = '登録できるファイル形式はJPEGのみです。';
 					break;
+				}
+				#5MB超なら自動リサイズ（JPEGのみ）
+				$resizeErr = null;
+				if (!resizeJpegToMaxBytes($imgTmpPath, 5 * 1024 * 1024, $resizeErr)) {
+					$makeTag['status'] = 'error';
+					$makeTag['msg'] = '画像の容量を5MB以内に調整できませんでした。' . ($resizeErr ? ('<br>' . htmlspecialchars((string)$resizeErr, ENT_QUOTES, 'UTF-8')) : '');
+					break;
+				}
+				#リサイズ後のメタを再取得
+				$info = @getimagesize($imgTmpPath);
+				if (is_array($info)) {
+					$width = isset($info[0]) ? (int)$info[0] : $width;
+					$height = isset($info[1]) ? (int)$info[1] : $height;
+				}
+				$mimeType = 'image/jpeg';
+				$fileSize = @filesize($imgTmpPath);
+				if ($fileSize !== false) {
+					$fileSize = (int)$fileSize;
+				} else {
+					$fileSize = null;
 				}
 				$tmpPathsToCleanup[] = $imgTmpPath;
 			}
@@ -1533,7 +1561,7 @@ HTML;
 							}
 						}
 						$postedDraftName = trim($postedDraftName);
-						if ($postedDraftName !== '' && preg_match('/\Aphoto_\d{14}_[0-9a-f]{8}\.(?:jpe?g|png|gif|webp)\z/i', $postedDraftName)) {
+						if ($postedDraftName !== '' && preg_match('/\Aphoto_\d{14}_[0-9a-f]{8}\.(?:jpe?g)\z/i', $postedDraftName)) {
 							$tmpDir = __DIR__ . '/../../../tmp_upload/';
 							$abs = $tmpDir . $postedDraftName;
 							if (file_exists($abs) && is_file($abs)) {
@@ -1732,7 +1760,7 @@ HTML;
 							$tmpName = (string)($_FILES['images_tmp']['tmp_name'] ?? '');
 							$origName = (string)($_FILES['images_tmp']['name'] ?? '');
 							$ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-							$allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+							$allowed = ['jpg', 'jpeg'];
 							if ($tmpName !== '' && is_uploaded_file($tmpName) && in_array($ext, $allowed, true)) {
 								$tmpDir = __DIR__ . '/../../../tmp_upload/';
 								if (!file_exists($tmpDir)) {
@@ -1742,18 +1770,24 @@ HTML;
 								$savePath = $tmpDir . $uniqueName;
 								$previewUrl = '/tmp_upload/' . $uniqueName;
 								if (@move_uploaded_file($tmpName, $savePath)) {
-									if ($targetImageUploadSessionKey !== '') {
-										$_SESSION[$targetImageUploadSessionKey] = [[
-											'tmp_name' => $savePath,
-											'preview' => $previewUrl,
-											'name' => $uniqueName,
-											'original' => $origName,
-											'type' => (string)($_FILES['images_tmp']['type'] ?? ''),
-											'size' => (int)($_FILES['images_tmp']['size'] ?? 0),
-											'uploaded_at' => time(),
-										]];
+									$imgInfo = @getimagesize($savePath);
+									$imgMime = is_array($imgInfo) && isset($imgInfo['mime']) && is_string($imgInfo['mime']) ? (string)$imgInfo['mime'] : '';
+									if (!in_array($imgMime, ['image/jpeg', 'image/pjpeg'], true)) {
+										@unlink($savePath);
+									} else {
+										if ($targetImageUploadSessionKey !== '') {
+											$_SESSION[$targetImageUploadSessionKey] = [[
+												'tmp_name' => $savePath,
+												'preview' => $previewUrl,
+												'name' => $uniqueName,
+												'original' => $origName,
+												'type' => (string)($_FILES['images_tmp']['type'] ?? ''),
+												'size' => (int)($_FILES['images_tmp']['size'] ?? 0),
+												'uploaded_at' => time(),
+											]];
+										}
+										$imgPath = $previewUrl;
 									}
-									$imgPath = $previewUrl;
 								}
 							}
 						}
@@ -1787,7 +1821,7 @@ HTML;
                           <input type="hidden" name="upload_image_area" value="photo_image" id="js-uploadImageArea-photoImage">
                           <input type="hidden" name="up_image_area[]" value="photo_image">
                           <input type="hidden" name="send_php" value="proc_client01_01_01.php">
-                          <input type="file" name="images_tmp" id="js-fileElem-photoImage" accept="image/*" style="display:none">
+                          <input type="file" name="images_tmp" id="js-fileElem-photoImage" accept="image/jpeg" style="display:none">
                           <picture>
                             <source srcset="{$imgPathEsc}" id="preview-source">
                             <img src="{$imgPathEsc}" alt="" id="preview-image">
@@ -1802,7 +1836,7 @@ HTML;
 HTML;
 				} else {
 					$makeTag['tag'] .= <<<HTML
-                      <input type="file" name="images_tmp" id="js-fileElem-photoImage" accept="image/*" style="display:none">
+                      <input type="file" name="images_tmp" id="js-fileElem-photoImage" accept="image/jpeg" style="display:none">
                       <input type="hidden" name="upload_image_mode" value="only" id="js-uploadImageMode-photoImage">
                       <input type="hidden" name="upload_image_area" value="photo_image" id="js-uploadImageArea-photoImage">
                       <input type="hidden" name="up_image_area[]" value="photo_image">
@@ -1859,7 +1893,6 @@ HTML;
               <nav>
 
 HTML;
-				#表示可能リストあればループで差し込む
 				#最初のフォルダ情報を保存する変数
 				$firstFolderId = '';
 				$firstFolderName = '';
@@ -1867,6 +1900,7 @@ HTML;
 				$firstFolderNameRaw = '';
 				$folderNameById = [];
 				$activeFolderIdRaw = '';
+				#表示可能リストあればループで差し込む
 				if (!empty($folderList)) {
 					foreach ($folderList as $folder) {
 						$folderIdEsc = htmlspecialchars($folder['folder_id'], ENT_QUOTES, 'UTF-8');

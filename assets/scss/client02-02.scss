@@ -209,8 +209,13 @@
                         display: flex;
                         align-items: center;
                         &::after {
-                            content: "番目";
-                            margin-left: 0.2em;
+                            // content: "番目";
+                            // margin-left: 0.2em;
+                            content: "に表示";
+                            position: absolute;
+                            left: calc(100% + 0.5em);
+                            width: max-content;
+                            font-size: FZ(14);
                         }
                         input {
                             font-size: FZ(16);
@@ -218,6 +223,14 @@
                             height: 4rem;
                             width: 10rem;
                             text-align: right;
+                        }
+                        &.select-page-number {
+                            width: 15rem;
+                            @include select-list-box(
+                                $height: 4.4rem,
+                                $position: "left",
+                                $list-height: 3.4rem
+                            );
                         }
                     }
                 }
@@ -231,15 +244,15 @@
                     display: none;
                 }
             }
-            h4 {
-                font-size: FZ(20);
-                font-weight: 700;
-                background-color: #e6e6e6;
-                padding: 0.6em 1.4em;
-            }
             .head {
                 position: relative;
                 font-size: inherit;
+                h4 {
+                    font-size: FZ(20);
+                    font-weight: 700;
+                    background-color: #e6e6e6;
+                    padding: 0.6em 1.4em;
+                }
                 & > button {
                     position: absolute;
                     top: 50%;
@@ -296,6 +309,7 @@
                         min-width: 7em;
                     }
                     dd {
+                        font-size: 1em;
                         input {
                             font-size: FZ(16);
                             height: 4rem;
@@ -306,13 +320,29 @@
                             & > div {
                                 width: stretch;
                             }
+                            &.dd-editor {
+                                background-color: #fff;
+                                border: 1px solid $border-gray;
+                                border-radius: 0.8rem;
+                                margin-top: 1em;
+                                min-height: 30rem;
+                                font-size: FZ(16);
+                                field-sizing: content;
+                            }
                         }
                     }
                     &.box_up-image {
                         dd {
+                            display: flex;
                             flex-direction: column;
+                            font-size: inherit;
                             .select-image {
                                 @include item-select-image;
+                                & > h4 {
+                                    font-size: FZ(16);
+                                    font-weight: 400;
+                                    background-color: unset;
+                                }
                             }
                             .item_image-delate {
                                 font-size: inherit;
@@ -409,6 +439,22 @@
                     font-size: 1em;
                     display: flex;
                 }
+                &.box_detail {
+                    dd {
+                        & > div {
+                            width: stretch;
+                        }
+                        &.dd-editor {
+                            background-color: #fff;
+                            border: 1px solid $border-gray;
+                            border-radius: 0.8rem;
+                            margin-top: 1em;
+                            min-height: 30rem;
+                            font-size: FZ(16);
+                            field-sizing: content;
+                        }
+                    }
+                }
             }
             .box_view-order {
                 dd {
@@ -417,12 +463,28 @@
                         display: flex;
                         align-items: center;
                         &::after {
-                            content: "番目";
-                            margin-left: 0.2em;
+                            // content: "番目";
+                            // margin-left: 0.2em;
+                            content: "に表示";
+                            position: absolute;
+                            left: calc(100% + 0.5em);
+                            width: max-content;
+                            font-size: FZ(14);
                         }
                         input {
+                            font-size: FZ(16);
+                            flex-grow: unset;
+                            height: 4rem;
                             width: 10rem;
                             text-align: right;
+                        }
+                        &.select-page-number {
+                            width: 15rem;
+                            @include select-list-box(
+                                $height: 4.4rem,
+                                $position: "left",
+                                $list-height: 3.4rem
+                            );
                         }
                     }
                 }

@@ -7,16 +7,13 @@
  * [初版]
  *  2026.2.23
  */
-
-$previewUrl = DOMAIN_NAME;
-
+$previewShopId = sprintf('%03d', $shopId);
+$previewUrl = DOMAIN_NAME . '/shops/detail/?id=' . $previewShopId;
 #***** タグ生成開始 *****#
 print <<<HTML
-
 <header class="cp-client">
   <div class="item-logo">
-    <span>黒川温泉</span>
-    <span>観光協会</span>
+    <img src="../assets/images/logo.svg" alt="黒川温泉観光協会" />
   </div>
   <div class="inner_head">
     <h1>{$headerShopName}</h1>
@@ -27,8 +24,8 @@ print <<<HTML
   </div>
   <nav>
     <a href="./client01_02.php" class="menu-color-01"><span>店舗管理</span></a>
-    <a href="#" class="menu-color-02"><span>サイト管理</span></a>
-    <a href="#" class="menu-color-03"><span>EC販売管理</span></a>
+    <a href="./client02_01.php" class="menu-color-02"><span>サイト管理</span></a>
+    <a href="./client03_01.php" class="menu-color-03"><span>EC販売管理</span></a>
   </nav>
 </header>
 

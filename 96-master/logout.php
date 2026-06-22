@@ -1,6 +1,6 @@
 <?php
 /*
- * [rw-master/index.php]
+ * [96-master/index.php]
  *  - 管理画面 -
  *  ログアウト
  *

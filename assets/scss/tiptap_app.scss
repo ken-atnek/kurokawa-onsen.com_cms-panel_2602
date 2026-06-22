@@ -1,0 +1,403 @@
+/*==========================================================
+TipTap Editor
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+
+/* 表示期間UIの簡易装飾（カード/チップ） */
+.periodBox {
+    width: 100%;
+    max-width: 55rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 0.5em;
+    background: #fafafa;
+    font-size: inherit;
+}
+.periodTypes {
+    display: flex;
+    gap: 0.5em;
+    flex-wrap: wrap;
+    font-size: inherit;
+    label {
+        font-size: FZ(12);
+        color: #333;
+        display: flex;
+        align-items: center;
+        padding: 0.6em 1em 0.4em 1em;
+        border: 1px solid #ddd;
+        border-radius: 999px;
+        background: #fff;
+        cursor: pointer;
+        user-select: none;
+        /* 選択中を強調（Chrome/Edge等） */
+        &:has(input:checked) {
+            border-color: #333;
+            background: rgba(255, 235, 59, 0.18);
+        }
+    }
+}
+.periodDates {
+    display: flex;
+    gap: 1em;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 0.5em;
+    font-size: inherit;
+    margin-top: 0.5em;
+    padding-top: 0.5em;
+    border-top: 1px dashed #ddd;
+    .small {
+        font-size: FZ(12);
+        color: #666;
+    }
+    .field {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        font-size: inherit;
+        span {
+            font-size: FZ(12);
+            color: #333;
+        }
+    }
+    input[type="date"] {
+        min-width: 16rem;
+        font-size: FZ(16);
+        padding: 0.4em 0.5em;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #fff;
+    }
+}
+.toolbar {
+    width: 100%;
+    max-width: 84rem;
+    display: flex;
+    gap: 0.5em;
+    flex-wrap: wrap;
+    padding: 0.5em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    align-items: center;
+    font-size: inherit;
+    button {
+        min-width: 3.5rem;
+        min-height: 3.5rem;
+        padding: 0 1em;
+        border: 1px solid #bbb;
+        border-radius: 8px;
+        background: #fff;
+        font-size: FZ(14);
+        cursor: pointer;
+        &.is-active {
+            color: #f29400;
+            font-weight: 600;
+            border-color: #f29400;
+            background-color: #ffeed4;
+        }
+    }
+    input[type="color"] {
+        width: 4rem;
+        height: 3.4rem;
+        padding: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+    }
+    .sep {
+        width: 1px;
+        height: 2.8rem;
+        background: #e5e5e5;
+        margin: 0 0.5em;
+    }
+    .hint {
+        font-size: FZ(12);
+        color: #666;
+        width: 100%;
+    }
+}
+.editor {
+    font-size: inherit;
+    width: 100%;
+    padding: 0.5em;
+    * {
+        font-size: inherit;
+        margin: 0.2em 0;
+    }
+    /* 現在段落（カーソル位置のブロック）を薄くハイライト */
+    .is-active-paragraph {
+        background: rgba(187, 185, 150, 0.2);
+        border-radius: 2px;
+        padding: 0.2em;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+    }
+    /* フォーカス時に太い枠線（アウトライン/フォーカスリング）を出さない */
+    &:focus-within {
+        outline: none;
+        box-shadow: none;
+    }
+    & :where(.ProseMirror) {
+        outline: none;
+        line-height: 1.6em;
+    }
+    & :where(.ProseMirror-focused) {
+        outline: none;
+    }
+    & :where(h1) {
+        font-size: FZ(48);
+    }
+    & :where(h2) {
+        font-size: FZ(32);
+    }
+    & :where(h3) {
+        font-size: FZ(28);
+    }
+    & :where(h4) {
+        font-size: FZ(24);
+        font-weight: 600;
+    }
+    & :where(h5) {
+        font-size: FZ(20);
+        font-weight: 600;
+    }
+    & :where(h6) {
+        font-size: FZ(18);
+    }
+    & :where(p) {
+        font-size: FZ(16);
+    }
+    & :where(strong) {
+        font-weight: 600;
+    }
+    & :where(ul, ol) {
+        font-size: inherit;
+        display: flex;
+        flex-direction: column;
+        li {
+            font-size: FZ(14);
+            display: flex;
+            align-items: center;
+            margin: 0;
+        }
+    }
+    & :where(ul) {
+        li {
+            &::before {
+                content: "・";
+                margin-right: 0.3em;
+            }
+        }
+    }
+    & :where(ol) {
+        counter-reset: number 0;
+        li {
+            &::before {
+                counter-increment: number 1;
+                content: counter(number) ".";
+                margin-right: 0.3em;
+            }
+        }
+    }
+    & :where(img) {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 1em 0;
+        border-radius: 8px;
+    }
+}
+.muted {
+    color: #666;
+    font-size: FZ(14);
+    margin-top: 1em;
+}
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    font-size: FZ(12);
+    margin-left: 8px;
+}
+
+/* 画像ギャラリー（X風の横並び：最大4枚をグリッド表示） */
+.image-gallery {
+    margin: 0.5em 0 1em;
+    .image-gallery__inner {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin: 0;
+    }
+}
+.image-gallery[data-count="1"] .image-gallery__inner {
+    grid-template-columns: 1fr;
+}
+
+/* 3枚のとき：上段に2枚、下段に1枚（横長で2カラム分） */
+.image-gallery[data-count="3"] .image-gallery__inner {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    align-items: stretch;
+}
+.image-gallery[data-count="3"] .image-gallery__inner > :nth-child(3) {
+    grid-column: 1 / -1; /* 下段は横に伸ばす */
+}
+/* 画像ノードがギャラリー内に入る場合の余白を調整 */
+.image-gallery .image-node {
+    width: 100%;
+    display: block;
+}
+/* ギャラリー内の画像はタイルにフィット（トリミング） */
+.image-gallery .image-node {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: 0;
+}
+.image-gallery .image-node > img {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    object-fit: cover;
+    display: block;
+    border-radius: 8px;
+}
+/* ギャラリー（複数画像）のプレビュー最大高さ：超えたら切り落とし（スクロールなし） */
+.image-gallery:not([data-count="1"]) {
+    max-height: 420px; /* ←必要に応じて変更 */
+    overflow: hidden;
+}
+/* タイル高さを揃える（見た目を安定） */
+.image-gallery:not([data-count="1"]) .image-gallery__inner {
+    grid-auto-rows: 180px; /* ←必要に応じて変更 */
+    align-content: start;
+}
+/* 画像ノード：右上に削除ボタン（×）を表示 */
+.image-node {
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+}
+.image-node > img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+}
+.image-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid #bbb;
+    background: rgba(255, 255, 255, 0.92);
+    pointer-events: auto;
+    cursor: pointer;
+    line-height: 28px;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 0;
+}
+.image-remove:hover {
+    background: rgba(255, 255, 255, 1);
+}
+/* 画像アップロード用ドロップゾーン（Simple editor風） */
+.tipTap_dropzone[hidden] {
+    display: none !important;
+}
+.tipTap_dropzone {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em;
+    font-size: inherit;
+    z-index: 9999;
+}
+.dropzone-card {
+    position: relative;
+    width: min(680px, 100%);
+    background: #fff;
+    border-radius: 8px;
+    padding: 2em;
+    border: 2px dashed #bbb;
+    text-align: center;
+    box-sizing: border-box;
+    font-size: inherit;
+    button.btn-tiptap-close {
+        position: absolute;
+        top: 0.5em;
+        right: 0.5em;
+        display: block;
+        width: 1.6rem;
+        aspect-ratio: 1;
+        align-self: center;
+        &::before,
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            width: 100%;
+            height: 2px;
+            background-color: $font-black;
+        }
+        &::before {
+            rotate: -45deg;
+        }
+        &::after {
+            rotate: 45deg;
+        }
+    }
+}
+.dropzone-card.is-dragover {
+    border-color: #333;
+    background: rgba(255, 235, 59, 0.4);
+}
+.dropzone-title {
+    font-size: FZ(16);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.dropzone-sub {
+    font-size: FZ(14);
+    color: #555;
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+.dropzone-actions {
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    button {
+        background-color: #fff;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 136px;
+        height: 36px;
+        font-size: FZ(14);
+        border: 1px solid #e2e0db;
+    }
+}
+.dropzone-note {
+    font-size: FZ(12);
+    color: #666;
+    margin-top: 1em;
+}
