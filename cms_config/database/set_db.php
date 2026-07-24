@@ -6,10 +6,12 @@
  *  2026.2.14
  */
 
-define('DB_DSN', 'localhost');
-define('DB_N', 'xbaf8039_km2603kko');
-define('DB_USER', 'xbaf8039_kmkko');
-define('DB_PASS', 'r|yX-5oW3dWJ');
+$dbConfigFile = dirname(__DIR__, 4) . '/db_conf.php';
+if (!is_readable($dbConfigFile)) {
+	die('WordPress configuration error.');
+}
+require_once $dbConfigFile;
+unset($dbConfigFile);
 #-------------------------------------------#
 # MySQL DB 接続
 function db_connect()
