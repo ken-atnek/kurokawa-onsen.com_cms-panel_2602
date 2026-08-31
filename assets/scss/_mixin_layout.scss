@@ -59,7 +59,7 @@
             align-items: center;
             grid-column: span 2;
             & > dt {
-                font-size: FZ(16);
+                font-size: fz(16);
                 font-weight: 700;
                 position: relative;
                 span {
@@ -88,7 +88,7 @@
                 width: 100%;
                 input[type="text"] {
                     height: 4rem;
-                    font-size: FZ(16);
+                    font-size: fz(16);
                 }
             }
         }
@@ -128,7 +128,7 @@
             position: absolute;
             top: 50%;
             translate: 0 -50%;
-            font-size: FZ(14);
+            font-size: fz(14);
         }
         &::before {
             content: "表示件数";
@@ -191,7 +191,7 @@
 //     flex-direction: column;
 //     gap: 1.6rem;
 //     h2 {
-//         font-size: FZ(20);
+//         font-size: fz(20);
 //         font-weight: 600;
 //     }
 // }
@@ -212,7 +212,7 @@
 //         @include btn-toggle;
 //     }
 //     h3 {
-//         font-size: FZ(18);
+//         font-size: fz(18);
 //         font-weight: 600;
 //         margin-left: 25px;
 //         margin-bottom: 19px;
@@ -242,7 +242,7 @@
 //                     align-items: center;
 //                     gap: 0 0.8em;
 //                     h4 {
-//                         font-size: FZ(16);
+//                         font-size: fz(16);
 //                         font-weight: 300;
 //                         width: max-content;
 //                         display: block;
@@ -349,7 +349,7 @@
 //     padding-top: 2rem;
 //     min-width: 208px;
 //     h2 {
-//         font-size: FZ(16);
+//         font-size: fz(16);
 //         font-weight: 600;
 //         color: #696969;
 //         border-bottom: 1px solid #e2e0db;
@@ -371,7 +371,7 @@
 //             display: flex;
 //             align-items: center;
 //             padding-left: 1.8rem;
-//             font-size: FZ(16);
+//             font-size: fz(16);
 //             font-weight: 300;
 //         }
 //         a {
@@ -438,7 +438,7 @@
         }
         & > div {
             position: relative;
-            font-size: FZ(14);
+            font-size: fz(14);
             &:not(:last-of-type) {
                 border-right: 1px solid $border-gray;
             }
@@ -448,7 +448,7 @@
             min-height: 2em;
             & > div {
                 height: 36px;
-                font-size: FZ(14);
+                font-size: fz(14);
                 padding-inline: 0.8em;
                 padding-inline: 1.8rem;
                 @include flex-center(column);
@@ -535,7 +535,7 @@
             align-items: center;
             counter-reset: number 0;
             a {
-                font-size: FZ(14);
+                font-size: fz(14);
                 width: 1em;
                 aspect-ratio: 1;
                 display: grid;
@@ -611,7 +611,7 @@
         input {
             width: 7rem;
             height: 40px;
-            font-size: FZ(14);
+            font-size: fz(14);
             @include flex-center;
             padding-inline: unset;
             text-align: center;

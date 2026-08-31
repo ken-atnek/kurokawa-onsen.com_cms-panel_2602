@@ -106,7 +106,7 @@ EC販売管理
                     @include flex-center(column);
                     gap: 0.3em 0;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                 }
 
@@ -116,7 +116,7 @@ EC販売管理
                     align-items: center;
                     padding-inline: 2rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         display: inline-block;
                         position: relative;
                     }
@@ -170,7 +170,7 @@ EC販売管理
             }
         }
         p {
-            font-size: FZ(14);
+            font-size: fz(14);
             padding: 1em;
             color: #888780;
         }

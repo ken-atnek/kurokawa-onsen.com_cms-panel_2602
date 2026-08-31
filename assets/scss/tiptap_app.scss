@@ -23,7 +23,7 @@ TipTap Editor
     flex-wrap: wrap;
     font-size: inherit;
     label {
-        font-size: FZ(12);
+        font-size: fz(12);
         color: #333;
         display: flex;
         align-items: center;
@@ -51,7 +51,7 @@ TipTap Editor
     padding-top: 0.5em;
     border-top: 1px dashed #ddd;
     .small {
-        font-size: FZ(12);
+        font-size: fz(12);
         color: #666;
     }
     .field {
@@ -60,13 +60,13 @@ TipTap Editor
         gap: 0.5em;
         font-size: inherit;
         span {
-            font-size: FZ(12);
+            font-size: fz(12);
             color: #333;
         }
     }
     input[type="date"] {
         min-width: 16rem;
-        font-size: FZ(16);
+        font-size: fz(16);
         padding: 0.4em 0.5em;
         border: 1px solid #ccc;
         border-radius: 8px;
@@ -91,7 +91,7 @@ TipTap Editor
         border: 1px solid #bbb;
         border-radius: 8px;
         background: #fff;
-        font-size: FZ(14);
+        font-size: fz(14);
         cursor: pointer;
         &.is-active {
             color: #f29400;
@@ -115,7 +115,7 @@ TipTap Editor
         margin: 0 0.5em;
     }
     .hint {
-        font-size: FZ(12);
+        font-size: fz(12);
         color: #666;
         width: 100%;
     }
@@ -149,27 +149,27 @@ TipTap Editor
         outline: none;
     }
     & :where(h1) {
-        font-size: FZ(48);
+        font-size: fz(48);
     }
     & :where(h2) {
-        font-size: FZ(32);
+        font-size: fz(32);
     }
     & :where(h3) {
-        font-size: FZ(28);
+        font-size: fz(28);
     }
     & :where(h4) {
-        font-size: FZ(24);
+        font-size: fz(24);
         font-weight: 600;
     }
     & :where(h5) {
-        font-size: FZ(20);
+        font-size: fz(20);
         font-weight: 600;
     }
     & :where(h6) {
-        font-size: FZ(18);
+        font-size: fz(18);
     }
     & :where(p) {
-        font-size: FZ(16);
+        font-size: fz(16);
     }
     & :where(strong) {
         font-weight: 600;
@@ -179,7 +179,7 @@ TipTap Editor
         display: flex;
         flex-direction: column;
         li {
-            font-size: FZ(14);
+            font-size: fz(14);
             display: flex;
             align-items: center;
             margin: 0;
@@ -213,7 +213,7 @@ TipTap Editor
 }
 .muted {
     color: #666;
-    font-size: FZ(14);
+    font-size: fz(14);
     margin-top: 1em;
 }
 .badge {
@@ -221,7 +221,7 @@ TipTap Editor
     padding: 2px 8px;
     border: 1px solid #ddd;
     border-radius: 999px;
-    font-size: FZ(12);
+    font-size: fz(12);
     margin-left: 8px;
 }
 
@@ -367,12 +367,12 @@ TipTap Editor
     background: rgba(255, 235, 59, 0.4);
 }
 .dropzone-title {
-    font-size: FZ(16);
+    font-size: fz(16);
     font-weight: 700;
     margin-bottom: 8px;
 }
 .dropzone-sub {
-    font-size: FZ(14);
+    font-size: fz(14);
     color: #555;
     margin-bottom: 14px;
     line-height: 1.5;
@@ -392,12 +392,12 @@ TipTap Editor
         justify-content: center;
         width: 136px;
         height: 36px;
-        font-size: FZ(14);
+        font-size: fz(14);
         border: 1px solid #e2e0db;
     }
 }
 .dropzone-note {
-    font-size: FZ(12);
+    font-size: fz(12);
     color: #666;
     margin-top: 1em;
 }

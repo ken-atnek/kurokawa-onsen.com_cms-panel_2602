@@ -49,7 +49,7 @@
             }
 
             dt {
-                font-size: FZ(14);
+                font-size: fz(14);
                 display: flex;
                 flex-direction: column;
             }
@@ -82,7 +82,7 @@
                         @include radioCheck;
                         margin-right: 1em;
                         label {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             padding-left: 2.2em;
                         }
                     }
@@ -99,7 +99,7 @@
             align-items: center;
             padding-right: 2.4rem;
             button {
-                font-size: FZ(14);
+                font-size: fz(14);
             }
             .item-reset {
                 width: 8.8rem;
@@ -134,7 +134,7 @@
                     }
                 }
                 .id {
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     padding-inline: 1.4em;
                     display: grid;
                     place-items: center;
@@ -147,7 +147,7 @@
                     padding: 1em;
                 }
                 .name {
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     font-weight: 700;
                     width: stretch;
                 }
@@ -156,7 +156,7 @@
                     font-size: 1em;
                     display: flex;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         display: flex;
                     }
                 }
@@ -218,7 +218,7 @@
                                 display: grid;
                                 place-items: center;
                                 width: stretch;
-                                font-size: FZ(12);
+                                font-size: fz(12);
                                 height: 2em;
                                 color: #fff;
                             }
@@ -241,7 +241,7 @@
                         }
                         &.btn {
                             button {
-                                font-size: FZ(12);
+                                font-size: fz(12);
                                 display: grid;
                                 place-items: center;
                                 border: 1px solid $font-black;

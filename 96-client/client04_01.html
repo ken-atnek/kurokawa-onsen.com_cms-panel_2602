@@ -1,0 +1,474 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/client04-01.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-04-01 status-client">
+      <section class="container-left-menu menu-color04">
+        <div class="title">飲食店予約</div>
+        <nav>
+          <a href="#" class="is-active"><span>席管理</span></a>
+          <a href="#"><span>予約基本設定</span></a>
+          <a href="#"><span>食事メニュー管理</span></a>
+          <a href="#"><span>予約カレンダー</span></a>
+          <a href="#"><span>予約一覧</span></a>
+          <a href="#"><span>予約詳細</span></a>
+        </nav>
+      </section>
+      <div class="main-contents menu-color04">
+        <div class="block_inner">
+          <h2>席管理</h2>
+          <article class="inner-contents">
+            <h3>席一覧</h3>
+            <div class="contents-form">
+              <form class="box-add-new">
+                <dl>
+                  <div>
+                    <dt>席名</dt>
+                    <dd><input type="text" /></dd>
+                  </div>
+                  <div>
+                    <dt>席種</dt>
+                    <dd>
+                      <div class="select-seat-type" data-selectbox>
+                        <button
+                          type="button"
+                          class="selectbox__head"
+                          aria-expanded="false"
+                        >
+                          <input
+                            type="hidden"
+                            name="select-seat-type"
+                            value=""
+                            data-selectbox-hidden
+                          />
+                          <span class="selectbox__value" data-selectbox-value
+                            >選択してください</span
+                          >
+                        </button>
+                        <div class="list-wrapper">
+                          <ul class="selectbox__panel">
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-seat-type"
+                                value="1"
+                                id="seatType01"
+                              />
+                              <label for="seatType01">カウンター</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-seat-type"
+                                value="2"
+                                id="seatType02"
+                              />
+                              <label for="seatType02">個室A</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-seat-type"
+                                value="3"
+                                id="seatType03"
+                              />
+                              <label for="seatType03">個室B</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-seat-type"
+                                value="4"
+                                id="seatType04"
+                              />
+                              <label for="seatType04">テーブル </label>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>定員</dt>
+                    <dd>
+                      <div class="select-capacity" data-selectbox>
+                        <button
+                          type="button"
+                          class="selectbox__head"
+                          aria-expanded="false"
+                        >
+                          <input
+                            type="hidden"
+                            name="select-capacity"
+                            value=""
+                            data-selectbox-hidden
+                          />
+                          <span class="selectbox__value" data-selectbox-value
+                            >--</span
+                          >
+                        </button>
+                        <div class="list-wrapper">
+                          <ul class="selectbox__panel">
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-capacity"
+                                value="1"
+                                id="capacity01"
+                              />
+                              <label for="capacity01">1名</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-capacity"
+                                value="2"
+                                id="capacity02"
+                              />
+                              <label for="capacity02">2名</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-capacity"
+                                value="3"
+                                id="capacity03"
+                              />
+                              <label for="capacity03">3名</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-capacity"
+                                value="4"
+                                id="capacity04"
+                              />
+                              <label for="capacity04">4名</label>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </dd>
+                  </div>
+                </dl>
+                <button type="button" class="btn-add">追加</button>
+              </form>
+              <p class="notice">
+                ※ 席種を「カウンター」にした場合、定員は1名固定になります。
+              </p>
+            </div>
+            <ul class="box-seat-list">
+              <li>
+                <div></div>
+                <div style="align-items: flex-start">席名</div>
+                <div style="align-items: flex-start">席種</div>
+                <div>定員</div>
+                <div>状態</div>
+                <div></div>
+              </li>
+              <li>
+                <div class="inner-list">
+                  <div class="item-control">
+                    <button>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </button>
+                  </div>
+                  <div class="item-name">
+                    <span>カウンター1</span>
+                  </div>
+                  <div class="item-type">
+                    <span>カウンター</span>
+                  </div>
+                  <div class="item-capacity">
+                    <span>1名</span>
+                  </div>
+                  <div class="item-toggle">
+                    <div
+                      class="wrap-toggle-button"
+                      data-tooltip-on="有効中 | 無効にする"
+                      data-tooltip-off="無効中 | 有効する"
+                    >
+                      <label class="toggle-button">
+                        <input type="checkbox" checked />
+                      </label>
+                    </div>
+                  </div>
+                  <nav>
+                    <button
+                      class="btn-edit"
+                      data-tooltip="編集"
+                      aria-label="編集"
+                    ></button>
+                    <button
+                      class="btn-delate"
+                      data-tooltip="削除"
+                      aria-label="削除"
+                    ></button>
+                  </nav>
+                </div>
+              </li>
+              <li>
+                <div class="inner-list">
+                  <div class="item-control">
+                    <button>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </button>
+                  </div>
+                  <div class="item-name">
+                    <span>個室A</span>
+                  </div>
+                  <div class="item-type">
+                    <span>個室</span>
+                  </div>
+                  <div class="item-capacity">
+                    <span>2名</span>
+                  </div>
+                  <div class="item-toggle">
+                    <div
+                      class="wrap-toggle-button"
+                      data-tooltip-on="有効中 | 無効にする"
+                      data-tooltip-off="無効中 | 有効する"
+                    >
+                      <label class="toggle-button">
+                        <input type="checkbox" checked />
+                      </label>
+                    </div>
+                  </div>
+                  <nav>
+                    <button
+                      class="btn-edit"
+                      data-tooltip="編集"
+                      aria-label="編集"
+                    ></button>
+                    <button
+                      class="btn-delate"
+                      data-tooltip="削除"
+                      aria-label="削除"
+                    ></button>
+                  </nav>
+                </div>
+              </li>
+              <li>
+                <div class="inner-list" style="display: none">
+                  <div class="item-control">
+                    <button>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </button>
+                  </div>
+                  <div class="item-name">
+                    <span>テーブルA</span>
+                  </div>
+                  <div class="item-type">
+                    <span>テーブル</span>
+                  </div>
+                  <div class="item-capacity">
+                    <span>4名</span>
+                  </div>
+                  <div class="item-toggle">
+                    <div
+                      class="wrap-toggle-button"
+                      data-tooltip-on="有効中 | 無効にする"
+                      data-tooltip-off="無効中 | 有効する"
+                    >
+                      <label class="toggle-button">
+                        <input type="checkbox" checked />
+                      </label>
+                    </div>
+                  </div>
+                  <nav>
+                    <button
+                      class="btn-edit"
+                      data-tooltip="編集"
+                      aria-label="編集"
+                    ></button>
+                    <button
+                      class="btn-delate"
+                      data-tooltip="削除"
+                      aria-label="削除"
+                    ></button>
+                  </nav>
+                </div>
+                <form>
+                  <dl>
+                    <div>
+                      <dt>席名</dt>
+                      <dd><input type="text" /></dd>
+                    </div>
+                    <div>
+                      <dt>席種</dt>
+                      <dd>
+                        <div class="select-seat-type" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-seat-type"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >選択してください</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-seat-type"
+                                  value="1"
+                                  id="seatType01"
+                                />
+                                <label for="seatType01">カウンター</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-seat-type"
+                                  value="2"
+                                  id="seatType02"
+                                />
+                                <label for="seatType02">個室A</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-seat-type"
+                                  value="3"
+                                  id="seatType03"
+                                />
+                                <label for="seatType03">個室B</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-seat-type"
+                                  value="4"
+                                  id="seatType04"
+                                />
+                                <label for="seatType04">テーブル </label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>定員</dt>
+                      <dd>
+                        <div class="select-capacity" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-capacity"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-capacity"
+                                  value="1"
+                                  id="capacity01"
+                                />
+                                <label for="capacity01">1名</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-capacity"
+                                  value="2"
+                                  id="capacity02"
+                                />
+                                <label for="capacity02">2名</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-capacity"
+                                  value="3"
+                                  id="capacity03"
+                                />
+                                <label for="capacity03">3名</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-capacity"
+                                  value="4"
+                                  id="capacity04"
+                                />
+                                <label for="capacity04">4名</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </dd>
+                    </div>
+                  </dl>
+                  <button type="button" class="btn-submit">決定</button>
+                  <button type="button" class="btn-cancel">キャンセル</button>
+                </form>
+              </li>
+            </ul>
+            <div class="wrap-notice">
+              <p class="notice">
+                ※
+                並び順はドラッグ＆ドロップで変更できます。カウンターの連続席判定にはこの表示順を使用します。
+              </p>
+            </div>
+          </article>
+
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>

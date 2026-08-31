@@ -48,7 +48,7 @@ EC販売管理
         gap: 0 2em;
       }
       dt {
-        font-size: FZ(14);
+        font-size: fz(14);
         display: flex;
         flex-direction: column;
       }
@@ -93,7 +93,7 @@ EC販売管理
             @include radioCheck;
             margin-right: 1em;
             label {
-              font-size: FZ(14);
+              font-size: fz(14);
               padding-left: 2.2em;
             }
           }
@@ -110,7 +110,7 @@ EC販売管理
       align-items: center;
       padding-right: 2.4rem;
       button {
-        font-size: FZ(14);
+        font-size: fz(14);
       }
       .item-reset {
         width: 8.8rem;
@@ -160,7 +160,7 @@ EC販売管理
           @include flex-center(column);
           gap: 0.3em 0;
           span {
-            font-size: FZ(14);
+            font-size: fz(14);
           }
         }
         .item-image {
@@ -177,7 +177,7 @@ EC販売管理
           align-items: center;
           padding-inline: 1rem;
           span {
-            font-size: FZ(14);
+            font-size: fz(14);
             display: inline-block;
             position: relative;
             &::after {
@@ -211,7 +211,7 @@ EC販売管理
           align-items: center;
           padding-inline: 1rem;
           span {
-            font-size: FZ(14);
+            font-size: fz(14);
             &::after {
               content: "円";
               margin-left: 0.1em;
@@ -224,14 +224,14 @@ EC販売管理
           align-items: center;
           padding-inline: 1rem;
           span {
-            font-size: FZ(14);
+            font-size: fz(14);
           }
         }
         .item-status {
           @include flex-center(column);
           padding: 1rem;
           span {
-            font-size: FZ(12);
+            font-size: fz(12);
             color: #fff;
             @include flex-center;
             width: 4.6em;
@@ -251,7 +251,7 @@ EC販売管理
           padding-inline: 1rem;
 
           span {
-            font-size: FZ(12);
+            font-size: fz(12);
             font-weight: 500;
             display: flex;
             flex-direction: column;
