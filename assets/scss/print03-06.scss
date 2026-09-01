@@ -87,7 +87,7 @@ main {
                     @include flex-center(column);
                     gap: 0.3em 0;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                 }
                 .item-name {
@@ -96,7 +96,7 @@ main {
                     align-items: center;
                     padding-inline: 1rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         display: inline-block;
                         position: relative;
                         &::after {
@@ -118,7 +118,7 @@ main {
                     align-items: center;
                     padding-inline: 1.6rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::after {
                             content: "円";
                             margin-left: 0.1em;
@@ -131,7 +131,7 @@ main {
                     align-items: center;
                     padding-inline: 1rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::after {
                             content: "円";
                             margin-left: 0.1em;
@@ -144,7 +144,7 @@ main {
                     align-items: center;
                     padding-inline: 2rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                 }
                 &:last-of-type {
@@ -204,10 +204,10 @@ main {
                     @include flex-center(column);
                     gap: 0.3em 0;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                     i {
-                        font-size: FZ(12);
+                        font-size: fz(12);
                         font-weight: 600;
                     }
                 }
@@ -220,7 +220,7 @@ main {
                         padding: 1rem;
                         border-bottom: 1px solid $border-gray;
                         span {
-                            font-size: FZ(12);
+                            font-size: fz(12);
                             border: 1px solid $border-gray;
                             border-radius: 100vmax;
                             padding: 0.5em 2em;
@@ -233,7 +233,7 @@ main {
                         flex-direction: column;
                         font-size: inherit;
                         .name {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             font-weight: 600;
                             letter-spacing: 0.08em;
                         }
@@ -242,13 +242,13 @@ main {
                             flex-direction: column;
                             font-size: inherit;
                             span {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                             }
                         }
                         .tel {
                             font-size: inherit;
                             span {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                                 &::before {
                                     content: "TEL";
                                     font-weight: 400;
@@ -259,7 +259,7 @@ main {
                         .mail {
                             font-size: inherit;
                             a {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                             }
                         }
                     }
@@ -285,11 +285,11 @@ main {
                                 padding-bottom: 0.5rem;
                             }
                             .goods-name {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                                 border-right: 1px solid #c7c7c7;
                             }
                             .goods-pieces {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                                 text-align: right;
                                 border-right: 1px solid #c7c7c7;
                             }
@@ -298,7 +298,7 @@ main {
                                 display: flex;
                                 justify-content: flex-end;
                                 span {
-                                    font-size: FZ(14);
+                                    font-size: fz(14);
                                     &::after {
                                         content: "円";
                                         font-size: 0.85em;
@@ -324,7 +324,7 @@ main {
                             padding-block: 0.5rem;
                         }
                         .title {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             border-right: 1px solid #c7c7c7;
                             text-align: right;
                         }
@@ -334,7 +334,7 @@ main {
                             justify-content: flex-end;
                             grid-column: span 2;
                             span {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                                 &::after {
                                     content: "円";
                                     font-size: 0.85em;
@@ -355,7 +355,7 @@ main {
                         align-items: flex-end;
                         align-self: stretch;
                         span {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             font-weight: 700;
                             &::before {
                                 content: "合計";
@@ -395,7 +395,7 @@ main {
                         }
                     }
                     .date {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::before {
                             content: "(";
                             margin-right: 0.2em;
@@ -417,7 +417,7 @@ main {
                         width: max-content;
                         display: inline-block;
                         padding-top: 1rem;
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                     textarea {
                         width: unset;
@@ -463,7 +463,7 @@ main {
                     align-items: center;
                     padding-inline: 1rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         display: inline-block;
                         position: relative;
                         &::after {
@@ -497,7 +497,7 @@ main {
                     align-items: center;
                     padding-inline: 1.6rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::after {
                             content: "円";
                             margin-left: 0.1em;
@@ -510,7 +510,7 @@ main {
                     align-items: center;
                     padding-inline: 1rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::after {
                             content: "円";
                             margin-left: 0.1em;
@@ -523,7 +523,7 @@ main {
                     align-items: center;
                     padding-inline: 2rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                 }
                 &:last-of-type {
@@ -548,7 +548,7 @@ main {
             }
         }
         p {
-            font-size: FZ(14);
+            font-size: fz(14);
             padding: 1em 2em;
         }
     }

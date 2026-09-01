@@ -31,7 +31,7 @@
             margin-right: 1em;
             width: max-content;
             label {
-                font-size: FZ(14);
+                font-size: fz(14);
                 padding-left: 2.2em;
             }
         }
@@ -63,7 +63,7 @@
                     gap: 0 3em;
                     align-items: center;
                     & > dt {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                     & > dd {
                         display: flex;
@@ -72,7 +72,7 @@
                         font-size: inherit;
                         input {
                             height: 4rem;
-                            font-size: FZ(14);
+                            font-size: fz(14);
                         }
                     }
                 }
@@ -108,7 +108,7 @@
                 padding-block: 3em;
                 gap: 0.5em 0;
                 h4 {
-                    font-size: FZ(20);
+                    font-size: fz(20);
                     font-weight: 700;
                     color: $confirm-blue;
                 }
@@ -117,7 +117,7 @@
                     color: #646464;
                 }
                 p {
-                    font-size: FZ(12);
+                    font-size: fz(12);
                     color: #646464;
                 }
             }
@@ -154,7 +154,7 @@
                 gap: 0 1em;
             }
             dt {
-                font-size: FZ(14);
+                font-size: fz(14);
                 display: flex;
                 flex-direction: column;
                 width: max-content;
@@ -184,7 +184,7 @@
                         margin-right: 1em;
                         width: max-content;
                         label {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             padding-left: 2.2em;
                         }
                     }
@@ -195,7 +195,7 @@
                 dd {
                     grid-column: span 3;
                     input[type="text"] {
-                        font-size: FZ(16);
+                        font-size: fz(16);
                         height: 4rem;
                     }
                 }
@@ -215,10 +215,10 @@
                             position: absolute;
                             left: calc(100% + 0.5em);
                             width: max-content;
-                            font-size: FZ(14);
+                            font-size: fz(14);
                         }
                         input {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             flex-grow: unset;
                             height: 4rem;
                             width: 10rem;
@@ -248,7 +248,7 @@
                 position: relative;
                 font-size: inherit;
                 h4 {
-                    font-size: FZ(20);
+                    font-size: fz(20);
                     font-weight: 700;
                     background-color: #e6e6e6;
                     padding: 0.6em 1.4em;
@@ -297,7 +297,7 @@
                     gap: 0 1em;
                 }
                 dt {
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     display: flex;
                     flex-direction: column;
                     width: max-content;
@@ -311,7 +311,7 @@
                     dd {
                         font-size: 1em;
                         input {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             height: 4rem;
                         }
                     }
@@ -326,7 +326,7 @@
                                 border-radius: 0.8rem;
                                 margin-top: 1em;
                                 min-height: 30rem;
-                                font-size: FZ(16);
+                                font-size: fz(16);
                                 field-sizing: content;
                             }
                         }
@@ -339,7 +339,7 @@
                             .select-image {
                                 @include item-select-image;
                                 & > h4 {
-                                    font-size: FZ(16);
+                                    font-size: fz(16);
                                     font-weight: 400;
                                     background-color: unset;
                                 }
@@ -348,7 +348,7 @@
                                 font-size: inherit;
                                 margin-top: 1em;
                                 & > button {
-                                    font-size: FZ(14);
+                                    font-size: fz(14);
                                     padding: 0.5em 1.6em;
                                     border: 1px solid rgba($base-black, 1);
                                     border-radius: 100vmax;
@@ -369,7 +369,7 @@
                         .item_url {
                             flex-direction: column !important;
                             p {
-                                font-size: FZ(12);
+                                font-size: fz(12);
                             }
                         }
                     }
@@ -383,7 +383,7 @@
             place-items: center;
             border-radius: 0.4rem;
             transition: 0.3s ease-out;
-            font-size: FZ(18);
+            font-size: fz(18);
             align-self: center;
             width: 15em;
             height: 2.6em;
@@ -429,7 +429,7 @@
                 border-bottom: 1px solid #c7c7c7;
                 gap: 0 1em;
                 dt {
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     display: flex;
                     flex-direction: column;
                     width: max-content;
@@ -450,7 +450,7 @@
                             border-radius: 0.8rem;
                             margin-top: 1em;
                             min-height: 30rem;
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             field-sizing: content;
                         }
                     }
@@ -469,10 +469,10 @@
                             position: absolute;
                             left: calc(100% + 0.5em);
                             width: max-content;
-                            font-size: FZ(14);
+                            font-size: fz(14);
                         }
                         input {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             flex-grow: unset;
                             height: 4rem;
                             width: 10rem;
@@ -495,7 +495,7 @@
                     flex-direction: column;
                     gap: 0.5em 0;
                     p {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                     & > div {
                         display: flex;
@@ -508,7 +508,7 @@
                         }
                         span {
                             display: inline-block;
-                            font-size: FZ(14);
+                            font-size: fz(14);
                         }
                     }
                 }
@@ -531,7 +531,7 @@
                         margin-right: 1em;
                         width: max-content;
                         label {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             padding-left: 2.2em;
                         }
                     }
@@ -539,7 +539,7 @@
             }
         }
         .notice {
-            font-size: FZ(12);
+            font-size: fz(12);
             text-align: center;
             margin-top: 1em;
             margin-bottom: 2em;

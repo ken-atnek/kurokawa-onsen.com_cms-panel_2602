@@ -45,10 +45,10 @@ EC販売管理
                 gap: 0 2em;
                 grid-template-columns: subgrid;
                 dt {
-                    font-size: FZ(14);
+                    font-size: fz(14);
                 }
                 dd {
-                    font-size: FZ(16);
+                    font-size: fz(16);
                     font-weight: 600;
                 }
             }
@@ -82,7 +82,7 @@ EC販売管理
                 flex: 1;
                 span {
                     display: block;
-                    font-size: FZ(14);
+                    font-size: fz(14);
                 }
                 input {
                     width: max-content;
@@ -154,7 +154,7 @@ EC販売管理
                     @include flex-center(column);
                     gap: 0.3em 0;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                 }
                 .item-name {
@@ -164,13 +164,13 @@ EC販売管理
                     padding-inline: 2rem;
                     gap: 0 0.5em;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         display: inline-block;
                         position: relative;
                     }
                     .name {
                         font-weight: 600;
-                        font-size: FZ(16);
+                        font-size: fz(16);
                     }
                     .admin {
                         &::before {
@@ -183,7 +183,7 @@ EC販売管理
                         }
                     }
                     .number {
-                        font-size: FZ(16);
+                        font-size: fz(16);
                         font-weight: 600;
                         color: $confirm-blue;
                         &::before,
@@ -249,7 +249,7 @@ EC販売管理
                         flex: 1;
                         span {
                             display: block;
-                            font-size: FZ(14);
+                            font-size: fz(14);
                         }
                         input {
                             width: max-content;
@@ -270,7 +270,7 @@ EC販売管理
             }
         }
         p {
-            font-size: FZ(14);
+            font-size: fz(14);
             padding: 1em;
             color: #888780;
         }

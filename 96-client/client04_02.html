@@ -1,0 +1,445 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/client04-02.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-04-02 status-client">
+      <section class="container-left-menu menu-color04">
+        <div class="title">飲食店予約</div>
+        <nav>
+          <a href="#"><span>席管理</span></a>
+          <a href="#" class="is-active"><span>予約基本設定</span></a>
+          <a href="#"><span>食事メニュー管理</span></a>
+          <a href="#"><span>予約カレンダー</span></a>
+          <a href="#"><span>予約一覧</span></a>
+          <a href="#"><span>予約詳細</span></a>
+        </nav>
+      </section>
+      <div class="main-contents menu-color04">
+        <div class="block_inner">
+          <h2>予約基本設定</h2>
+
+          <form>
+            <h3>注文者情報</h3>
+            <dl>
+              <div class="box-name">
+                <dt>店舗名</dt>
+                <dd>
+                  <span>豚皇【TONKOU】</span>
+                </dd>
+              </div>
+              <div class="box-check">
+                <dt>予約受付</dt>
+                <dd>
+                  <div>
+                    <input
+                      type="radio"
+                      name="reservationFlg"
+                      id="reservationFlg_01"
+                      value="0"
+                      checked="checked"
+                    /><label for="reservationFlg_01">使用しない</label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      name="reservationFlg"
+                      id="reservationFlg_02"
+                      value="1"
+                    /><label for="reservationFlg_02">使用する</label>
+                  </div>
+                </dd>
+              </div>
+              <div class="box-check">
+                <dt>食事メニュー選択</dt>
+                <dd>
+                  <div>
+                    <input
+                      type="radio"
+                      name="mealMenuFlg"
+                      id="mealMenuFlg_01"
+                      value="0"
+                      checked="checked"
+                    /><label for="mealMenuFlg_01">利用しない</label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      name="mealMenuFlg"
+                      id="mealMenuFlg_02"
+                      value="1"
+                    /><label for="mealMenuFlg_02">利用する</label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      name="mealMenuFlg"
+                      id="mealMenuFlg_03"
+                      value="2"
+                    /><label for="mealMenuFlg_03">利用する（必須入力）</label>
+                  </div>
+                </dd>
+              </div>
+              <div class="box-periode">
+                <dt>予約受付期間</dt>
+                <dd>
+                  <div class="wrap-dd">
+                    <span>何日前から受付</span>
+                    <div class="select-search-category" data-selectbox>
+                      <button
+                        type="button"
+                        class="selectbox__head"
+                        aria-expanded="false"
+                      >
+                        <input
+                          type="hidden"
+                          name="reservationStartDay"
+                          value=""
+                          data-selectbox-hidden
+                        />
+                        <span class="selectbox__value" data-selectbox-value
+                          >選択してください</span
+                        >
+                      </button>
+                      <div class="list-wrapper">
+                        <ul class="selectbox__panel">
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationStartDay"
+                              value="1"
+                              id="reservationStartDay_01"
+                              checked
+                            />
+                            <label for="reservationStartDay_01">無期限</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationStartDay"
+                              value="2"
+                              id="reservationStartDay_02"
+                            />
+                            <label for="reservationStartDay_02">90日</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationStartDay"
+                              value="3"
+                              id="reservationStartDay_03"
+                            />
+                            <label for="reservationStartDay_03">60日</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationStartDay"
+                              value="4"
+                              id="reservationStartDay_04"
+                            />
+                            <label for="reservationStartDay_04">30日 </label>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <i>〜</i>
+                  <div class="wrap-dd">
+                    <span>何日前まで受付</span>
+                    <div class="select-search-category" data-selectbox>
+                      <button
+                        type="button"
+                        class="selectbox__head"
+                        aria-expanded="false"
+                      >
+                        <input
+                          type="hidden"
+                          name="reservationEndDay"
+                          value=""
+                          data-selectbox-hidden
+                        />
+                        <span class="selectbox__value" data-selectbox-value
+                          >選択してください</span
+                        >
+                      </button>
+                      <div class="list-wrapper">
+                        <ul class="selectbox__panel">
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationEndDay"
+                              value="1"
+                              id="reservationEndDay_01"
+                              checked
+                            />
+                            <label for="reservationEndDay_01">当日</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationEndDay"
+                              value="2"
+                              id="reservationEndDay_02"
+                            />
+                            <label for="reservationEndDay_02">1日前</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationEndDay"
+                              value="3"
+                              id="reservationEndDay_03"
+                            />
+                            <label for="reservationEndDay_03">3日前</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationEndDay"
+                              value="4"
+                              id="reservationEndDay_04"
+                            />
+                            <label for="reservationEndDay_04">1週間前 </label>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </dd>
+              </div>
+              <div class="box-person">
+                <dt>最小予約人数</dt>
+                <dd>
+                  <div class="select-search-category" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="minReservationPerson"
+                        value=""
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <li>
+                          <input
+                            type="radio"
+                            name="minReservationPerson"
+                            value="1"
+                            id="minReservationPerson_01"
+                            checked
+                          />
+                          <label for="minReservationPerson_01">1名</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="minReservationPerson"
+                            value="2"
+                            id="minReservationPerson_02"
+                          />
+                          <label for="minReservationPerson_02">2名</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="minReservationPerson"
+                            value="3"
+                            id="minReservationPerson_03"
+                          />
+                          <label for="minReservationPerson_03">3名</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="minReservationPerson"
+                            value="4"
+                            id="minReservationPerson_04"
+                          />
+                          <label for="minReservationPerson_04">4名 </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </dd>
+              </div>
+              <div class="box-person">
+                <dt>最大予約人数</dt>
+                <dd>
+                  <div class="select-search-category" data-selectbox>
+                    <button
+                      type="button"
+                      class="selectbox__head"
+                      aria-expanded="false"
+                    >
+                      <input
+                        type="hidden"
+                        name="maxReservationPerson"
+                        value=""
+                        data-selectbox-hidden
+                      />
+                      <span class="selectbox__value" data-selectbox-value
+                        >選択してください</span
+                      >
+                    </button>
+                    <div class="list-wrapper">
+                      <ul class="selectbox__panel">
+                        <li>
+                          <input
+                            type="radio"
+                            name="maxReservationPerson"
+                            value="1"
+                            id="maxReservationPerson_01"
+                            checked
+                          />
+                          <label for="maxReservationPerson_01">6名</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="maxReservationPerson"
+                            value="2"
+                            id="maxReservationPerson_02"
+                          />
+                          <label for="maxReservationPerson_02">5名</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="maxReservationPerson"
+                            value="3"
+                            id="maxReservationPerson_03"
+                          />
+                          <label for="maxReservationPerson_03">4名</label>
+                        </li>
+                        <li>
+                          <input
+                            type="radio"
+                            name="maxReservationPerson"
+                            value="4"
+                            id="maxReservationPerson_04"
+                          />
+                          <label for="maxReservationPerson_04">3名 </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </dd>
+              </div>
+              <div class="box-holiday">
+                <dt>定休日</dt>
+                <dd>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="regularHoliday[]"
+                      id="regularHolidayMon"
+                      value="mon"
+                    />
+                    <label for="regularHolidayMon">月</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="regularHoliday[]"
+                      id="regularHolidayTue"
+                      value="tue"
+                    />
+                    <label for="regularHolidayTue">火</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="regularHoliday[]"
+                      id="regularHolidayWed"
+                      value="wed"
+                      checked
+                    />
+                    <label for="regularHolidayWed">水</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="regularHoliday[]"
+                      id="regularHolidayThu"
+                      value="thu"
+                    />
+                    <label for="regularHolidayThu">木</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="regularHoliday[]"
+                      id="regularHolidayFri"
+                      value="fri"
+                    />
+                    <label for="regularHolidayFri">金</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="regularHoliday[]"
+                      id="regularHolidaySat"
+                      value="sat"
+                    />
+                    <label for="regularHolidaySat">土</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="regularHoliday[]"
+                      id="regularHolidaySun"
+                      value="sun"
+                    />
+                    <label for="regularHolidaySun">日</label>
+                  </div>
+                </dd>
+              </div>
+            </dl>
+            <div class="box-btn">
+              <button class="btn-cancel">キャンセル</button>
+              <button class="btn-confirmed">保存</button>
+            </div>
+          </form>
+
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>

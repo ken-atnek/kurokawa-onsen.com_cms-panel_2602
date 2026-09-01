@@ -32,7 +32,7 @@
             font-size: inherit;
             background-color: var(--cp-color);
             span {
-                font-size: FZ(36);
+                font-size: fz(36);
                 font-weight: 700;
                 line-height: 1.6em;
             }
@@ -46,11 +46,11 @@
             width: 100%;
             max-width: 36rem;
             h2 {
-                font-size: FZ(18);
+                font-size: fz(18);
                 font-weight: 600;
             }
             .title {
-                font-size: FZ(14);
+                font-size: fz(14);
                 font-weight: 600;
                 margin-top: 1em;
             }
@@ -67,14 +67,14 @@
             // display: none;
             .link-pw {
                 color: $confirm-blue;
-                font-size: FZ(14);
+                font-size: fz(14);
                 font-weight: 300;
                 align-self: center;
                 margin-top: 1em;
             }
             .text-caution {
                 position: relative;
-                font-size: FZ(12);
+                font-size: fz(12);
                 color: $caution-red;
                 font-weight: 600;
                 margin-top: 2rem;

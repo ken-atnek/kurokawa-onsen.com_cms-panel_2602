@@ -50,7 +50,7 @@
                                 @include radioCheck;
                                 margin-right: 1em;
                                 label {
-                                    font-size: FZ(16);
+                                    font-size: fz(16);
                                     padding-left: 1.8em;
                                 }
                             }
@@ -60,7 +60,7 @@
                         @include dt-top;
                         dd {
                             textarea {
-                                font-size: FZ(16);
+                                font-size: fz(16);
                                 min-height: 3.2lh;
                             }
                         }
@@ -74,7 +74,7 @@
                             align-items: center;
                             gap: 0.8em 2em;
                             & > div {
-                                font-size: FZ(16);
+                                font-size: fz(16);
                             }
                             input[type="text"] {
                                 &.add_01 {
@@ -115,7 +115,7 @@
                                 font-size: inherit;
                                 gap: 0 1rem;
                                 h4 {
-                                    font-size: FZ(12);
+                                    font-size: fz(12);
                                     font-weight: 600;
                                     align-self: center;
                                     margin-right: 0.3rem;
@@ -149,7 +149,7 @@
                                         }
                                     }
                                     p {
-                                        font-size: FZ(14);
+                                        font-size: fz(14);
                                         display: inline-block;
                                         align-self: center;
                                     }
@@ -165,7 +165,7 @@
                         @include dt-top();
                         dd {
                             textarea {
-                                font-size: FZ(16);
+                                font-size: fz(16);
                                 min-height: 3lh;
                             }
                         }
@@ -191,7 +191,7 @@
                                 }
                                 label {
                                     position: relative;
-                                    font-size: FZ(16);
+                                    font-size: fz(16);
                                     display: grid;
                                     place-items: center;
                                     z-index: +1;
@@ -242,7 +242,7 @@
                             }
                             a {
                                 color: $hover-blue;
-                                font-size: FZ(12);
+                                font-size: fz(12);
                                 margin-left: 1em;
                             }
                         }

@@ -39,7 +39,7 @@
     position: absolute;
     top: 1.3125em;
     right: 1.875em;
-    font-size: FZ(16);
+    font-size: fz(16);
     border: 1px solid;
     padding: 0.55em 0;
     width: 5em;
@@ -62,7 +62,7 @@
  戻るボタン（下部）
 --------------------------------*/
 @mixin linkPageBack_bottom {
-    font-size: FZ(16);
+    font-size: fz(16);
     border: 1px solid;
     padding: 0.55em 0;
     width: 15em;
@@ -90,7 +90,7 @@
     gap: 0 1.4em;
     .btn_search {
         // @include btnBlue;
-        font-size: FZ(16);
+        font-size: fz(16);
         width: 15em;
         height: 2.5em;
     }
@@ -114,7 +114,7 @@
     }
     label {
         position: relative;
-        font-size: FZ(16);
+        font-size: fz(16);
         padding-left: 2.1em;
         &::before {
             content: "";
@@ -259,7 +259,7 @@
 //     position: absolute;
 //     right: 3rem;
 //     top: 1.4rem;
-//     font-size: FZ(14);
+//     font-size: fz(14);
 //     @include flex-center;
 //     width: 8rem;
 //     height: 36px;
@@ -419,7 +419,7 @@
 //     position: absolute;
 //     right: 3rem;
 //     top: 1.4rem;
-//     font-size: FZ(14);
+//     font-size: fz(14);
 
 //     width: 8rem;
 //     height: 36px;
@@ -433,7 +433,7 @@
 //     position: absolute;
 //     right: 4rem;
 //     bottom: 2rem;
-//     font-size: FZ(14);
+//     font-size: fz(14);
 //     width: 12rem;
 //     height: 4rem;
 //     @include main-button("clear");
@@ -456,7 +456,7 @@
 //         display: grid;
 //         place-items: center;
 //         position: relative;
-//         font-size: FZ(14);
+//         font-size: fz(14);
 //         color: #696969;
 //         padding: 0.5em 0.8em;
 //         transition: 0.3s ease-out;
@@ -510,7 +510,7 @@
 //         display: grid;
 //         place-items: center;
 //         position: relative;
-//         font-size: FZ(14);
+//         font-size: fz(14);
 //         color: #ababab;
 //         padding: 0.5em 0.8em;
 //         transition: 0.3s ease-out;
@@ -585,7 +585,7 @@
     }
     .selectbox__value {
         flex: 1;
-        font-size: FZ(14);
+        font-size: fz(14);
         @if $position == "center" {
             text-align: center;
         } @else if $position == "right" {
@@ -635,7 +635,7 @@
                 label {
                     height: $list-height;
                     cursor: pointer;
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     display: flex;
                     align-items: center;
                     width: 100%;
@@ -843,10 +843,10 @@
     --borderSize: 8px;
     --borderWidth: 4px;
     h4 {
-        font-size: FZ(18);
+        font-size: fz(18);
     }
     span {
-        font-size: FZ(12);
+        font-size: fz(12);
     }
     button {
         background-color: $hover-bg-blue;
@@ -854,7 +854,7 @@
         @include flex-center;
         width: 136px;
         height: 36px;
-        font-size: FZ(14);
+        font-size: fz(14);
         color: $hover-blue;
         border: 1px solid $hover-blue;
     }
@@ -866,11 +866,11 @@
         color: #df3d3d;
         gap: 0.3rem 0;
         h5 {
-            font-size: FZ(16);
+            font-size: fz(16);
             font-weight: 600;
         }
         p {
-            font-size: FZ(14);
+            font-size: fz(14);
             color: #df3d3d;
         }
     }
@@ -1037,7 +1037,7 @@
     max-height: 90dvh;
     overflow-y: scroll;
     h4 {
-        font-size: FZ(16);
+        font-size: fz(16);
         font-weight: 700;
         padding: 1em;
     }
@@ -1071,7 +1071,7 @@
                 }
             }
             h5 {
-                font-size: FZ(14);
+                font-size: fz(14);
                 font-weight: 700;
                 text-align: left;
                 line-height: 1.6em;
@@ -1084,7 +1084,7 @@
                 place-items: center;
                 width: 3rem;
                 height: 2rem;
-                font-size: FZ(12);
+                font-size: fz(12);
                 border-radius: 4px;
                 align-self: start;
             }
@@ -1111,7 +1111,7 @@
         gap: 0 0.5em;
         padding: 0.5em;
         h4 {
-            font-size: FZ(20);
+            font-size: fz(20);
             font-weight: 700;
             margin-right: auto;
         }
@@ -1154,7 +1154,7 @@
                 gap: 0 0.5em;
                 font-size: inherit;
                 .title {
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     line-height: 1.4em;
                     letter-spacing: 0.04em;
                 }
@@ -1209,7 +1209,7 @@
         }
         .selectbox__value {
             flex: 1;
-            font-size: FZ(14);
+            font-size: fz(14);
             display: flex;
             align-self: stretch;
             border-radius: 8px 0 0 8px;
@@ -1274,7 +1274,7 @@
                     z-index: 1;
                     height: $list-height;
                     cursor: pointer;
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     padding-left: 1.4em;
                     display: flex;
                     align-items: center;

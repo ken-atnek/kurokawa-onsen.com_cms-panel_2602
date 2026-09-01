@@ -43,7 +43,7 @@ EC販売管理
         dl {
             div {
                 dt {
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     text-align: right;
                     &.is-required {
                         display: flex;
@@ -79,7 +79,7 @@ EC販売管理
                 align-items: center;
                 h4,
                 span {
-                    font-size: FZ(14);
+                    font-size: fz(14);
                 }
                 h4 {
                     &::after {
@@ -144,7 +144,7 @@ EC販売管理
                         @include radioCheck;
                         margin-right: 1em;
                         label {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             padding-left: 2.2em;
                         }
                     }
@@ -279,7 +279,7 @@ EC販売管理
                         display: flex;
                         align-items: center;
                         h4 {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             margin-right: 0.4em;
                         }
                         input {
@@ -288,7 +288,7 @@ EC販売管理
                             text-align: right;
                         }
                         span {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             margin-left: 0.5em;
                         }
                     }
@@ -306,7 +306,7 @@ EC販売管理
                         text-align: right;
                     }
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         margin-left: 0.5em;
                     }
                 }
@@ -324,7 +324,7 @@ EC販売管理
                         @include radioCheck;
                         margin-right: 1em;
                         label {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             padding-left: 2.2em;
                         }
                     }
@@ -370,7 +370,7 @@ EC販売管理
                         text-align: right;
                     }
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         margin-left: 0.5em;
                     }
                 }
@@ -386,7 +386,7 @@ EC販売管理
                         display: flex;
                         align-items: center;
                         span {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             margin-left: 0.5em;
                         }
                         input {
@@ -397,7 +397,7 @@ EC販売管理
                         @include radioCheck;
                         margin-right: 1em;
                         label {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             padding-left: 2.2em;
                         }
                     }
@@ -416,7 +416,7 @@ EC販売管理
                         @include radioCheck;
                         margin-right: 1em;
                         label {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             padding-left: 2.2em;
                         }
                     }
@@ -455,7 +455,7 @@ EC販売管理
                         font-size: inherit;
                         border-right: unset;
                         span {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                         }
                     }
                     .item-name {
@@ -482,7 +482,7 @@ EC販売管理
             display: flex;
             @include main-button("cancel");
             width: 14em;
-            font-size: FZ(16);
+            font-size: fz(16);
             height: 4rem;
             margin-top: 1em;
         }
@@ -507,7 +507,7 @@ EC販売管理
             &.btn-confirmed {
                 background-color: $confirm-blue;
                 color: #fff;
-                font-size: FZ(14);
+                font-size: fz(14);
                 font-weight: 600;
                 width: 12rem;
                 &:hover {
@@ -517,7 +517,7 @@ EC販売管理
             &.btn-cancel {
                 background-color: #fff;
                 border: 1px solid $font-black;
-                font-size: FZ(14);
+                font-size: fz(14);
                 font-weight: 600;
                 width: 10rem;
                 &:hover {
@@ -549,13 +549,13 @@ EC販売管理
             justify-content: space-between;
             align-items: center;
             span {
-                font-size: FZ(18);
+                font-size: fz(18);
                 font-weight: 600;
             }
             button {
                 @include main-button("confirm");
                 width: 10em;
-                font-size: FZ(16);
+                font-size: fz(16);
                 height: 4rem;
             }
         }
@@ -596,7 +596,7 @@ EC販売管理
             align-items: center;
             padding: 1em 2em 1em;
             p {
-                font-size: FZ(16);
+                font-size: fz(16);
             }
             button {
                 background-color: #fff;
@@ -609,7 +609,7 @@ EC販売管理
                 padding-inline: 1.8em;
                 span {
                     position: relative;
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     padding-left: 2em;
                     &::before {
                         content: "";
@@ -649,7 +649,7 @@ EC販売管理
                         font-size: inherit;
                         border-right: unset;
                         span {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                         }
                     }
                     .item-toggle {
@@ -667,7 +667,7 @@ EC販売管理
                         align-items: center;
                         gap: 0 1em;
                         p {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             font-weight: 600;
                         }
                     }
@@ -693,7 +693,7 @@ EC販売管理
                                 @include radioCheck;
                                 margin-right: 1em;
                                 label {
-                                    font-size: FZ(14);
+                                    font-size: fz(14);
                                     padding-left: 2.2em;
                                 }
                             }
@@ -729,7 +729,7 @@ EC販売管理
                 &.btn-confirmed {
                     background-color: $confirm-blue;
                     color: #fff;
-                    font-size: FZ(14);
+                    font-size: fz(14);
                     font-weight: 600;
                     width: 12rem;
                     &:hover {

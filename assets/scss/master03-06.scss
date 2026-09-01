@@ -91,7 +91,7 @@ EC販売管理（集計）
                     @include flex-center(column);
                     gap: 0.3em 0;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                 }
                 .item-name {
@@ -100,7 +100,7 @@ EC販売管理（集計）
                     align-items: center;
                     padding-inline: 1rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         display: inline-block;
                         position: relative;
                         &::after {
@@ -134,7 +134,7 @@ EC販売管理（集計）
                     align-items: center;
                     padding-inline: 1.6rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::after {
                             content: "円";
                             margin-left: 0.1em;
@@ -147,7 +147,7 @@ EC販売管理（集計）
                     align-items: center;
                     padding-inline: 1rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::after {
                             content: "円";
                             margin-left: 0.1em;
@@ -160,7 +160,7 @@ EC販売管理（集計）
                     align-items: center;
                     padding-inline: 2rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                 }
                 &:last-of-type {
@@ -256,10 +256,10 @@ EC販売管理（集計）
                     @include flex-center(column);
                     gap: 0.3em 0;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                     i {
-                        font-size: FZ(12);
+                        font-size: fz(12);
                         font-weight: 600;
                     }
                 }
@@ -272,7 +272,7 @@ EC販売管理（集計）
                         padding: 1rem;
                         border-bottom: 1px solid $border-gray;
                         span {
-                            font-size: FZ(12);
+                            font-size: fz(12);
                             border: 1px solid $border-gray;
                             border-radius: 100vmax;
                             padding: 0.5em 2em;
@@ -285,7 +285,7 @@ EC販売管理（集計）
                         flex-direction: column;
                         font-size: inherit;
                         .name {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             font-weight: 600;
                             letter-spacing: 0.08em;
                         }
@@ -294,13 +294,13 @@ EC販売管理（集計）
                             flex-direction: column;
                             font-size: inherit;
                             span {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                             }
                         }
                         .tel {
                             font-size: inherit;
                             span {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                                 &::before {
                                     content: "TEL";
                                     font-weight: 400;
@@ -311,7 +311,7 @@ EC販売管理（集計）
                         .mail {
                             font-size: inherit;
                             a {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                             }
                         }
                     }
@@ -338,11 +338,11 @@ EC販売管理（集計）
                                 padding-bottom: 0.5rem;
                             }
                             .goods-name {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                                 border-right: 1px solid #c7c7c7;
                             }
                             .goods-pieces {
-                                font-size: FZ(14);
+                                font-size: fz(14);
                                 text-align: right;
                                 border-right: 1px solid #c7c7c7;
                             }
@@ -351,7 +351,7 @@ EC販売管理（集計）
                                 display: flex;
                                 justify-content: flex-end;
                                 span {
-                                    font-size: FZ(14);
+                                    font-size: fz(14);
                                     &::after {
                                         content: "円";
                                         font-size: 0.85em;
@@ -378,7 +378,7 @@ EC販売管理（集計）
                             padding-block: 0.5rem;
                         }
                         .title {
-                            font-size: FZ(14);
+                            font-size: fz(14);
                             border-right: 1px solid #c7c7c7;
                             text-align: right;
                         }
@@ -389,7 +389,7 @@ EC販売管理（集計）
                             grid-column: span 2;
 
                             span {
-                                font-size: FZ(14);
+                                font-size: fz(14);
 
                                 &::after {
                                     content: "円";
@@ -411,7 +411,7 @@ EC販売管理（集計）
                         align-items: flex-end;
                         align-self: stretch;
                         span {
-                            font-size: FZ(16);
+                            font-size: fz(16);
                             font-weight: 700;
                             &::before {
                                 content: "合計";
@@ -451,7 +451,7 @@ EC販売管理（集計）
                         }
                     }
                     .date {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::before {
                             content: "(";
                             margin-right: 0.2em;
@@ -473,7 +473,7 @@ EC販売管理（集計）
                         width: max-content;
                         display: inline-block;
                         padding-top: 1rem;
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                     textarea {
                         width: unset;
@@ -521,7 +521,7 @@ EC販売管理（集計）
                     align-items: center;
                     padding-inline: 1rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         display: inline-block;
                         position: relative;
                         &::after {
@@ -555,7 +555,7 @@ EC販売管理（集計）
                     align-items: center;
                     padding-inline: 1.6rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::after {
                             content: "円";
                             margin-left: 0.1em;
@@ -568,7 +568,7 @@ EC販売管理（集計）
                     align-items: center;
                     padding-inline: 1rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                         &::after {
                             content: "円";
                             margin-left: 0.1em;
@@ -581,7 +581,7 @@ EC販売管理（集計）
                     align-items: center;
                     padding-inline: 2rem;
                     span {
-                        font-size: FZ(14);
+                        font-size: fz(14);
                     }
                 }
                 &:last-of-type {
@@ -606,7 +606,7 @@ EC販売管理（集計）
             }
         }
         p {
-            font-size: FZ(14);
+            font-size: fz(14);
             padding: 1em 2em;
         }
     }
