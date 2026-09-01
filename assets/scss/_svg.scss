@@ -112,3 +112,8 @@
     @include svg-bg-base($w, $h);
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{$w} #{$h}" fill="none"><polygon points="6.5 8 0 1.59 1.61 0 6.5 4.82 11.39 0 13 1.59 6.5 8" fill="%23#{$color}"/></svg>');
 }
+// プラス（＋）アイコン
+@mixin svg-icon-plus($color, $w: 14, $h: 14) {
+    @include svg-bg-base($w, $h);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{$w} #{$h}"  fill="%23#{$color}"><path d="M6.38235 14V7.61765H0V6.38235H6.38235V0H7.61765V6.38235H14V7.61765H7.61765V14H6.38235Z"/></svg>');
+}
