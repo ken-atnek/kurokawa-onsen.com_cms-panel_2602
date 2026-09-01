@@ -1,0 +1,483 @@
+/*==========================================================
+飲食店予約
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+.link_page-back_bottom {
+    @include linkPageBack_bottom;
+}
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+/*=========================================
+食事メニュー管理
+-----------------------------------------*/
+.inner-04-03 {
+    .inner-contents {
+        @include layoutContentsWhiteBlock;
+        border-bottom-left-radius: unset;
+        border-bottom-right-radius: unset;
+        z-index: 3;
+        flex-grow: unset;
+        h3 {
+            position: relative;
+            @include decorationHeadH3;
+            button {
+                position: absolute;
+                top: 50%;
+                translate: 0 -50%;
+                right: 1em;
+                font-size: inherit;
+                @include main-button(confirm);
+                padding: 0.8rem 2rem 0.8rem 4rem;
+                span {
+                    position: relative;
+                    font-size: 1.4rem;
+                    font-weight: 400;
+                    &::before {
+                        content: "";
+                        position: absolute;
+                        top: 50%;
+                        translate: 0 -50%;
+                        right: calc(100% + 0.5em);
+                        width: 1.2rem;
+                        @include svg-icon-plus("fff");
+                    }
+                }
+            }
+        }
+        .notice {
+            font-size: fz(12);
+            color: #888;
+            margin-top: 1rem;
+        }
+        .contents-list {
+            font-size: inherit;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding: 2em 2em 1em;
+            .box-seat-list {
+                @include layout-table-list(
+                    auto auto 1fr auto auto auto auto,
+                    7
+                );
+                border-left: 1px solid $border-gray;
+                border-right: 1px solid $border-gray;
+
+                & > li {
+                    &:not(:first-of-type) {
+                        cursor: auto;
+                        min-height: 6rem;
+                        & > div {
+                            border-right: unset;
+                        }
+                        &:active {
+                            &::before {
+                                background-color: #edf1f8;
+                            }
+                        }
+                    }
+                    &:first-of-type {
+                        & > div {
+                            border-right: unset;
+                            &:has(span) {
+                                padding-inline: unset;
+                            }
+                        }
+                    }
+
+                    .item-control {
+                        @include flex-center;
+                        padding: 2rem 3rem;
+                        button {
+                            position: relative;
+                            width: 1.4rem;
+                            aspect-ratio: 1;
+                            span {
+                                position: absolute;
+                                left: 0;
+                                width: 100%;
+                                height: 1px;
+                                background-color: #b0aea8;
+                                top: 50%;
+                                &:nth-of-type(1) {
+                                    translate: 0 calc(-50% + 4px);
+                                }
+                                &:nth-of-type(2) {
+                                    translate: 0 -50%;
+                                }
+                                &:nth-of-type(3) {
+                                    translate: 0 calc(-50% - 4px);
+                                }
+                            }
+                            &:active,
+                            &:hover {
+                                cursor: move;
+                            }
+                        }
+                    }
+                    .item-image {
+                        @include flex-center;
+                        width: 8rem;
+                        img {
+                            aspect-ratio: 1;
+                            max-width: 48px;
+                        }
+                    }
+                    .item-name,
+                    .item-price,
+                    .item-periode {
+                        font-size: inherit;
+                        padding-inline: 1rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.3em 0;
+                        span {
+                            font-size: fz(14);
+                        }
+                    }
+                    .item-price {
+                        min-width: 8rem;
+                    }
+                    .item-periode {
+                        justify-content: center;
+                        display: flex;
+                        align-items: center;
+                        span {
+                            &:first-of-type {
+                                &::after {
+                                    content: "〜";
+                                    margin-right: 0.2rem;
+                                }
+                            }
+                        }
+                    }
+                    .item-toggle {
+                        align-self: center;
+                        min-width: 11rem;
+                        .wrap-toggle-button {
+                            display: flex;
+                            justify-content: center;
+                            padding-right: 2rem;
+                            label {
+                                @include toggle-button();
+                                &::after {
+                                    content: "停止中";
+                                    position: absolute;
+                                    left: calc(100% + 8px);
+                                    top: 52%;
+                                    translate: 0 -50%;
+                                    font-size: 1.2rem;
+                                    display: inline-block;
+                                    width: max-content;
+                                }
+                                &:has(:checked) {
+                                    &::after {
+                                        content: "有効";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    nav {
+                        position: relative;
+                        font-size: inherit;
+                        display: flex;
+                        align-items: center;
+                        gap: 0 1rem;
+                        padding-inline: 1.8rem;
+                        button {
+                            border: 1px solid $border-gray;
+                            border-radius: 50%;
+                        }
+                        .btn-edit {
+                            @include decorationIcon("icon_edit");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+/*=========================================
+食事メニュー 新規・編集
+-----------------------------------------*/
+.inner-04-03-01 {
+    form {
+        display: flex;
+        flex-direction: column;
+        font-size: inherit;
+        width: 100%;
+        margin: 1.5em 1.4em 3.25em;
+        flex-grow: 1;
+        // border-radius: 1.2rem;
+        @media (max-width: 1025px) {
+            margin-inline: 0;
+        }
+        h3 {
+            border: 1px solid #c7c7c7;
+            @include decorationHeadH3;
+        }
+        dl {
+            border: 1px solid #c7c7c7;
+            border-top: unset;
+            font-size: inherit;
+            background-color: #fff;
+            padding: 2em;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            & > div {
+                font-size: inherit;
+                display: grid;
+                grid-template-columns: subgrid;
+                grid-column: span 2;
+                padding-block: 1.6rem;
+                gap: 0 5rem;
+                &:not(:last-of-type) {
+                    border-bottom: 1px solid #e8e7e2;
+                }
+                dt {
+                    font-size: fz(14);
+                    display: flex;
+                    align-items: center;
+                    &.position-top {
+                        align-items: flex-start;
+                        padding-top: 0.5em;
+                    }
+                }
+                dd {
+                    font-size: inherit;
+                    span {
+                        font-size: fz(14);
+                    }
+                    textarea {
+                        font-size: fz(16);
+                        min-height: 6lh;
+                    }
+                }
+                &.box-name {
+                    dd {
+                        input {
+                            max-width: 30em;
+                        }
+                    }
+                }
+                &.box-price {
+                    dd {
+                        display: flex;
+                        align-items: center;
+                        input {
+                            max-width: 10em;
+                            text-align: right;
+                            margin-right: 0.5rem;
+                        }
+                    }
+                }
+                &.box-image {
+                    dd {
+                        font-size: inherit;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2em 0;
+                        .select-image {
+                            @include item-select-image;
+                        }
+                        ul {
+                            position: relative;
+                            font-size: inherit;
+                            display: grid;
+                            grid-template-columns: repeat(1, 1fr);
+                            gap: 1rem;
+                            li {
+                                position: relative;
+                                background-color: $base-black;
+                                font-size: inherit;
+                                padding: 1rem;
+                                border-radius: 5px;
+                                cursor: grab;
+                                &::before {
+                                    content: "";
+                                    position: absolute;
+                                    left: 0;
+                                    width: 100%;
+                                    height: 4rem;
+                                    background-image: linear-gradient(
+                                        to bottom,
+                                        rgba($base-black, 0.5),
+                                        rgba($base-black, 0) 100%
+                                    );
+                                }
+                                &::after {
+                                    content: attr(data-name);
+                                    font-size: 1.4rem;
+                                    position: absolute;
+                                    color: #fff;
+                                    top: 0.8rem;
+                                    right: 1rem;
+                                    z-index: 1;
+                                }
+                                button {
+                                    position: absolute;
+                                    left: 1rem;
+                                    top: 1rem;
+                                    width: 3rem;
+                                    aspect-ratio: 1;
+                                    border-radius: 50%;
+                                    background-color: $base-black;
+                                    z-index: 3;
+                                    &::before,
+                                    &::after {
+                                        content: "";
+                                        position: absolute;
+                                        inset: 0;
+                                        margin: auto;
+                                        width: 1.4rem;
+                                        height: 2px;
+                                        background-color: #fff;
+                                    }
+                                    &::before {
+                                        rotate: -45deg;
+                                    }
+                                    &::after {
+                                        rotate: 45deg;
+                                    }
+                                }
+                                img {
+                                    object-fit: cover;
+                                }
+                            }
+                        }
+                    }
+                }
+                &.box-periode {
+                    dd {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2rem 0;
+                        .wrap-dd-top {
+                            position: relative;
+                            font-size: 1em;
+                            @include radioCheck;
+                            margin-right: 1em;
+                            label {
+                                font-size: fz(14);
+                                padding-left: 2.2em;
+                            }
+                        }
+                        .wrap-dd-bottom {
+                            font-size: inherit;
+                            display: flex;
+                            align-items: center;
+                            .item-check-box {
+                                position: relative;
+                                font-size: 1em;
+                                @include radioCheck;
+                                margin-right: 1em;
+                                label {
+                                    font-size: fz(14);
+                                    padding-left: 2.2em;
+                                }
+                            }
+                            .item-periode {
+                                font-size: inherit;
+                                display: flex;
+                                align-items: center;
+                                span {
+                                    font-size: fz(12);
+                                    display: flex;
+                                    width: 4rem;
+                                }
+                                i {
+                                    font-size: 1.6rem;
+                                    margin-inline: 1rem;
+                                }
+                                input {
+                                    @include box-input-period;
+                                    width: 16rem;
+                                    font-size: 1.4rem;
+                                }
+                            }
+                        }
+                    }
+                }
+                &.box-status {
+                    dd {
+                        display: flex;
+                        align-items: center;
+                        .item-toggle {
+                            min-width: 11rem;
+                            .wrap-toggle-button {
+                                display: flex;
+                                padding-right: 2rem;
+                                label {
+                                    @include toggle-button();
+                                    &::after {
+                                        content: "停止中";
+                                        position: absolute;
+                                        left: calc(100% + 8px);
+                                        top: 52%;
+                                        translate: 0 -50%;
+                                        font-size: 1.4rem;
+                                        display: inline-block;
+                                        width: max-content;
+                                    }
+                                    &:has(:checked) {
+                                        &::after {
+                                            content: "有効";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .box-btn {
+            position: relative;
+            font-size: inherit;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0 1rem;
+            margin-top: 2rem;
+            button {
+                height: 4rem;
+                display: flex;
+                justify-content: center;
+                border-radius: 6px;
+                transition: 0.3s ease-out;
+
+                &.btn-cancel {
+                    background-color: #fff;
+                    border: 1px solid $base-black;
+                    font-size: fz(14);
+                    font-weight: 600;
+                    width: 12rem;
+                    &:hover {
+                        opacity: 0.8;
+                    }
+                }
+                &.btn-confirmed {
+                    background-color: $confirm-blue;
+                    color: #fff;
+                    font-size: fz(14);
+                    font-weight: 600;
+                    width: 12rem;
+                    &:hover {
+                        opacity: 0.8;
+                    }
+                }
+            }
+        }
+    }
+}
