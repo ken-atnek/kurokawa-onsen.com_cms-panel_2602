@@ -26,7 +26,6 @@
         @include layoutContentsWhiteBlock;
         border-bottom-left-radius: unset;
         border-bottom-right-radius: unset;
-        z-index: 3;
         flex-grow: unset;
         h3 {
             @include decorationHeadH3;
@@ -42,6 +41,8 @@
             flex-direction: column;
             width: 100%;
             padding: 2em 2em 1em;
+            z-index: 55;
+
             .box-add-new {
                 font-size: inherit;
                 display: flex;
@@ -86,6 +87,14 @@
                                     $list-height: 3.4rem
                                 );
                             }
+                            .select-counter-area {
+                                min-width: 8rem;
+                                @include select-list-box(
+                                    $height: 4.4rem,
+                                    $position: "left",
+                                    $list-height: 3.4rem
+                                );
+                            }
                         }
                     }
                 }
@@ -97,7 +106,7 @@
             }
         }
         .box-seat-list {
-            @include layout-table-list(auto 1fr auto auto auto auto, 6);
+            @include layout-table-list(auto 1fr auto auto auto auto auto, 7);
             & > li {
                 &:not(:first-of-type) {
                     cursor: auto;
@@ -105,6 +114,11 @@
                     &:active {
                         &::before {
                             background-color: #edf1f8;
+                        }
+                    }
+                    @for $i from 1 through 50 {
+                        &:nth-child(#{$i}) {
+                            z-index: calc(52 - #{$i});
                         }
                     }
                 }
@@ -119,7 +133,7 @@
                 .inner-list {
                     position: relative;
                     font-size: inherit;
-                    grid-column: span 6;
+                    grid-column: span 7;
                     display: grid;
                     grid-template-columns: subgrid;
                     font-size: inherit;
@@ -156,7 +170,8 @@
                     }
                     .item-name,
                     .item-type,
-                    .item-capacity {
+                    .item-capacity,
+                    .item-area {
                         font-size: inherit;
                         padding-inline: 1rem;
                         display: flex;
@@ -171,6 +186,10 @@
                     }
                     .item-capacity {
                         justify-content: center;
+                    }
+                    .item-area {
+                        justify-content: center;
+                        padding-inline: unset;
                     }
                     .item-toggle {
                         align-self: center;
@@ -235,7 +254,7 @@
                     background-color: #f0f6ff;
                     align-items: flex-end;
                     gap: 0 1rem;
-                    grid-column: span 6;
+                    grid-column: span 7;
                     dl {
                         display: flex;
                         gap: 0 1em;
@@ -268,6 +287,14 @@
                                     );
                                 }
                                 .select-capacity {
+                                    min-width: 8rem;
+                                    @include select-list-box(
+                                        $height: 4.4rem,
+                                        $position: "left",
+                                        $list-height: 3.4rem
+                                    );
+                                }
+                                .select-counter-area {
                                     min-width: 8rem;
                                     @include select-list-box(
                                         $height: 4.4rem,

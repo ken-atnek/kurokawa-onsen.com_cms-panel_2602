@@ -1401,3 +1401,83 @@
         }
     }
 }
+/*================================
+ 予約ステータス(JS併用版)
+--------------------------------*/
+@mixin customer-status-box {
+    width: 130px;
+    @include select-status-box(
+        $height: 3.6rem,
+        $position: "center",
+        $list-height: 3.6rem
+    );
+    font-size: 1.4rem;
+    .selectbox__head {
+        i {
+            width: 36px;
+        }
+        // 確定
+        &.status-confirmed {
+            .selectbox__value {
+                background-color: #164d84;
+            }
+        }
+        // 来店済み
+        &.status-visited {
+            .selectbox__value {
+                background-color: #068666;
+            }
+        }
+        // キャンセル
+        &.status-canceled {
+            .selectbox__value {
+                background-color: #675a4a;
+            }
+        }
+        // 無断キャンセル
+        &.status-no-show {
+            .selectbox__value {
+                background-color: #8b1a1a;
+            }
+        }
+    }
+    .list-wrapper {
+        .selectbox__panel {
+            li {
+                label {
+                    transition: 0.3s ease-out;
+                    // 確定
+                    &.status-confirmed {
+                        --status-color: #164d84;
+                    }
+                    // 来店済み
+                    &.status-visited {
+                        --status-color: #068666;
+                    }
+                    // キャンセル
+                    &.status-canceled {
+                        --status-color: #675a4a;
+                    }
+                    // 無断キャンセル
+                    &.status-no-show {
+                        --status-color: #8b1a1a;
+                    }
+
+                    &::before {
+                        content: "";
+                        position: absolute;
+                        inset: 0;
+                        background-color: var(--status-color);
+                        z-index: -1;
+                        transition: 0.3s ease-out;
+                    }
+                    &:hover {
+                        &::before {
+                            filter: brightness(0.9);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
