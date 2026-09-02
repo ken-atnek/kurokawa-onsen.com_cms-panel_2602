@@ -177,6 +177,77 @@
                       </div>
                     </dd>
                   </div>
+                  <div>
+                    <dt>カウンターエリア</dt>
+                    <dd>
+                      <div class="select-counter-area" data-selectbox>
+                        <button
+                          type="button"
+                          class="selectbox__head"
+                          aria-expanded="false"
+                        >
+                          <input
+                            type="hidden"
+                            name="select-counter-area"
+                            value=""
+                            data-selectbox-hidden
+                          />
+                          <span class="selectbox__value" data-selectbox-value
+                            >--</span
+                          >
+                        </button>
+                        <div class="list-wrapper">
+                          <ul class="selectbox__panel">
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-counter-area"
+                                value="1"
+                                id="counterArea01"
+                              />
+                              <label for="counterArea01">エリアA</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-counter-area"
+                                value="2"
+                                id="counterArea02"
+                              />
+                              <label for="counterArea02">エリアB</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-counter-area"
+                                value="3"
+                                id="counterArea03"
+                              />
+                              <label for="counterArea03">エリアC</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-counter-area"
+                                value="4"
+                                id="counterArea04"
+                              />
+                              <label for="counterArea04">エリアD</label>
+                            </li>
+                            <li>
+                              <input
+                                type="radio"
+                                name="select-counter-area"
+                                value="5"
+                                id="counterArea05"
+                              />
+                              <label for="counterArea05">エリアE</label>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </dd>
+                  </div>
                 </dl>
                 <button type="button" class="btn-add">追加</button>
               </form>
@@ -190,6 +261,7 @@
                 <div style="align-items: flex-start">席名</div>
                 <div style="align-items: flex-start">席種</div>
                 <div>定員</div>
+                <div>カウンターエリア</div>
                 <div>状態</div>
                 <div></div>
               </li>
@@ -210,6 +282,9 @@
                   </div>
                   <div class="item-capacity">
                     <span>1名</span>
+                  </div>
+                  <div class="item-area">
+                    <span>エリアA</span>
                   </div>
                   <div class="item-toggle">
                     <div
@@ -254,6 +329,9 @@
                   <div class="item-capacity">
                     <span>2名</span>
                   </div>
+                  <div class="item-area">
+                    <span>-</span>
+                  </div>
                   <div class="item-toggle">
                     <div
                       class="wrap-toggle-button"
@@ -289,13 +367,16 @@
                     </button>
                   </div>
                   <div class="item-name">
-                    <span>テーブルA</span>
+                    <span>カウンター2</span>
                   </div>
                   <div class="item-type">
-                    <span>テーブル</span>
+                    <span>カウンター</span>
                   </div>
                   <div class="item-capacity">
-                    <span>4名</span>
+                    <span>1名</span>
+                  </div>
+                  <div class="item-area">
+                    <span>エリアB</span>
                   </div>
                   <div class="item-toggle">
                     <div
@@ -364,8 +445,9 @@
                                   value="2"
                                   id="seatType02"
                                 />
-                                <label for="seatType02">個室A</label>
+                                <label for="seatType02">個室</label>
                               </li>
+
                               <li>
                                 <input
                                   type="radio"
@@ -373,16 +455,7 @@
                                   value="3"
                                   id="seatType03"
                                 />
-                                <label for="seatType03">個室B</label>
-                              </li>
-                              <li>
-                                <input
-                                  type="radio"
-                                  name="select-seat-type"
-                                  value="4"
-                                  id="seatType04"
-                                />
-                                <label for="seatType04">テーブル </label>
+                                <label for="seatType03">テーブル </label>
                               </li>
                             </ul>
                           </div>
@@ -451,10 +524,127 @@
                         </div>
                       </dd>
                     </div>
+                    <div>
+                      <dt>カウンターエリア</dt>
+                      <dd>
+                        <div class="select-counter-area" data-selectbox>
+                          <button
+                            type="button"
+                            class="selectbox__head"
+                            aria-expanded="false"
+                          >
+                            <input
+                              type="hidden"
+                              name="select-counter-area-list"
+                              value=""
+                              data-selectbox-hidden
+                            />
+                            <span class="selectbox__value" data-selectbox-value
+                              >--</span
+                            >
+                          </button>
+                          <div class="list-wrapper">
+                            <ul class="selectbox__panel">
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-counter-area-list"
+                                  value="1"
+                                  id="counterAreaList01"
+                                />
+                                <label for="counterAreaList01">エリアA</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-counter-area-list"
+                                  value="2"
+                                  id="counterAreaList02"
+                                />
+                                <label for="counterAreaList02">エリアB</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-counter-area-list"
+                                  value="3"
+                                  id="counterAreaList03"
+                                />
+                                <label for="counterAreaList03">エリアC</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-counter-area-list"
+                                  value="4"
+                                  id="counterAreaList04"
+                                />
+                                <label for="counterAreaList04">エリアD</label>
+                              </li>
+                              <li>
+                                <input
+                                  type="radio"
+                                  name="select-counter-area-list"
+                                  value="5"
+                                  id="counterAreaList05"
+                                />
+                                <label for="counterAreaList05">エリアE</label>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </dd>
+                    </div>
                   </dl>
                   <button type="button" class="btn-submit">決定</button>
                   <button type="button" class="btn-cancel">キャンセル</button>
                 </form>
+              </li>
+              <li>
+                <div class="inner-list">
+                  <div class="item-control">
+                    <button>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </button>
+                  </div>
+                  <div class="item-name">
+                    <span>テーブルA</span>
+                  </div>
+                  <div class="item-type">
+                    <span>テーブル</span>
+                  </div>
+                  <div class="item-capacity">
+                    <span>4名</span>
+                  </div>
+                  <div class="item-area">
+                    <span>-</span>
+                  </div>
+                  <div class="item-toggle">
+                    <div
+                      class="wrap-toggle-button"
+                      data-tooltip-on="有効中 | 無効にする"
+                      data-tooltip-off="無効中 | 有効する"
+                    >
+                      <label class="toggle-button">
+                        <input type="checkbox" checked />
+                      </label>
+                    </div>
+                  </div>
+                  <nav>
+                    <button
+                      class="btn-edit"
+                      data-tooltip="編集"
+                      aria-label="編集"
+                    ></button>
+                    <button
+                      class="btn-delate"
+                      data-tooltip="削除"
+                      aria-label="削除"
+                    ></button>
+                  </nav>
+                </div>
               </li>
             </ul>
             <div class="wrap-notice">
