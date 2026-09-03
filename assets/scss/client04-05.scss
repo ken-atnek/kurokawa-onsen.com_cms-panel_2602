@@ -1,0 +1,256 @@
+/*==========================================================
+飲食店予約
+==========================================================*/
+@use "./_reset_v2.5" as *;
+@use "./_variable" as *;
+@use "./svg" as *;
+@use "./_font" as *;
+@use "./_common" as *;
+@use "./mixin_decoration" as *;
+@use "./mixin_layout" as *;
+
+/*=========================================
+戻る・TOPボタン
+-----------------------------------------*/
+.link_page-back_bottom {
+    @include linkPageBack_bottom;
+}
+.link_page-back_top {
+    @include linkPageBack_top;
+}
+/*=========================================
+席予約
+-----------------------------------------*/
+.inner-04-05 {
+    .block-search {
+        display: flex;
+        flex-direction: column;
+        font-size: inherit;
+        width: 100%;
+        margin: 1.5em 1.4em 3.25em;
+        @media (max-width: 1025px) {
+            margin-inline: 0;
+        }
+        h3 {
+            border: 1px solid #c7c7c7;
+            @include decorationHeadH3;
+        }
+        form {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+
+            border: 1px solid #c7c7c7;
+            border-top: unset;
+            dl {
+                font-size: inherit;
+                display: grid;
+                grid-template-columns: auto 1fr auto 1fr;
+                & > div {
+                    font-size: inherit;
+                    display: grid;
+                    grid-template-columns: subgrid;
+                    grid-column: span 4;
+                    padding-block: 1.6rem;
+                    padding-inline: 2em;
+                    gap: 0 5rem;
+                    border-bottom: 1px solid #e8e7e2;
+
+                    dt {
+                        font-size: fz(14);
+                        display: flex;
+                        align-items: center;
+                    }
+                    dd {
+                        font-size: inherit;
+                        span {
+                            font-size: fz(14);
+                        }
+                    }
+                    &.box-date,
+                    &.box-name {
+                        grid-column: span 2;
+                    }
+                    &.box-date {
+                        .item-periode {
+                            font-size: inherit;
+                            display: flex;
+                            align-items: center;
+                            span {
+                                font-size: fz(12);
+                                display: flex;
+                                width: 4rem;
+                            }
+                            i {
+                                font-size: 1.6rem;
+                                margin-inline: 1rem;
+                            }
+                            input {
+                                @include box-input-period;
+                                width: 16rem;
+                                font-size: 1.4rem;
+                            }
+                        }
+                    }
+                    &.box-check {
+                        dd {
+                            display: flex;
+                            align-items: center;
+                            gap: 0 0.8em;
+                            padding-block: 0.3em;
+                            grid-column: span 3;
+                            & > div {
+                                position: relative;
+                                font-size: 1em;
+                                @include radioCheck;
+                                margin-right: 1em;
+                                label {
+                                    font-size: fz(14);
+                                    padding-left: 2.2em;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .box-btn {
+                position: relative;
+                font-size: inherit;
+                display: flex;
+                justify-content: flex-end;
+                gap: 0 1rem;
+                padding: 2em;
+                button {
+                    height: 4rem;
+                    display: flex;
+                    justify-content: center;
+                    border-radius: 6px;
+                    transition: 0.3s ease-out;
+
+                    &.btn-cancel {
+                        background-color: #fff;
+                        border: 1px solid $base-black;
+                        font-size: fz(14);
+                        font-weight: 600;
+                        width: 12rem;
+                        &:hover {
+                            opacity: 0.8;
+                        }
+                    }
+                    &.btn-search {
+                        background-color: $confirm-blue;
+                        color: #fff;
+                        font-size: fz(14);
+                        font-weight: 600;
+                        width: 12rem;
+                        padding-left: 1em;
+                        &:hover {
+                            opacity: 0.8;
+                        }
+                        span {
+                            position: relative;
+                            &::before {
+                                content: "";
+                                position: absolute;
+                                top: 50%;
+                                translate: 0 -50%;
+                                right: calc(100% + 0.5em);
+                                width: 1em;
+                                @include svg-iconSearch("fff");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .block-search-list {
+        margin: 1.5em 1.4em 3.25em;
+        .search-list {
+            @include layout-table-list(
+                auto 1fr auto auto auto auto auto auto,
+                8
+            );
+            border-left: 1px solid $border-gray;
+            border-right: 1px solid $border-gray;
+            & > li {
+                &:first-of-type {
+                    & > div {
+                        border-right: unset;
+                        &:has(span) {
+                            padding-inline: unset;
+                        }
+                    }
+                }
+                &:not(:first-of-type) {
+                    cursor: auto;
+                    min-height: 6rem;
+                    & > div {
+                        border-right: unset;
+                        font-size: inherit;
+                        display: flex;
+                        align-items: center;
+                        padding-inline: 1rem;
+                        &.item-person,
+                        &.item-channel {
+                            justify-content: center;
+                            padding-inline: 2rem;
+                        }
+                        &.item-status {
+                            justify-content: center;
+                            span {
+                                color: #fff;
+                                font-size: fz(14);
+                                font-weight: 600;
+                                width: 14rem;
+                                height: 2.4em;
+                                @include flex-center;
+                                border-radius: 100vmax;
+                                &.status-confirmed {
+                                    background-color: #164d84;
+                                }
+                                &.status-visited {
+                                    background-color: #068666;
+                                }
+                                &.status-canceled {
+                                    background-color: #675a4a;
+                                }
+                                &.status-no-show {
+                                    background-color: #8b1a1a;
+                                }
+                            }
+                        }
+                    }
+                    &:active {
+                        &::before {
+                            background-color: #edf1f8;
+                        }
+                    }
+                }
+
+                nav {
+                    position: relative;
+                    font-size: inherit;
+                    display: flex;
+                    align-items: center;
+                    gap: 0 1rem;
+                    padding-inline: 1.8rem;
+                    button {
+                        border: 1px solid $border-gray;
+                        border-radius: 50%;
+                    }
+                    .btn-edit {
+                        @include decorationIcon("icon_edit");
+                    }
+                }
+            }
+        }
+        // ページャー
+        .box-pager {
+            @include layout-pager;
+            padding: 0;
+            margin-top: 2rem;
+        }
+    }
+}
