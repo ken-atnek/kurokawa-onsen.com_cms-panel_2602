@@ -193,7 +193,7 @@
                       >
                         <input
                           type="hidden"
-                          name="select-seat-type"
+                          name="list01-seat-type"
                           value=""
                           data-selectbox-hidden
                         />
@@ -206,39 +206,39 @@
                           <li>
                             <input
                               type="radio"
-                              name="select-seat-type"
+                              name="list01-seat-type"
                               value="1"
-                              id="seatType01"
+                              id="list01-seat-type01"
                             />
-                            <label for="seatType01">CエリアA</label>
+                            <label for="list01-seat-type01">CエリアA</label>
                           </li>
                           <li>
                             <input
                               type="radio"
-                              name="select-seat-type"
+                              name="list01-seat-type"
                               value="2"
-                              id="seatType02"
+                              id="list01-seat-type02"
                               checked
                             />
-                            <label for="seatType02">個室A</label>
+                            <label for="list01-seat-type02">個室A</label>
                           </li>
                           <li>
                             <input
                               type="radio"
-                              name="select-seat-type"
+                              name="list01-seat-type"
                               value="3"
-                              id="seatType03"
+                              id="list01-seat-type03"
                             />
-                            <label for="seatType03">個室B</label>
+                            <label for="list01-seat-type03">個室B</label>
                           </li>
                           <li>
                             <input
                               type="radio"
-                              name="select-seat-type"
+                              name="list01-seat-type"
                               value="4"
-                              id="seatType04"
+                              id="list01-seat-type04"
                             />
-                            <label for="seatType04">テーブル </label>
+                            <label for="list01-seat-type04">テーブル </label>
                           </li>
                         </ul>
                       </div>
@@ -272,12 +272,12 @@
                           <li style="z-index: 2">
                             <input
                               type="radio"
-                              name="List03Status"
+                              name="List01Status"
                               value="1"
-                              id="list03-registered"
+                              id="list01-registered"
                             />
                             <label
-                              for="list03-registered"
+                              for="list01-registered"
                               class="status-confirmed"
                               >確定</label
                             >
@@ -285,34 +285,34 @@
                           <li>
                             <input
                               type="radio"
-                              name="List03Status"
+                              name="List01Status"
                               value="2"
-                              id="list03-preparing"
+                              id="list01-preparing"
                             />
-                            <label for="list03-preparing" class="status-visited"
+                            <label for="list01-preparing" class="status-visited"
                               >来店済み</label
                             >
                           </li>
                           <li>
                             <input
                               type="radio"
-                              name="List03Status"
+                              name="List01Status"
                               value="3"
-                              id="list03-shippedw"
+                              id="list01-shippedw"
                               checked
                             />
-                            <label for="list03-shippedw" class="status-canceled"
+                            <label for="list01-shippedw" class="status-canceled"
                               >キャンセル</label
                             >
                           </li>
                           <li>
                             <input
                               type="radio"
-                              name="List03Status"
+                              name="List01Status"
                               value="4"
-                              id="list03-completed"
+                              id="list01-completed"
                             />
-                            <label for="list03-completed" class="status-no-show"
+                            <label for="list01-completed" class="status-no-show"
                               >無断キャンセル</label
                             >
                           </li>
@@ -552,7 +552,7 @@
                       >
                         <input
                           type="hidden"
-                          name="List06Status"
+                          name="List03Status"
                           value="2"
                           data-selectbox-hidden
                         />
@@ -566,12 +566,12 @@
                           <li style="z-index: 2">
                             <input
                               type="radio"
-                              name="List06Status"
+                              name="List03Status"
                               value="1"
-                              id="list06-registered"
+                              id="list03-registered"
                             />
                             <label
-                              for="list06-registered"
+                              for="list03-registered"
                               class="status-confirmed"
                               >確定</label
                             >
@@ -579,34 +579,34 @@
                           <li>
                             <input
                               type="radio"
-                              name="List06Status"
+                              name="List03Status"
                               value="2"
-                              id="list06-preparing"
+                              id="list03-preparing"
                               checked
                             />
-                            <label for="list06-preparing" class="status-visited"
+                            <label for="list03-preparing" class="status-visited"
                               >来店済み</label
                             >
                           </li>
                           <li>
                             <input
                               type="radio"
-                              name="List06Status"
+                              name="List03Status"
                               value="3"
-                              id="list06-shippedw"
+                              id="list03-shippedw"
                             />
-                            <label for="list06-shippedw" class="status-canceled"
+                            <label for="list03-shippedw" class="status-canceled"
                               >キャンセル</label
                             >
                           </li>
                           <li>
                             <input
                               type="radio"
-                              name="List06Status"
+                              name="List03Status"
                               value="4"
-                              id="list06-completed"
+                              id="list03-completed"
                             />
-                            <label for="list06-completed" class="status-no-show"
+                            <label for="list03-completed" class="status-no-show"
                               >無断キャンセル</label
                             >
                           </li>
@@ -933,7 +933,7 @@
                             type="radio"
                             name="reservationRoute"
                             id="reservationRouteTel"
-                            value="0"
+                            value="tel"
                             checked="checked"
                           /><label for="reservationRouteTel">電話</label>
                         </div>
@@ -942,7 +942,7 @@
                             type="radio"
                             name="reservationRoute"
                             id="reservationRouteOther"
-                            value="1"
+                            value="other"
                           /><label for="reservationRouteOther">その他</label>
                         </div>
                       </dd>
@@ -958,7 +958,7 @@
                           >
                             <input
                               type="hidden"
-                              name="minReservationPerson"
+                              name="reservationPerson"
                               value=""
                               data-selectbox-hidden
                             />
@@ -971,57 +971,57 @@
                               <li>
                                 <input
                                   type="radio"
-                                  name="minReservationPerson"
+                                  name="reservationPerson"
                                   value="1"
-                                  id="minReservationPerson_01"
+                                  id="reservationPerson_01"
                                   checked
                                 />
-                                <label for="minReservationPerson_01">1名</label>
+                                <label for="reservationPerson_01">1名</label>
                               </li>
                               <li>
                                 <input
                                   type="radio"
-                                  name="minReservationPerson"
+                                  name="reservationPerson"
                                   value="2"
-                                  id="minReservationPerson_02"
+                                  id="reservationPerson_02"
                                 />
-                                <label for="minReservationPerson_02">2名</label>
+                                <label for="reservationPerson_02">2名</label>
                               </li>
                               <li>
                                 <input
                                   type="radio"
-                                  name="minReservationPerson"
+                                  name="reservationPerson"
                                   value="3"
-                                  id="minReservationPerson_03"
+                                  id="reservationPerson_03"
                                 />
-                                <label for="minReservationPerson_03">3名</label>
+                                <label for="reservationPerson_03">3名</label>
                               </li>
                               <li>
                                 <input
                                   type="radio"
-                                  name="minReservationPerson"
+                                  name="reservationPerson"
                                   value="4"
-                                  id="minReservationPerson_04"
+                                  id="reservationPerson_04"
                                 />
-                                <label for="minReservationPerson_04">4名</label>
+                                <label for="reservationPerson_04">4名</label>
                               </li>
                               <li>
                                 <input
                                   type="radio"
-                                  name="minReservationPerson"
+                                  name="reservationPerson"
                                   value="5"
-                                  id="minReservationPerson_05"
+                                  id="reservationPerson_05"
                                 />
-                                <label for="minReservationPerson_05">5名</label>
+                                <label for="reservationPerson_05">5名</label>
                               </li>
                               <li>
                                 <input
                                   type="radio"
-                                  name="minReservationPerson"
+                                  name="reservationPerson"
                                   value="6"
-                                  id="minReservationPerson_06"
+                                  id="reservationPerson_06"
                                 />
-                                <label for="minReservationPerson_06">6名</label>
+                                <label for="reservationPerson_06">6名</label>
                               </li>
                             </ul>
                           </div>
@@ -1155,43 +1155,43 @@
                     <div>
                       <dt>お客様名</dt>
                       <dd>
-                        <input type="text" />
+                        <input type="text" name="customerName" />
                       </dd>
                     </div>
                     <div>
                       <dt>フリガナ</dt>
                       <dd>
-                        <input type="text" />
+                        <input type="text" name="customerKana" />
                       </dd>
                     </div>
                     <div>
                       <dt>電話番号</dt>
                       <dd>
-                        <input type="text" />
+                        <input type="text" name="customerTel" />
                       </dd>
                     </div>
                     <div>
                       <dt>メールアドレス</dt>
                       <dd>
-                        <input type="text" />
+                        <input type="text" name="customerEmail" />
                       </dd>
                     </div>
                     <div>
                       <dt>宿泊宿名</dt>
                       <dd>
-                        <input type="text" />
+                        <input type="text" name="accommodationName" />
                       </dd>
                     </div>
                     <div>
                       <dt class="position-top">備考 / ご要望</dt>
                       <dd>
-                        <textarea></textarea>
+                        <textarea name="reservationNote"></textarea>
                       </dd>
                     </div>
                     <div>
                       <dt class="position-top">店舗メモ</dt>
                       <dd>
-                        <textarea></textarea>
+                        <textarea name="shopMemo"></textarea>
                       </dd>
                     </div>
                   </dl>

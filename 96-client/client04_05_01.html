@@ -1,0 +1,366 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>黒川温泉観光協会｜コントロールパネル(管理)</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="../assets/images/favicon/favicon.svg"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../assets/images/favicon/apple-touch-icon.png"
+    />
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico" />
+    <link rel="stylesheet" href="../assets/css/client04-05.css" />
+  </head>
+
+  <body>
+    <!--#include virtual="./inc_header.html"-->
+    <main class="inner-04-05-01 status-client">
+      <section class="container-left-menu menu-color04">
+        <div class="title">飲食店予約</div>
+        <nav>
+          <a href="./client04_01.html"><span>席管理</span></a>
+          <a href="./client04_02.html"><span>予約基本設定</span></a>
+          <a href="./client04_03.html"><span>食事メニュー管理</span></a>
+          <a href="./client04_04.html"><span>予約カレンダー</span></a>
+          <a href="./client04_05.html" class="is-active"
+            ><span>予約一覧</span></a
+          >
+          <a href="./client04_01.html"><span>予約詳細</span></a>
+        </nav>
+      </section>
+      <div class="main-contents menu-color04">
+        <div class="block_inner">
+          <h2>予約基本設定</h2>
+
+          <form>
+            <article class="block-overview">
+              <h3>予約概要</h3>
+              <dl>
+                <div>
+                  <dt>予約ID</dt>
+                  <dd><span>#1058</span></dd>
+                </div>
+                <div>
+                  <dt>来店日</dt>
+                  <dd>
+                    <span>2026年8月20日（木） </span>
+                    <p>
+                      ※
+                      来店日はこの画面では変更できません。日付を変更する場合は、いったんキャンセルのうえ、新しい日付で予約を取り直してください。
+                    </p>
+                  </dd>
+                </div>
+                <div>
+                  <dt>予約受付日時</dt>
+                  <dd>
+                    <span>2026年8月20日（木） </span>
+                    <p>
+                      ※
+                      来店日はこの画面では変更できません。日付を変更する場合は、いったんキャンセルのうえ、新しい日付で予約を取り直してください。
+                    </p>
+                  </dd>
+                </div>
+                <div>
+                  <dt>割当席</dt>
+                  <dd>
+                    <span>テーブルB（4名） </span>
+                    <p>
+                      ※
+                      割り当て席はこの画面では変更できません。席の変更は予約カレンダー・予約一覧の画面から行ってください。
+                    </p>
+                  </dd>
+                </div>
+              </dl>
+            </article>
+            <article class="block-customer-info">
+              <h3>お客様情報</h3>
+              <dl>
+                <div>
+                  <dt>お客様名</dt>
+                  <dd>
+                    <input type="text" name="customerName" />
+                  </dd>
+                </div>
+                <div>
+                  <dt>フリガナ</dt>
+                  <dd>
+                    <input type="text" name="customerKana" />
+                  </dd>
+                </div>
+                <div>
+                  <dt>電話番号</dt>
+                  <dd>
+                    <input type="text" name="customerTel" />
+                  </dd>
+                </div>
+                <div>
+                  <dt>メールアドレス</dt>
+                  <dd>
+                    <input type="text" name="customerEmail" />
+                  </dd>
+                </div>
+                <div class="item-status">
+                  <dt>予約経路</dt>
+                  <dd>
+                    <div>
+                      <input
+                        type="radio"
+                        name="reservationRoute"
+                        id="reservationRouteTel"
+                        value="tel"
+                        checked="checked"
+                      /><label for="reservationRouteTel">電話</label>
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        name="reservationRoute"
+                        id="reservationRouteWeb"
+                        value="web"
+                      /><label for="reservationRouteWeb">Web</label>
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        name="reservationRoute"
+                        id="reservationRouteOther"
+                        value="other"
+                      /><label for="reservationRouteOther">その他</label>
+                    </div>
+                  </dd>
+                </div>
+                <div class="item-person">
+                  <dt>人数</dt>
+                  <dd>
+                    <div class="select-person" data-selectbox>
+                      <button
+                        type="button"
+                        class="selectbox__head"
+                        aria-expanded="false"
+                      >
+                        <input
+                          type="hidden"
+                          name="reservationPerson"
+                          value=""
+                          data-selectbox-hidden
+                        />
+                        <span class="selectbox__value" data-selectbox-value
+                          >選択してください</span
+                        >
+                      </button>
+                      <div class="list-wrapper">
+                        <ul class="selectbox__panel">
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationPerson"
+                              value="1"
+                              id="reservationPerson_01"
+                              checked
+                            />
+                            <label for="reservationPerson_01">1名</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationPerson"
+                              value="2"
+                              id="reservationPerson_02"
+                            />
+                            <label for="reservationPerson_02">2名</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationPerson"
+                              value="3"
+                              id="reservationPerson_03"
+                            />
+                            <label for="reservationPerson_03">3名</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationPerson"
+                              value="4"
+                              id="reservationPerson_04"
+                            />
+                            <label for="reservationPerson_04">4名</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationPerson"
+                              value="5"
+                              id="reservationPerson_05"
+                            />
+                            <label for="reservationPerson_05">5名</label>
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationPerson"
+                              value="6"
+                              id="reservationPerson_06"
+                            />
+                            <label for="reservationPerson_06">6名</label>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </dd>
+                </div>
+                <div class="item-menu">
+                  <dt>ご注文メニュー</dt>
+                  <dd>
+                    <div class="select-menu" data-selectbox>
+                      <button
+                        type="button"
+                        class="selectbox__head"
+                        aria-expanded="false"
+                      >
+                        <input
+                          type="hidden"
+                          name="reservationMenu"
+                          value=""
+                          data-selectbox-hidden
+                        />
+                        <span class="selectbox__value" data-selectbox-value
+                          >選択してください</span
+                        >
+                      </button>
+                      <div class="list-wrapper">
+                        <ul class="selectbox__panel">
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationMenu"
+                              value="1"
+                              id="reservationMenu_01"
+                            />
+                            <label for="reservationMenu_01"
+                              >あか牛しゃぶしゃぶコース</label
+                            >
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationMenu"
+                              value="2"
+                              id="reservationMenu_02"
+                            />
+                            <label for="reservationMenu_02"
+                              >肥後牛ステーキ膳</label
+                            >
+                          </li>
+                          <li>
+                            <input
+                              type="radio"
+                              name="reservationMenu"
+                              value="3"
+                              id="reservationMenu_03"
+                            />
+                            <label for="reservationMenu_03"
+                              >季節の会席コース</label
+                            >
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </dd>
+                </div>
+                <div>
+                  <dt>宿泊宿名</dt>
+                  <dd>
+                    <input type="text" name="accommodationName" />
+                  </dd>
+                </div>
+                <div>
+                  <dt class="position-top">備考 / ご要望</dt>
+                  <dd>
+                    <textarea name="reservationNote"></textarea>
+                  </dd>
+                </div>
+              </dl>
+            </article>
+            <article class="block-management">
+              <h3>管理情報</h3>
+              <dl>
+                <div class="item-channel">
+                  <dt>予約ステータス</dt>
+                  <dd>
+                    <div>
+                      <input
+                        type="radio"
+                        name="reservationStatus"
+                        id="reservationStatusConfirmed"
+                        value="confirmed"
+                      /><label for="reservationStatusConfirmed">確定</label>
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        name="reservationStatus"
+                        id="reservationStatusVisited"
+                        value="visited"
+                      /><label for="reservationStatusVisited">来店済み</label>
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        name="reservationStatus"
+                        id="reservationStatusCanceled"
+                        value="canceled"
+                      /><label for="reservationStatusCanceled"
+                        >キャンセル</label
+                      >
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        name="reservationStatus"
+                        id="reservationStatusNoShow"
+                        value="noShow"
+                      /><label for="reservationStatusNoShow"
+                        >無断キャンセル</label
+                      >
+                    </div>
+                  </dd>
+                </div>
+
+                <div>
+                  <dt class="position-top">店舗メモ</dt>
+                  <dd>
+                    <textarea name="shopMemo"></textarea>
+                  </dd>
+                </div>
+              </dl>
+            </article>
+            <div class="box-btn">
+              <button class="btn-cancel">キャンセル</button>
+              <button class="btn-confirmed">保存</button>
+            </div>
+          </form>
+
+          <a href="#body" class="move_page-top"><i>↑</i>TOPへ</a>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/common.js" defer></script>
+  </body>
+</html>
