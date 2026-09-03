@@ -53,12 +53,12 @@
               <div class="box-name">
                 <dt>メニュー名</dt>
                 <dd>
-                  <input type="text" />
+                  <input type="text" name="menuName" />
                 </dd>
               </div>
               <div class="box-price">
                 <dt>料金</dt>
-                <dd><input type="text" />円</dd>
+                <dd><input type="text" name="menuPrice" />円</dd>
               </div>
               <div class="box-image">
                 <dt class="position-top">画像</dt>
@@ -91,7 +91,7 @@
               <div>
                 <dt class="position-top">説明文</dt>
                 <dd>
-                  <textarea></textarea>
+                  <textarea name="menuDescription"></textarea>
                 </dd>
               </div>
               <div class="box-periode">
@@ -100,26 +100,26 @@
                   <div class="wrap-dd-top">
                     <input
                       type="radio"
-                      name="mealMenuFlg"
-                      id="mealMenuFlg_02"
-                      value="1"
-                    /><label for="mealMenuFlg_02">無期限</label>
+                      name="menuPublicationPeriod"
+                      id="menuPublicationPeriodUnlimited"
+                      value="unlimited"
+                    /><label for="menuPublicationPeriodUnlimited">無期限</label>
                   </div>
                   <div class="wrap-dd-bottom">
                     <div class="item-check-box">
                       <input
                         type="radio"
-                        name="mealMenuFlg"
-                        id="mealMenuFlg_03"
-                        value="2"
-                      /><label for="mealMenuFlg_03">期間を指定する</label>
+                        name="menuPublicationPeriod"
+                        id="menuPublicationPeriodCustom"
+                        value="custom"
+                      /><label for="menuPublicationPeriodCustom">期間を指定する</label>
                     </div>
                     <div class="item-periode">
                       <span>開始日</span>
-                      <input type="date" name="searchStartDay" />
+                      <input type="date" name="menuPublicationStartDay" />
                       <i>〜</i>
                       <span>終了日</span>
-                      <input type="date" name="searchEndDay" />
+                      <input type="date" name="menuPublicationEndDay" />
                     </div>
                   </div>
                 </dd>

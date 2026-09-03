@@ -54,9 +54,9 @@
                   <dt>来店日</dt>
                   <dd>
                     <div class="item-periode">
-                      <input type="date" name="searchStartDay" />
+                      <input type="date" name="searchVisitStartDay" />
                       <i>〜</i>
-                      <input type="date" name="searchEndDay" />
+                      <input type="date" name="searchVisitEndDay" />
                     </div>
                   </dd>
                 </div>
@@ -64,22 +64,22 @@
                   <dt>受付日</dt>
                   <dd>
                     <div class="item-periode">
-                      <input type="date" name="searchStartDay" />
+                      <input type="date" name="searchReceptionStartDay" />
                       <i>〜</i>
-                      <input type="date" name="searchEndDay" />
+                      <input type="date" name="searchReceptionEndDay" />
                     </div>
                   </dd>
                 </div>
                 <div class="box-name" style="border-right: 1px solid #e8e7e2">
                   <dt>お客様名</dt>
                   <dd>
-                    <input type="text" />
+                    <input type="text" name="searchCustomerName" />
                   </dd>
                 </div>
                 <div class="box-name" style="border-right: 1px solid #e8e7e2">
                   <dt>電話番号</dt>
                   <dd>
-                    <input type="text" />
+                    <input type="text" name="searchCustomerTel" />
                   </dd>
                 </div>
                 <div class="box-check">
@@ -317,7 +317,7 @@
                 <button type="button" class="btn_next"></button>
               </div>
               <div class="box_input">
-                <input type="text" placeholder="1/16513" />
+                <input type="text" name="pageNumber" placeholder="1/16513" />
               </div>
             </div>
           </article>
