@@ -111,16 +111,18 @@
                 &:not(:first-of-type) {
                     cursor: auto;
                     min-height: 6rem;
+                    z-index: calc(sibling-count() - sibling-index() + 1);
+
                     &:active {
                         &::before {
                             background-color: #edf1f8;
                         }
                     }
-                    @for $i from 1 through 50 {
-                        &:nth-child(#{$i}) {
-                            z-index: calc(52 - #{$i});
-                        }
-                    }
+                    // @for $i from 1 through 50 {
+                    //     &:nth-child(#{$i}) {
+                    //         z-index: calc(52 - #{$i});
+                    //     }
+                    // }
                 }
                 &:first-of-type {
                     & > div {
