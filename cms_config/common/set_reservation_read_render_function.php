@@ -241,7 +241,54 @@ function clientReservationReadMenuLabel($menus)
     }
     $labels[] = $guestNo . '人目：' . (string)($menu['menu_name_snapshot'] ?? '');
   }
-  return implode(' / ', $labels);
+  return implode("\n", $labels);
+}
+
+/**
+ * 予約一覧の現在席表示生成
+ *  通常カウンター席だけの割当は、個別席名ではなくカウンターエリア名へまとめる
+ */
+function clientReservationReadSeatLabel($seats)
+{
+  if (is_array($seats) === false) {
+    return null;
+  }
+  $seatLabels = [];
+  $normalSeatIds = [];
+  $counterAreas = [];
+  $allNormalSeatsAreCounter = true;
+  foreach ($seats as $seat) {
+    if (is_array($seat) === false) {
+      return null;
+    }
+    if (($seat['seat_is_temp_move'] ?? null) !== 0) {
+      continue;
+    }
+    $seatId = (int)($seat['seat_id'] ?? 0);
+    $seatName = (string)($seat['seat_name_snapshot'] ?? '');
+    if ($seatId < 1 || trim($seatName) === '') {
+      return null;
+    }
+    $normalSeatIds[] = $seatId;
+    $seatLabels[] = $seatName;
+    $seatType = $seat['seat_type'] ?? null;
+    $counterArea = $seat['seat_counter_area'] ?? null;
+    if ($seatType !== 1 || is_string($counterArea) === false || $counterArea === '') {
+      $allNormalSeatsAreCounter = false;
+      continue;
+    }
+    $counterAreas[$counterArea] = true;
+  }
+  if (empty($normalSeatIds) === true) {
+    return '---';
+  }
+  if ($allNormalSeatsAreCounter === true && empty($counterAreas) === false) {
+    $counterAreaKeys = array_keys($counterAreas);
+    return count($counterAreaKeys) === 1
+      ? 'カウンター' . $counterAreaKeys[0]
+      : 'カウンター' . $counterAreaKeys[0] . '〜' . $counterAreaKeys[count($counterAreaKeys) - 1];
+  }
+  return implode(' / ', $seatLabels);
 }
 
 /**
@@ -289,25 +336,112 @@ function clientReservationReadRenderListTag($reservations)
     if ($routeLabel === '' || $statusLabel === '' || $menuLabel === null) {
       return null;
     }
-    $seatLabels = [];
+    $menuLabelHtml = str_replace("\n", '<br>', clientReservationReadEscape($menuLabel));
+	$normalSeatIds = [];
     foreach ($reservation['seats'] ?? [] as $seat) {
       if (is_array($seat) === false) {
         return null;
       }
-      $seatLabels[] = (string)($seat['seat_name_snapshot'] ?? '');
+		if (($seat['seat_is_temp_move'] ?? null) === 0) {
+			$normalSeatIds[] = (int)($seat['seat_id'] ?? 0);
+		}
     }
-    $seatLabel = empty($seatLabels) === true ? '---' : implode(' / ', $seatLabels);
-    $customerName = (string)($reservation['customer_last_name'] ?? '') . '　' . (string)($reservation['customer_first_name'] ?? '');
+    $seatLabel = clientReservationReadSeatLabel($reservation['seats'] ?? []);
+	if ($seatLabel === null) {
+		return null;
+	}
+    $customerName = (string)($reservation['customer_name'] ?? '');
+	$reservationId = (int)($reservation['reservation_id'] ?? 0);
+	$status = (int)($reservation['status'] ?? 0);
+	$seatDataError = ($reservation['seat_data_error'] ?? false) === true;
+	$duplicateTempRecoverable = ($reservation['duplicate_temp_recoverable'] ?? false) === true;
+	$hasTempMove = ($reservation['has_temp_move'] ?? false) === true;
+	$seatChangeDateAllowed = ($reservation['seat_change_date_allowed'] ?? false) === true;
+	$seatChangeVersion = (string)($reservation['seat_change_version'] ?? '');
+	$seatChangeCandidates = $reservation['seat_change_candidates'] ?? null;
+	$currentSeatIds = array_values(array_unique(array_map('intval', $reservation['seat_ids'] ?? [])));
+	if (
+		$reservationId < 1 ||
+		($seatDataError === false && preg_match('/\A[0-9a-f]{64}\z/D', $seatChangeVersion) !== 1) ||
+		is_array($seatChangeCandidates) === false
+	) {
+		return null;
+	}
+	if ($seatDataError === true) {
+		$seatChangeVersion = '';
+		$seatChangeCandidates = [];
+	}
+	$normalSeatIds = array_values(array_unique(array_filter($normalSeatIds, function ($seatId) { return $seatId > 0; })));
+	sort($normalSeatIds, SORT_NUMERIC);
+	$currentSeatValue = implode(',', $normalSeatIds);
+	$seatTargetEnabled = in_array($status, [1, 2], true) === true
+		&& $seatDataError === false
+		&& $seatChangeDateAllowed
+		&& empty($normalSeatIds) === false;
+	$seatRestoreEnabled = $hasTempMove === true
+		&& empty($normalSeatIds) === false
+		&& (
+			($duplicateTempRecoverable === true && in_array($status, [1, 2, 3, 4], true)) ||
+			($seatDataError === false && in_array($status, [1, 2], true))
+		);
+	$seatChangeEnabled = $seatTargetEnabled || $seatRestoreEnabled;
+	$seatControlDisabled = $seatChangeEnabled ? '' : ' disabled aria-disabled="true"';
+	$seatFormAttributes = ' data-reservation-seat-change'
+		. ' data-reservation-id="' . $reservationId . '"'
+		. ($seatDataError ? ' data-reservation-seat-data-error="1"' : '')
+		. ($duplicateTempRecoverable ? ' data-reservation-duplicate-temp-recoverable="1"' : '')
+		. ($hasTempMove ? ' data-reservation-temp-move-active="1"' : '')
+		. ' data-seat-change-version="' . clientReservationReadEscape($seatChangeVersion) . '"'
+		. ' data-current-seat-value="' . clientReservationReadEscape($currentSeatValue) . '"'
+		. ' data-current-seat-label="' . clientReservationReadEscape($seatLabel) . '"';
+	$seatOptions = [];
+	$currentOptionId = 'reservationSeat_' . $reservationId . '_current';
+	$seatOptions[] = '          <li><input type="radio" name="reservationSeat_' . $reservationId . '" value="' . clientReservationReadEscape($currentSeatValue) . '" id="' . $currentOptionId . '" data-reservation-seat-option checked' . ($seatChangeEnabled ? '' : ' disabled') . '><label for="' . $currentOptionId . '">' . clientReservationReadEscape($seatLabel) . '</label></li>';
+	$tempMoveOption = '';
+	if ($seatTargetEnabled && $hasTempMove === false) {
+		$tempOptionId = 'reservationSeat_' . $reservationId . '_temp';
+		$tempMoveOption = '          <li><input type="radio" name="reservationSeat_' . $reservationId . '" value="__temp_start__" id="' . $tempOptionId . '" data-reservation-seat-option><label for="' . $tempOptionId . '">仮の席へ移動</label></li>';
+	}
+	foreach ($seatChangeCandidates as $candidateIndex => $candidate) {
+		if (is_array($candidate) === false || is_array($candidate['seat_ids'] ?? null) === false || is_string($candidate['label'] ?? null) === false) {
+			return null;
+		}
+		$candidateSeatIds = array_values(array_unique(array_map('intval', $candidate['seat_ids'])));
+		if (empty($candidateSeatIds) === true || min($candidateSeatIds) < 1) {
+			return null;
+		}
+		$candidateValue = implode(',', $candidateSeatIds);
+		$candidateOptionId = 'reservationSeat_' . $reservationId . '_' . ($candidateIndex + 1);
+		$seatOptions[] = '          <li><input type="radio" name="reservationSeat_' . $reservationId . '" value="' . clientReservationReadEscape($candidateValue) . '" id="' . $candidateOptionId . '" data-reservation-seat-option' . ($seatTargetEnabled ? '' : ' disabled') . '><label for="' . $candidateOptionId . '">' . clientReservationReadEscape($candidate['label']) . '</label></li>';
+	}
+	if ($hasTempMove === true) {
+		$restoreOptionId = 'reservationSeat_' . $reservationId . '_restore';
+		$restoreValue = $duplicateTempRecoverable ? '__temp_restore_duplicate__' : '__temp_restore__';
+		$seatOptions[] = '          <li><input type="radio" name="reservationSeat_' . $reservationId . '" value="' . $restoreValue . '" id="' . $restoreOptionId . '" data-reservation-seat-option' . ($seatRestoreEnabled ? '' : ' disabled') . '><label for="' . $restoreOptionId . '">元の席に戻す</label></li>';
+	}
+	if ($tempMoveOption !== '') {
+		$seatOptions[] = $tempMoveOption;
+	}
 
     $lines[] = '  <li>';
     $lines[] = '    <div class="item-name"><span>' . clientReservationReadEscape($customerName) . '</span></div>';
-    $lines[] = '    <div>' . clientReservationReadEscape($seatLabel) . '</div>';
+	$lines[] = '    <form class="form-seat"' . $seatFormAttributes . '>';
+	$lines[] = '      <div class="select-seat-type is-selected" data-selectbox>';
+	$lines[] = '        <button type="button" class="selectbox__head" aria-expanded="false"' . $seatControlDisabled . '>';
+	$lines[] = '          <input type="hidden" name="reservationSeat" value="' . clientReservationReadEscape($currentSeatValue) . '" data-selectbox-hidden data-reservation-seat-value' . ($seatChangeEnabled ? '' : ' disabled') . '>';
+	$lines[] = '          <span class="selectbox__value" data-selectbox-value>' . clientReservationReadEscape($seatLabel) . '</span>';
+	$lines[] = '        </button>';
+	$lines[] = '        <div class="list-wrapper"><ul class="selectbox__panel">';
+	$lines = array_merge($lines, $seatOptions);
+	$lines[] = '        </ul></div>';
+	$lines[] = '      </div>';
+	$lines[] = '    </form>';
     $lines[] = '    <div>' . (int)($reservation['party_size'] ?? 0) . '名</div>';
-    $lines[] = '    <div>' . clientReservationReadEscape($menuLabel) . '</div>';
+    $lines[] = '    <div>' . $menuLabelHtml . '</div>';
     $lines[] = '    <div>' . clientReservationReadEscape($routeLabel) . '</div>';
     $lines[] = '    <div>' . clientReservationReadEscape($reservation['customer_tel'] ?? '') . '</div>';
     $lines[] = '    <div>' . clientReservationReadEscape($statusLabel) . '</div>';
-    $lines[] = '    <div></div>';
+	$lines[] = '    <nav><button type="button" class="btn-edit" data-tooltip="予約詳細" aria-label="予約詳細" data-reservation-detail-url="./client04_05_01.php?reservationId=' . $reservationId . '"></button></nav>';
     $lines[] = '  </li>';
   }
   $lines[] = '</ul>';

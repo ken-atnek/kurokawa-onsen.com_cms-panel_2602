@@ -70,6 +70,8 @@ $sendAddressList = array(
 );
 
 #マスター通知先（固定）
+$infoMaster = 'info@kurokawa-onsen.com';
+
 #※未設定の場合は $sendAddressList の先頭をフォールバック
 $DEFINE_MASTER_NOTIFY_EMAIL = $sendAddressList[0] ?? '';
 $DEFINE_MASTER_NOTIFY_NAME = '黒川温泉観光協会';

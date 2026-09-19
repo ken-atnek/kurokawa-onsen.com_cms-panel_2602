@@ -37,6 +37,8 @@ if ($_SESSION[$noUpDateKey]['clientKey'] < 1) {
   exit;
 }
 $csrfToken = getClientCsrfToken();
+$reservationTempMoveGuardActiveValue = (($GLOBALS['reservationTempMoveGuardActive'] ?? false) === true) ? '1' : '0';
+$reservationTempMoveInvalidValue = (($GLOBALS['reservationTempMoveGuardState']['has_invalid_reference'] ?? false) === true) ? '1' : '0';
 
 #店舗ID（編集／削除時のみ）
 $shopId = isset($_SESSION['client_login']['shop_id']) ? $_SESSION['client_login']['shop_id'] : null;
@@ -59,7 +61,10 @@ if (!isset($shopData) || empty($shopData)) {
   $headerShopType = htmlspecialchars($shopData['shop_type'], ENT_QUOTES, 'UTF-8');
 }
 
-$initialReservationDate = new DateTimeImmutable('today', new DateTimeZone('Asia/Tokyo'));
+$guardReservationDate = $GLOBALS['reservationTempMoveGuardState']['guard_reservation_date'] ?? null;
+$initialReservationDate = is_string($guardReservationDate) && preg_match('/\A\d{4}-\d{2}-\d{2}\z/D', $guardReservationDate) === 1
+  ? new DateTimeImmutable($guardReservationDate, new DateTimeZone('Asia/Tokyo'))
+  : new DateTimeImmutable('today', new DateTimeZone('Asia/Tokyo'));
 $initialReservationDateValue = $initialReservationDate->format('Y-m-d');
 $initialReservationTargetMonth = $initialReservationDate->format('Y-m');
 $initialReservationTargetMonthLabel = $initialReservationDate->format('Y年n月');
@@ -489,7 +494,7 @@ print <<<HTML
   <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
   <link rel="stylesheet" href="../assets/css/client04-04.css">
 </head>
-<body>
+<body data-reservation-temp-move-active="{$reservationTempMoveGuardActiveValue}" data-reservation-temp-move-invalid="{$reservationTempMoveInvalidValue}">
 
 HTML;
 @include './inc_header.php';
@@ -582,28 +587,26 @@ print <<<HTML
                   {$reservationMenuBlockHtml}
                   <div>
                     <dt class="is-required">お客様名</dt>
-                    <dd class="input-pair">
-                      <input type="text" name="customerLastName" aria-label="姓" placeholder="姓" required maxlength="50"{$reservationFormControlDisabled}>
-                      <input type="text" name="customerFirstName" aria-label="名" placeholder="名" required maxlength="50"{$reservationFormControlDisabled}>
+                    <dd>
+                      <input type="text" name="customerName" placeholder="黒川 太郎" required maxlength="101"{$reservationFormControlDisabled}>
                     </dd>
                   </div>
                   <div>
-                    <dt class="is-required">フリガナ</dt>
-                    <dd class="input-pair">
-                      <input type="text" name="customerLastKana" aria-label="姓かな" placeholder="姓かな" required maxlength="50"{$reservationFormControlDisabled}>
-                      <input type="text" name="customerFirstKana" aria-label="名かな" placeholder="名かな" required maxlength="50"{$reservationFormControlDisabled}>
+                    <dt class="is-required">ふりがな</dt>
+                    <dd>
+                      <input type="text" name="customerKana" placeholder="くろかわ たろう" required maxlength="101"{$reservationFormControlDisabled}>
                     </dd>
                   </div>
                   <div>
                     <dt class="is-required">電話番号</dt>
                     <dd>
-                      <input type="tel" name="customerTel" required maxlength="20"{$reservationFormControlDisabled}>
+                      <input type="text" name="customerTel" required maxlength="20"{$reservationFormControlDisabled}>
                     </dd>
                   </div>
                   <div>
                     <dt>メールアドレス</dt>
                     <dd>
-                      <input type="email" name="customerEmail" maxlength="255"{$reservationFormControlDisabled}>
+                      <input type="text" name="customerEmail" maxlength="255"{$reservationFormControlDisabled}>
                     </dd>
                   </div>
                   <div>
@@ -642,19 +645,20 @@ print <<<HTML
     <div class="inner-modal">
       <div class="box-title">
         <p>予約登録</p>
-        <button type="button" onclick="closeModal()" class="btn-top-close"></button>
+        <button type="button" class="btn-top-close" data-reservation-modal-close aria-label="閉じる" onclick="closeModal();"></button>
       </div>
       <div class="box-details">
         <p></p>
         <div class="box-btn">
-          <button type="button" class="btn-cancel" onclick="closeModal();">閉じる</button>
+          <button type="button" class="btn-cancel" data-reservation-modal-cancel onclick="closeModal();">閉じる</button>
+          <button type="button" class="btn-confirm" data-reservation-modal-confirm hidden style="display: none;">変更する</button>
         </div>
       </div>
     </div>
   </article>
-  <script src="../assets/js/common.js" defer></script>
+  <script src="../assets/js/common.js?v=20260919-1" defer></script>
   <script src="../assets/js/modal.js" defer></script>
-  <script src="./assets/js/client04_04.js" defer></script>
+  <script src="./assets/js/client04_04.js?v=20260919-4" defer></script>
 </body>
 </html>
 

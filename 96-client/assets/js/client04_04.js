@@ -5,16 +5,29 @@
 const requestURL = "./assets/function/proc_client04_05_01.php";
 const reservationReadURL = "./assets/function/proc_client04_04.php";
 const reservationCalendarOverrideURL = "./assets/function/proc_client04_04_override.php";
+const reservationSeatChangeURL = "./assets/function/proc_reservation_seat_change.php";
+const reservationTempMoveURL = "./assets/function/proc_reservation_temp_move.php";
 
 let isReservationSubmitting = false;
 let isReservationCalendarOverrideSubmitting = false;
 let isReservationMonthLoading = false;
 let isReservationDateLoading = false;
+let isReservationSeatChangeSubmitting = false;
+let reservationSeatDataErrorNotified = false;
+let allowReservationTempMoveUnload = false;
+let reservationActionModalTimer = null;
 let hasReservationReadError = false;
 let reservationShopEligible = null;
 let reservationShopUnavailableReason = null;
 let reservationAcceptedDate = "";
 let reservationAvailabilityStatus = "";
+
+function clearReservationActionModalTimer() {
+    if (reservationActionModalTimer !== null) {
+        clearTimeout(reservationActionModalTimer);
+        reservationActionModalTimer = null;
+    }
+}
 let monthRequestSequence = 0;
 let dateRequestSequence = 0;
 let reservationSeatPreviewState = "idle";
@@ -183,6 +196,13 @@ function replaceReservationHtml(targetSelector, html) {
     const target = document.querySelector(targetSelector);
     if (!target || !isValidReservationHtmlFragment(html, targetSelector)) return false;
     target.outerHTML = html.trim();
+    const replacement = document.querySelector(targetSelector);
+    if (replacement && typeof window.initSelectBoxes === "function") {
+        window.initSelectBoxes(replacement);
+    }
+    if (replacement && typeof window.initTooltips === "function") {
+        window.initTooltips(replacement);
+    }
     return true;
 }
 /**
@@ -235,6 +255,7 @@ function updateReservationCalendarOverrideButtonState(form) {
         !isReservationDateLoading &&
         !isReservationSubmitting &&
         !isReservationCalendarOverrideSubmitting &&
+        !isReservationSeatChangeSubmitting &&
         !hasReservationReadError,
     );
     document.querySelectorAll(".reservation-calendar-actions [data-reservation-calendar-action]").forEach((button) => {
@@ -319,7 +340,7 @@ function updateReservationCalendarControlState(form) {
     const calendarContainer = document.querySelector(".inner-calender");
     const reservationAddCard = document.getElementById("reservationAddCard");
     if (!calendarContainer || !reservationAddCard) return;
-    const disabled = isReservationMonthLoading || isReservationDateLoading || isReservationSubmitting || isReservationCalendarOverrideSubmitting || !reservationAddCard.hidden;
+    const disabled = isReservationMonthLoading || isReservationDateLoading || isReservationSubmitting || isReservationCalendarOverrideSubmitting || isReservationSeatChangeSubmitting || !reservationAddCard.hidden;
     calendarContainer.querySelectorAll(".btn-prev, .btn-next").forEach((button) => {
         button.disabled = disabled;
         button.classList.toggle("is-inactive", disabled);
@@ -698,6 +719,7 @@ async function readReservationDate(form, options = null) {
         if (!statusReplaced || !listReplaced) {
             throw new Error("Date detail replacement failed");
         }
+        syncReservationTempMoveGuardState(true);
         reservationAcceptedDate = result.selected_date;
         reservationAvailabilityStatus = result.availability_status;
         hasReservationReadError = false;
@@ -822,7 +844,8 @@ function updateReservationButtonState(form) {
         !isReservationDateLoading &&
         !hasReservationReadError &&
         !isReservationSubmitting &&
-        !isReservationCalendarOverrideSubmitting;
+        !isReservationCalendarOverrideSubmitting &&
+        !isReservationSeatChangeSubmitting;
     const previewAllowsSubmit = reservationSeatPreviewState === "assignable" || reservationSeatPreviewState === "technical_error";
     const canSubmit = canUseForm && reservationAddCard && reservationAddCard.hidden === false && previewAllowsSubmit;
     [
@@ -959,6 +982,7 @@ async function sendReservationCalendarOverride(form, action) {
     const currentJstToday = getCurrentReservationJstDate();
     if (
         isReservationCalendarOverrideSubmitting ||
+        isReservationSeatChangeSubmitting ||
         isReservationSubmitting ||
         isReservationMonthLoading ||
         isReservationDateLoading ||
@@ -1125,21 +1149,73 @@ function resetReservationAddForm(form) {
     syncSelectedReservationDate(form);
 }
 /**
- * 予約登録結果をmodalへ表示
- *  titleとmessageをtextContentで設定して既存modalを開く
+ * 予約操作modalを表示
+ *  通知と確認を既存modalで共通処理し、確認時だけtrueを返す
+ *  keepOpenOnConfirmがtrueの場合、確認後もmodal rootは閉じずメッセージだけ切り替える
+ *  confirmationRequiredがfalseの場合は2秒で自動closeする
  */
-function showReservationResultModal(title, message) {
+function showReservationActionModal(title, message, confirmationRequired = false, keepOpenOnConfirm = false) {
     const blockModal = document.getElementById("modalBlock");
-    const titleElement = blockModal ? blockModal.querySelector(".box-title p") : null;
-    const messageElement = blockModal ? blockModal.querySelector(".box-details p") : null;
-    if (!blockModal || !titleElement || !messageElement) {
-        alert(message || title);
-        return;
+    const titleElement = blockModal?.querySelector(".box-title p");
+    const messageElement = blockModal?.querySelector(".box-details > p");
+    const closeButtons = blockModal?.querySelectorAll("[data-reservation-modal-close], [data-reservation-modal-cancel]");
+    const cancelButton = blockModal?.querySelector("[data-reservation-modal-cancel]");
+    const confirmButton = blockModal?.querySelector("[data-reservation-modal-confirm]");
+    if (!blockModal || !titleElement || !messageElement || !closeButtons || !cancelButton || !confirmButton) {
+        return Promise.resolve(confirmationRequired ? window.confirm(message) : (window.alert(message || title), false));
     }
+
+    clearReservationActionModalTimer();
     titleElement.textContent = title;
     messageElement.textContent = message;
+    messageElement.style.whiteSpace = "pre-line";
+    cancelButton.textContent = confirmationRequired ? "いいえ" : "閉じる";
+    confirmButton.textContent = "はい";
+    confirmButton.hidden = !confirmationRequired;
+    confirmButton.style.display = confirmationRequired ? "" : "none";
+    closeButtons.forEach((button) => (button.disabled = false));
+    confirmButton.disabled = false;
     blockModal.classList.add("is-active");
     document.documentElement.style.overflow = "hidden";
+
+    return new Promise((resolve) => {
+        let settled = false;
+        const cleanup = () => {
+            clearReservationActionModalTimer();
+            closeButtons.forEach((button) => button.removeEventListener("click", cancel));
+            confirmButton.removeEventListener("click", confirm);
+        };
+        const finish = (confirmed) => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            blockModal.classList.remove("is-active");
+            document.documentElement.style.overflow = "";
+            resolve(confirmed);
+        };
+        const cancel = () => finish(false);
+        const confirm = () => {
+            if (settled) return;
+            if (confirmationRequired && keepOpenOnConfirm) {
+                settled = true;
+                cleanup();
+                closeButtons.forEach((button) => (button.disabled = true));
+                confirmButton.disabled = true;
+                resolve(true);
+                return;
+            }
+            finish(true);
+        };
+        closeButtons.forEach((button) => button.addEventListener("click", cancel));
+        confirmButton.addEventListener("click", confirm);
+        if (!confirmationRequired) {
+            reservationActionModalTimer = setTimeout(() => finish(false), 2000);
+        }
+    });
+}
+
+function showReservationResultModal(title, message) {
+    return showReservationActionModal(title, message, false);
 }
 /**
  * 予約追加formの入力値を検証
@@ -1167,10 +1243,8 @@ function validateReservationAddForm(form) {
         return null;
     }
     const requiredTextFields = [
-        ["customerLastName", "お客様名（姓）"],
-        ["customerFirstName", "お客様名（名）"],
-        ["customerLastKana", "フリガナ（姓）"],
-        ["customerFirstKana", "フリガナ（名）"],
+        ["customerName", "お客様名"],
+        ["customerKana", "ふりがな"],
         ["customerTel", "電話番号"],
     ];
     for (const [fieldName, fieldLabel] of requiredTextFields) {
@@ -1221,7 +1295,7 @@ function buildReservationRegistrationFormData(form, validatedData) {
     formData.append("reservationDate", validatedData.reservationDate);
     formData.append("reservationPerson", validatedData.reservationPerson);
     formData.append("reservationRoute", validatedData.reservationRoute);
-    ["customerLastName", "customerFirstName", "customerLastKana", "customerFirstKana", "customerTel", "customerEmail"].forEach((fieldName) => {
+    ["customerName", "customerKana", "customerTel", "customerEmail"].forEach((fieldName) => {
         const input = form.querySelector(`[name="${fieldName}"]`);
         formData.append(fieldName, input ? input.value : "");
     });
@@ -1303,7 +1377,7 @@ async function sendReservationRegistration(form) {
         if (refreshResult.success && actionsRefreshed) {
             showReservationResultModal(result.title, result.msg);
         } else {
-            showReservationResultModal("予約登録", "予約は登録されましたが、最新の予約状況を取得できませんでした。画面を再読み込みしてください。" + (result.jsonSyncFailed === true ? " フロント表示用JSONの更新に失敗しました。" : ""));
+            showReservationResultModal("予約登録", "予約は登録されましたが、最新の予約状況を取得できませんでした。\n画面を再読み込みしてください。" + (result.jsonSyncFailed === true ? " フロント表示用JSONの更新に失敗しました。" : ""));
         }
     } finally {
         isReservationSubmitting = false;
@@ -1311,6 +1385,233 @@ async function sendReservationRegistration(form) {
         updateReservationCalendarControlState(form);
     }
 }
+
+function restoreReservationSeatSelection(seatForm) {
+    const currentValue = seatForm.dataset.currentSeatValue || "";
+    const currentLabel = seatForm.dataset.currentSeatLabel || "---";
+    const selectBox = seatForm.querySelector("[data-selectbox]");
+    const hiddenInput = seatForm.querySelector("[data-reservation-seat-value]");
+    const valueLabel = seatForm.querySelector("[data-selectbox-value]");
+    seatForm.querySelectorAll("[data-reservation-seat-option]").forEach((radio) => {
+        radio.checked = radio.value === currentValue;
+    });
+    if (hiddenInput) hiddenInput.value = currentValue;
+    if (valueLabel) valueLabel.textContent = currentLabel;
+    if (selectBox) {
+        selectBox.classList.add("is-selected");
+        selectBox.classList.remove("is-empty", "is-open");
+    }
+    const selectHead = seatForm.querySelector(".selectbox__head");
+    if (selectHead) selectHead.setAttribute("aria-expanded", "false");
+}
+
+function setReservationSeatChangeBusy(busy) {
+    isReservationSeatChangeSubmitting = busy;
+    document.querySelectorAll("[data-reservation-seat-change]").forEach((seatForm) => {
+        seatForm.querySelectorAll("button, input").forEach((control) => {
+            if (!Object.prototype.hasOwnProperty.call(control.dataset, "seatChangeInitiallyDisabled")) {
+                control.dataset.seatChangeInitiallyDisabled = control.disabled ? "1" : "0";
+            }
+            control.disabled = busy || control.dataset.seatChangeInitiallyDisabled === "1";
+        });
+    });
+    const pageForm = document.getElementById("reservationAddForm");
+    if (pageForm) {
+        updateReservationCalendarControlState(pageForm);
+        updateReservationButtonState(pageForm);
+        updateReservationCalendarOverrideButtonState(pageForm);
+    }
+}
+
+/**
+ * 仮席へ移動中の予約行を見た目で識別できるようにする
+ */
+function applyReservationTempMoveVisualState() {
+    document.querySelectorAll('[data-reservation-seat-change][data-reservation-temp-move-active="1"]').forEach((seatForm) => {
+        const selectHead = seatForm.querySelector(".selectbox__head");
+        if (selectHead) {
+            selectHead.style.borderColor = "#f39800";
+            selectHead.style.boxShadow = "0 0 0 2px rgba(243, 152, 0, 0.25)";
+            selectHead.style.backgroundColor = "#fff7e8";
+        }
+
+        const row = seatForm.closest("li");
+        const statusElement = row?.querySelector("nav")?.previousElementSibling;
+        if (statusElement && statusElement.textContent.trim() === "確定") {
+            statusElement.textContent = "仮席へ移動中";
+            statusElement.style.color = "#f0911e";
+            statusElement.style.fontWeight = "700";
+        }
+    });
+}
+
+/**
+ * 仮移動ガード状態を最新の予約一覧へ同期
+ *  temp予約または回復可能なtemp重複があれば離脱・画面操作ガードを有効にする
+ */
+function syncReservationTempMoveGuardState(authoritativeRead = false) {
+    applyReservationTempMoveVisualState();
+    const activeInReservationList = Boolean(document.querySelector('[data-reservation-seat-change][data-reservation-temp-move-active="1"], [data-reservation-seat-change][data-reservation-duplicate-temp-recoverable="1"]'));
+    const active = document.body.dataset.reservationTempMoveInvalid === "1" || activeInReservationList || (authoritativeRead === false && document.body.dataset.reservationTempMoveActive === "1");
+    document.body.dataset.reservationTempMoveActive = active ? "1" : "0";
+    const unrecoverableError = document.querySelector('[data-reservation-seat-data-error="1"]:not([data-reservation-duplicate-temp-recoverable="1"])');
+    if (unrecoverableError && !reservationSeatDataErrorNotified) {
+        reservationSeatDataErrorNotified = true;
+        showReservationResultModal("席情報エラー", "割当席情報に異常がある予約があります。該当予約の席操作を停止しました。");
+    }
+    return active;
+}
+
+/**
+ * serverガードによる誘導理由を表示
+ *  モーダル表示後は再読込で再表示しないようqueryだけを除去する
+ */
+function showReservationTempMoveRedirectNotice() {
+    const currentUrl = new URL(window.location.href);
+    if (currentUrl.searchParams.get("seatMoveGuard") !== "1" || document.body.dataset.reservationTempMoveActive !== "1") return;
+    showReservationResultModal("席移動", "席の移動中です。席を確定させてからページを移動して下さい");
+    currentUrl.searchParams.delete("seatMoveGuard");
+    window.history.replaceState(null, "", `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`);
+}
+
+/**
+ * 仮移動中の画面操作を共通モーダルで停止
+ *  logoutと対象予約の席セレクトだけを例外として扱う
+ */
+function blockReservationTempMoveOperation() {
+    if (document.body.dataset.reservationTempMoveActive !== "1") return false;
+    showReservationResultModal("席移動", "席の移動中です。席を確定させてからページを移動して下さい");
+    return true;
+}
+
+function isReservationSeatChangeResponse(result) {
+    return Boolean(result && typeof result === "object" && !Array.isArray(result) && /^(success|error)$/.test(result.status) && typeof result.title === "string" && typeof result.msg === "string" && typeof result.tag === "string" && typeof result.refreshRequired === "boolean");
+}
+
+async function refreshReservationSeatChangeView(form) {
+    const calendarContainer = document.querySelector(".inner-calender");
+    const savedDisplayMonth = calendarContainer ? normalizeReservationTargetMonth(calendarContainer.dataset.targetMonth || "") : "";
+    const savedSelectedDate = getReservationSelectedDate();
+    if (!savedDisplayMonth || !formatReservationDateLabels(savedSelectedDate)) {
+        invalidateReservationCalendarActions(form);
+        return false;
+    }
+
+    const monthRefreshed = await readReservationMonth(form, savedDisplayMonth, false, {
+        selectedDateAfterLoad: savedSelectedDate,
+        preserveDetail: true,
+        suppressErrorUi: true,
+    });
+    if (!monthRefreshed || getReservationSelectedDate() !== savedSelectedDate) {
+        invalidateReservationCalendarActions(form);
+        return false;
+    }
+
+    const dateRefreshed = await readReservationDate(form, { suppressErrorUi: true });
+    if (!dateRefreshed || reservationAcceptedDate !== savedSelectedDate) {
+        invalidateReservationCalendarActions(form);
+        return false;
+    }
+    return readReservationCalendarActions(form, { suppressErrorUi: true });
+}
+
+async function sendReservationSeatChange(pageForm, seatForm, selectedRadio) {
+    if (isReservationSeatChangeSubmitting) {
+        restoreReservationSeatSelection(seatForm);
+        return;
+    }
+
+    const reservationId = seatForm.dataset.reservationId || "";
+    const seatChangeVersion = seatForm.dataset.seatChangeVersion || "";
+    const currentValue = seatForm.dataset.currentSeatValue || "";
+    const currentLabel = seatForm.dataset.currentSeatLabel || "---";
+    const targetValue = selectedRadio.value || "";
+    const targetLabelElement = selectedRadio.closest("li")?.querySelector("label");
+    const targetLabel = targetLabelElement?.textContent.trim() || "";
+    const hasTempMove = seatForm.dataset.reservationTempMoveActive === "1";
+    const duplicateTempRecoverable = seatForm.dataset.reservationDuplicateTempRecoverable === "1";
+    const specialAction = targetValue === "__temp_start__" ? "start" : targetValue === "__temp_restore__" ? "restore" : targetValue === "__temp_restore_duplicate__" ? "restoreDuplicateTemp" : "";
+    const noUpDateKeyInput = pageForm.querySelector('input[name="noUpDateKey"]');
+    const csrfTokenInput = pageForm.querySelector('input[name="csrfToken"]');
+
+    if (targetValue === currentValue) {
+        restoreReservationSeatSelection(seatForm);
+        return;
+    }
+    const requiresVersion = specialAction !== "restoreDuplicateTemp";
+    const targetIsValid = specialAction !== "" || /^[1-9]\d*(?:,[1-9]\d*){0,3}$/.test(targetValue);
+    if (!/^[1-9]\d*$/.test(reservationId) || (requiresVersion && !/^[0-9a-f]{64}$/.test(seatChangeVersion)) || !targetIsValid || !targetLabel || !noUpDateKeyInput || !csrfTokenInput) {
+        restoreReservationSeatSelection(seatForm);
+        showReservationResultModal("席変更", "画面情報を確認できません。ページを再読み込みしてください。");
+        return;
+    }
+
+    setReservationSeatChangeBusy(true);
+    let confirmed = false;
+    try {
+        const confirmationMessage = specialAction === "start" ? "仮の席へ移動しますか？" : specialAction === "restore" || specialAction === "restoreDuplicateTemp" ? "元の席に戻しますか？" : `割当席を変更しますか？\n\n変更前：${currentLabel}\n変更後：${targetLabel}`;
+        confirmed = await showReservationActionModal("席移動", confirmationMessage, true, true);
+    } catch (error) {
+        console.error("席変更確認モーダルエラー:", error);
+    }
+    if (!confirmed) {
+        setReservationSeatChangeBusy(false);
+        restoreReservationSeatSelection(seatForm);
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("noUpDateKey", noUpDateKeyInput.value);
+    formData.append("csrfToken", csrfTokenInput.value);
+    formData.append("reservationId", reservationId);
+    let requestUrl = reservationSeatChangeURL;
+    if (specialAction || hasTempMove || duplicateTempRecoverable) {
+        requestUrl = reservationTempMoveURL;
+        const action = specialAction || "commit";
+        formData.append("action", action);
+        if (action !== "restoreDuplicateTemp") formData.append("seatChangeVersion", seatChangeVersion);
+        if (action === "commit") formData.append("targetSeatIds", targetValue);
+    } else {
+        formData.append("seatChangeVersion", seatChangeVersion);
+        formData.append("targetSeatIds", targetValue);
+    }
+    let result = null;
+    let responseUncertain = false;
+    try {
+        const response = await fetch(requestUrl, {
+            method: "POST",
+            body: formData,
+        });
+        if (!response.ok) throw new Error("Network response was not ok");
+        result = await response.json();
+        if (!isReservationSeatChangeResponse(result)) {
+            throw new Error("Invalid seat change response shape");
+        }
+    } catch (error) {
+        console.error("席変更送信エラー:", error);
+        responseUncertain = true;
+    }
+
+    let refreshed = false;
+    try {
+        refreshed = await refreshReservationSeatChangeView(pageForm);
+    } catch (error) {
+        console.error("席変更後画面更新エラー:", error);
+    } finally {
+        setReservationSeatChangeBusy(false);
+    }
+
+    if (responseUncertain) {
+        showReservationResultModal("通信エラー", "通信結果を確認できませんでした。\n変更が保存されている可能性があります。\nページを再読み込みしてください。");
+        return;
+    }
+    if (!refreshed) {
+        showReservationResultModal(result.status === "success" ? "席変更" : result.title, (result.status === "success" ? "割当席は変更されましたが、最新の予約状況を取得できませんでした。" : result.msg) + "\nページを再読み込みしてください。");
+        return;
+    }
+    showReservationResultModal(result.title, result.msg);
+}
+
 /**
  * 予約追加formを初期化
  *  初期表示を同期してcalendar・formのeventを登録する
@@ -1328,6 +1629,29 @@ function initializeReservationAddForm() {
         return;
     }
     const initialReservationReadReady = initializeReservationReadState(calendarContainer);
+    syncReservationTempMoveGuardState();
+    showReservationTempMoveRedirectNotice();
+    document.addEventListener(
+        "click",
+        (event) => {
+            if (document.body.dataset.reservationTempMoveActive !== "1") return;
+            const target = event.target && typeof event.target.closest === "function" ? event.target.closest("a[href]") : null;
+            if (!target) return;
+            if (target.matches('a.logout[href$="logout.php"]')) {
+                allowReservationTempMoveUnload = true;
+                return;
+            }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            blockReservationTempMoveOperation();
+        },
+        true,
+    );
+    window.addEventListener("beforeunload", (event) => {
+        if (document.body.dataset.reservationTempMoveActive !== "1" || allowReservationTempMoveUnload) return;
+        event.preventDefault();
+        event.returnValue = "";
+    });
     syncSelectedReservationDate(form);
     syncReservationMenuSlots(form);
     setReservationDateDetailVisibility(initialReservationReadReady);
@@ -1335,11 +1659,15 @@ function initializeReservationAddForm() {
     updateReservationButtonState(form);
     updateReservationCalendarOverrideButtonState(form);
     calendarContainer.addEventListener("click", async (event) => {
-        if (!reservationAddCard.hidden || isReservationMonthLoading || isReservationDateLoading || isReservationSubmitting || isReservationCalendarOverrideSubmitting) {
+        if (!reservationAddCard.hidden || isReservationMonthLoading || isReservationDateLoading || isReservationSubmitting || isReservationCalendarOverrideSubmitting || isReservationSeatChangeSubmitting) {
             return;
         }
         const eventTarget = event.target && typeof event.target.closest === "function" ? event.target : null;
         if (!eventTarget) return;
+        if (document.body.dataset.reservationTempMoveActive === "1") {
+            blockReservationTempMoveOperation();
+            return;
+        }
         const monthButton = eventTarget.closest(".btn-prev, .btn-next");
         if (monthButton && calendarContainer.contains(monthButton)) {
             if (monthButton.disabled) return;
@@ -1367,13 +1695,40 @@ function initializeReservationAddForm() {
     });
     contentsDetails.addEventListener("click", (event) => {
         const eventTarget = event.target && typeof event.target.closest === "function" ? event.target : null;
+        const detailButton = eventTarget ? eventTarget.closest("[data-reservation-detail-url]") : null;
+        if (detailButton && contentsDetails.contains(detailButton)) {
+            if (blockReservationTempMoveOperation()) return;
+            const detailUrl = detailButton.dataset.reservationDetailUrl || "";
+            if (!isReservationSeatChangeSubmitting && /^\.\/client04_05_01\.php\?reservationId=[1-9]\d*$/.test(detailUrl)) {
+                window.location.href = detailUrl;
+            }
+            return;
+        }
         const actionButton = eventTarget ? eventTarget.closest("[data-reservation-calendar-action]") : null;
-        if (!actionButton || !contentsDetails.contains(actionButton) || actionButton.disabled || isReservationCalendarOverrideSubmitting) {
+        if (actionButton && blockReservationTempMoveOperation()) return;
+        if (!actionButton || !contentsDetails.contains(actionButton) || actionButton.disabled || isReservationCalendarOverrideSubmitting || isReservationSeatChangeSubmitting) {
             return;
         }
         sendReservationCalendarOverride(form, actionButton.dataset.reservationCalendarAction || "");
     });
+    contentsDetails.addEventListener("change", (event) => {
+        const selectedRadio = event.target;
+        if (!(selectedRadio instanceof HTMLInputElement) || !selectedRadio.matches("[data-reservation-seat-option]")) {
+            return;
+        }
+        const seatForm = selectedRadio.closest("[data-reservation-seat-change]");
+        if (!seatForm || !contentsDetails.contains(seatForm)) {
+            return;
+        }
+        if (document.body.dataset.reservationTempMoveActive === "1" && seatForm.dataset.reservationTempMoveActive !== "1" && seatForm.dataset.reservationDuplicateTempRecoverable !== "1") {
+            restoreReservationSeatSelection(seatForm);
+            blockReservationTempMoveOperation();
+            return;
+        }
+        void sendReservationSeatChange(form, seatForm, selectedRadio);
+    });
     addButton.addEventListener("click", () => {
+        if (blockReservationTempMoveOperation()) return;
         const selectedDate = syncSelectedReservationDate(form);
         if (form.dataset.reservationFormEnabled !== "1" || addButton.disabled || !selectedDate) {
             return;

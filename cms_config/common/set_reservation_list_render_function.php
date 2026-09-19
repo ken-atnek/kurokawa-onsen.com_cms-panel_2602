@@ -146,7 +146,7 @@ function clientReservationListRenderTag($reservations, $menuRows)
       return null;
     }
 
-    $customerName = trim((string)($reservation['customer_last_name'] ?? '') . ' ' . (string)($reservation['customer_first_name'] ?? ''));
+    $customerName = trim((string)($reservation['customer_name'] ?? ''));
     if ($customerName === '') {
       $customerName = '---';
     }
@@ -162,7 +162,7 @@ function clientReservationListRenderTag($reservations, $menuRows)
     $reservationDateHtml = clientReservationReadEscape($reservationDateLabel);
     $customerNameHtml = clientReservationReadEscape($customerName);
     $customerTelHtml = clientReservationReadEscape($customerTel);
-    $menuLabelHtml = clientReservationReadEscape($menuLabel);
+    $menuLabelHtml = str_replace("\n", '<br>', clientReservationReadEscape($menuLabel));
     $routeLabelHtml = clientReservationReadEscape($routeLabel);
     $statusLabelHtml = clientReservationReadEscape($statusLabel);
     $statusClassHtml = clientReservationReadEscape($statusClass);

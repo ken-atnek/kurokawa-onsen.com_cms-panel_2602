@@ -125,10 +125,8 @@ function clientReservationNormalizePost($post, $today)
     'reservationDate',
     'reservationPerson',
     'reservationRoute',
-    'customerLastName',
-    'customerFirstName',
-    'customerLastKana',
-    'customerFirstKana',
+    'customerName',
+    'customerKana',
     'customerTel',
     'customerEmail',
     'reservationMenu',
@@ -154,18 +152,16 @@ function clientReservationNormalizePost($post, $today)
   if (is_string($route) === false || isset($routeMap[$route]) === false) {
     return [false, '予約経路を正しく選択してください。'];
   }
-  $requiredFields = [
-    'customerLastName' => 50,
-    'customerFirstName' => 50,
-    'customerLastKana' => 50,
-    'customerFirstKana' => 50,
-    'customerTel' => 20,
-  ];
-  foreach ($requiredFields as $key => $maxLength) {
-    $value = $post[$key] ?? null;
-    if (clientReservationBlank($value) === true || clientReservationLength($value) > $maxLength) {
-      return [false, 'お客様情報を正しく入力してください。'];
-    }
+  $customerName = normalizeReservationCustomerIdentityValue($post['customerName'] ?? null);
+  $customerKana = normalizeReservationCustomerIdentityValue($post['customerKana'] ?? null);
+  $customerTel = $post['customerTel'] ?? null;
+  if (
+    $customerName === null ||
+    $customerKana === null ||
+    clientReservationBlank($customerTel) === true ||
+    clientReservationLength($customerTel) > 20
+  ) {
+    return [false, 'お客様情報を正しく入力してください。氏名とフリガナは姓名の間を空けて入力してください。'];
   }
   $email = clientReservationOptional($post['customerEmail'] ?? null);
   $accommodationName = clientReservationOptional($post['accommodationName'] ?? null);
@@ -206,11 +202,9 @@ function clientReservationNormalizePost($post, $today)
     'reservation_date' => $reservationDate,
     'party_size' => $partySize,
     'reservation_route' => $routeMap[$route],
-    'customer_last_name' => $post['customerLastName'],
-    'customer_first_name' => $post['customerFirstName'],
-    'customer_last_kana' => $post['customerLastKana'],
-    'customer_first_kana' => $post['customerFirstKana'],
-    'customer_tel' => $post['customerTel'],
+    'customer_name' => $customerName,
+    'customer_kana' => $customerKana,
+    'customer_tel' => $customerTel,
     'customer_email' => $email,
     'accommodation_name' => $accommodationName,
     'customer_note' => $customerNote,

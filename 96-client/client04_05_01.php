@@ -210,10 +210,8 @@ if ($reservationDetailHasError === true) {
     $updatedAtHtml = clientReservationReadEscape($updatedAtLabel);
     $cancelledAtHtml = clientReservationReadEscape($cancelledAtLabel);
     $seatLabelHtml = clientReservationReadEscape($seatLabel);
-    $customerLastNameHtml = clientReservationReadEscape($reservationDetail['customer_last_name']);
-    $customerFirstNameHtml = clientReservationReadEscape($reservationDetail['customer_first_name']);
-    $customerLastKanaHtml = clientReservationReadEscape($reservationDetail['customer_last_kana']);
-    $customerFirstKanaHtml = clientReservationReadEscape($reservationDetail['customer_first_kana']);
+    $customerNameHtml = clientReservationReadEscape($reservationDetail['customer_name']);
+    $customerKanaHtml = clientReservationReadEscape($reservationDetail['customer_kana']);
     $customerTelHtml = clientReservationReadEscape($reservationDetail['customer_tel']);
     $customerEmailHtml = clientReservationReadEscape($reservationDetail['customer_email'] ?? '');
     $partySizeHtml = (int)$reservationDetail['party_size'];
@@ -478,20 +476,12 @@ HTML;
             <h3>お客様情報</h3>
             <dl>
               <div>
-                <dt>お客様名（姓）</dt>
-                <dd><input type="text" name="customerLastName" value="{$customerLastNameHtml}" maxlength="50" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
+                <dt>お客様名</dt>
+                <dd><input type="text" name="customerName" value="{$customerNameHtml}" maxlength="101" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
               </div>
               <div>
-                <dt>お客様名（名）</dt>
-                <dd><input type="text" name="customerFirstName" value="{$customerFirstNameHtml}" maxlength="50" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
-              </div>
-              <div>
-                <dt>フリガナ（姓）</dt>
-                <dd><input type="text" name="customerLastKana" value="{$customerLastKanaHtml}" maxlength="50" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
-              </div>
-              <div>
-                <dt>フリガナ（名）</dt>
-                <dd><input type="text" name="customerFirstKana" value="{$customerFirstKanaHtml}" maxlength="50" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
+                <dt>ふりがな</dt>
+                <dd><input type="text" name="customerKana" value="{$customerKanaHtml}" maxlength="101" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
               </div>
               <div>
                 <dt>電話番号</dt>
@@ -583,8 +573,8 @@ print <<<HTML
       </div>
     </div>
   </main>
-  <script src="../assets/js/common.js" defer></script>
-  <script src="./assets/js/client04_05_01.js" defer></script>
+  <script src="../assets/js/common.js?v=20260919-1" defer></script>
+  <script src="./assets/js/client04_05_01.js?v=20260919-1" defer></script>
   <script src="./assets/js/client04_05_01_status.js" defer></script>
 </body>
 </html>

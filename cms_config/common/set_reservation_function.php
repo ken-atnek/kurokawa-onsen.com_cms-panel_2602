@@ -5,6 +5,37 @@
 require_once __DIR__ . '/set_food_menu_function.php';
 
 /**
+ * 予約者の氏名・ふりがなを保存形式へ正規化
+ *  Unicode空白を半角スペース1文字へ揃え、姓名区切りを必須とする
+ */
+function normalizeReservationCustomerIdentityValue($value)
+{
+	if (is_string($value) === false || preg_match('//u', $value) !== 1) {
+		return null;
+	}
+	$controlCharacterResult = preg_match('/\p{Cc}/u', $value);
+	if ($controlCharacterResult !== 0) {
+		return null;
+	}
+	$normalizedValue = preg_replace('/[\s\p{Z}\x{FEFF}]+/u', ' ', $value);
+	if (is_string($normalizedValue) === false) {
+		return null;
+	}
+	$normalizedValue = trim($normalizedValue, ' ');
+	$length = function_exists('mb_strlen') === true
+		? mb_strlen($normalizedValue, 'UTF-8')
+		: strlen($normalizedValue);
+	if (
+		$length < 3 ||
+		$length > 101 ||
+		preg_match('/\A[^ ]+ [^ ]+(?: [^ ]+)*\z/uD', $normalizedValue) !== 1
+	) {
+		return null;
+	}
+	return $normalizedValue;
+}
+
+/**
  * 定休日曜日配列を正規化
  *  異常値は予約受付安全性を優先して全曜日定休日扱いにする
  */
@@ -181,6 +212,7 @@ function buildReservationOccupancyStateFromDb($shopId, $date)
 		}
 		$state['seatsById'][$seatId] = [
 			'id' => $seatId,
+			'name' => (string)($seatRow['name'] ?? ''),
 			'type' => (int)($seatRow['type'] ?? 0),
 			'capacity' => (int)($seatRow['capacity'] ?? 0),
 			'counter_area' => $seatRow['counter_area'] ?? null,
@@ -211,12 +243,230 @@ function buildReservationOccupancyStateFromDb($shopId, $date)
 			continue;
 		}
 		$state['reservationsById'][$reservationId]['seat_ids'][] = $seatId;
-		if ((int)($row['seat_is_temp_move'] ?? 0) === 1) {
+		$matchedSeatId = isset($row['matched_seat_id']) ? (int)$row['matched_seat_id'] : 0;
+		if ($matchedSeatId === $seatId && (int)($row['seat_is_temp_move'] ?? 0) === 1) {
 			$state['reservationsById'][$reservationId]['has_temp_move'] = true;
 		}
 	}
 
 	return $state;
+}
+
+/**
+ * 席変更競合検知version生成
+ *  予約本体と現在割当席の変更を同一hashで検出する
+ */
+function makeReservationSeatChangeVersion($reservationId, $reservationDate, $partySize, $status, $seatIds, $hasTempMove = false)
+{
+	if (
+		is_numeric($reservationId) === false ||
+		(int)$reservationId < 1 ||
+		isReservationDateString($reservationDate) === false ||
+		is_numeric($partySize) === false ||
+		(int)$partySize < 1 ||
+		(int)$partySize > 4 ||
+		is_numeric($status) === false ||
+		in_array((int)$status, [1, 2, 3, 4], true) === false ||
+		is_array($seatIds) === false
+	) {
+		return null;
+	}
+
+	$normalizedSeatIds = [];
+	foreach ($seatIds as $seatId) {
+		if (is_numeric($seatId) === false || (int)$seatId < 1 || isset($normalizedSeatIds[(int)$seatId]) === true) {
+			return null;
+		}
+		$normalizedSeatIds[(int)$seatId] = (int)$seatId;
+	}
+	$normalizedSeatIds = array_values($normalizedSeatIds);
+	sort($normalizedSeatIds, SORT_NUMERIC);
+
+	$payload = json_encode([
+		'reservation_id' => (int)$reservationId,
+		'reservation_date' => $reservationDate,
+		'party_size' => (int)$partySize,
+		'status' => (int)$status,
+		'seat_ids' => $normalizedSeatIds,
+		'has_temp_move' => $hasTempMove === true,
+	], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+	return is_string($payload) === true ? hash('sha256', $payload) : null;
+}
+
+/**
+ * 管理画面の実席変更候補を全件生成
+ *  対象予約自身の現在席だけを占有計算から外し、table・counter順で返す
+ */
+function buildReservationSeatChangeCandidates($occupancyState, $reservationId)
+{
+	if (
+		is_array($occupancyState) === false ||
+		is_numeric($reservationId) === false ||
+		(int)$reservationId < 1 ||
+		isValidReservationOccupancyState(
+			$occupancyState['shop_id'] ?? null,
+			$occupancyState['reservation_date'] ?? null,
+			$occupancyState
+		) === false
+	) {
+		return null;
+	}
+
+	$reservationId = (int)$reservationId;
+	$reservation = $occupancyState['reservationsById'][$reservationId] ?? null;
+	if (
+		is_array($reservation) === false ||
+		isReservationOccupiedStatus($reservation['status'] ?? null) === false ||
+		(bool)($reservation['has_temp_move'] ?? false) === true
+	) {
+		return [];
+	}
+
+	$partySize = (int)($reservation['party_size'] ?? 0);
+	if ($partySize < 1 || $partySize > 4) {
+		return null;
+	}
+	$currentSeatIds = getReservationNormalSeatIds($occupancyState, $reservation['seat_ids'] ?? []);
+	if (empty($currentSeatIds) === true) {
+		return [];
+	}
+	$currentSeatIdSet = $currentSeatIds;
+	sort($currentSeatIdSet, SORT_NUMERIC);
+
+	$candidateState = $occupancyState;
+	unset($candidateState['reservationsById'][$reservationId]);
+	$occupiedSeatIds = getReservationOccupiedSeatIds($candidateState);
+	$tableCandidates = [];
+	$counters = [];
+
+	foreach (($candidateState['seatsById'] ?? []) as $seat) {
+		$seatId = (int)($seat['id'] ?? 0);
+		if ($seatId < 1 || (int)($seat['is_temp_move'] ?? 0) !== 0) {
+			continue;
+		}
+		if ((int)($seat['type'] ?? 0) === 2) {
+			if (
+				(int)($seat['is_active'] ?? 0) === 1 &&
+				(int)($seat['capacity'] ?? 0) >= $partySize &&
+				isset($occupiedSeatIds[$seatId]) === false
+			) {
+				$tableCandidates[] = $seat;
+			}
+			continue;
+		}
+		if ((int)($seat['type'] ?? 0) === 1) {
+			$counters[] = $seat;
+		}
+	}
+
+	usort($tableCandidates, function ($left, $right) use ($partySize) {
+		$leftExact = (int)($left['capacity'] ?? 0) === $partySize ? 0 : 1;
+		$rightExact = (int)($right['capacity'] ?? 0) === $partySize ? 0 : 1;
+		if ($leftExact !== $rightExact) {
+			return $leftExact <=> $rightExact;
+		}
+		return compareReservationSeatsForAssignment($left, $right);
+	});
+	usort($counters, 'compareReservationSeatsByPhysicalOrder');
+
+	$candidates = [];
+	foreach ($tableCandidates as $seat) {
+		$seatIds = [(int)$seat['id']];
+		$comparisonIds = $seatIds;
+		sort($comparisonIds, SORT_NUMERIC);
+		if ($comparisonIds === $currentSeatIdSet) {
+			continue;
+		}
+		$name = (string)($seat['name'] ?? '');
+		if (trim($name) === '') {
+			return null;
+		}
+		$candidates[] = [
+			'seat_ids' => $seatIds,
+			'label' => $name,
+			'type' => 'table',
+		];
+	}
+
+	$counterCandidateAreas = [];
+	$currentCounterSeats = [];
+	$currentSeatsAreCounter = true;
+	foreach ($currentSeatIds as $currentSeatId) {
+		$currentSeat = $occupancyState['seatsById'][$currentSeatId] ?? null;
+		if (
+			is_array($currentSeat) === false ||
+			(int)($currentSeat['type'] ?? 0) !== 1 ||
+			($currentSeat['counter_area'] ?? null) === null ||
+			($currentSeat['counter_area'] ?? '') === ''
+		) {
+			$currentSeatsAreCounter = false;
+			break;
+		}
+		$currentCounterSeats[] = $currentSeat;
+	}
+	if ($currentSeatsAreCounter === true && empty($currentCounterSeats) === false) {
+		usort($currentCounterSeats, 'compareReservationSeatsByPhysicalOrder');
+		$currentCounterAreas = [];
+		foreach ($currentCounterSeats as $currentCounterSeat) {
+			$currentCounterAreas[$currentCounterSeat['counter_area']] = true;
+		}
+		$counterCandidateAreas[implode('/', array_keys($currentCounterAreas))] = true;
+	}
+	if ($partySize <= count($counters)) {
+		for ($index = 0; $index <= count($counters) - $partySize; $index++) {
+			$block = array_slice($counters, $index, $partySize);
+			$seatIds = [];
+			$counterArea = null;
+			$counterAreas = [];
+			$assignable = true;
+			foreach ($block as $counter) {
+				$seatId = (int)($counter['id'] ?? 0);
+				$currentArea = $counter['counter_area'] ?? null;
+				if (
+					$seatId < 1 ||
+					$currentArea === null ||
+					$currentArea === '' ||
+					(int)($counter['is_active'] ?? 0) !== 1 ||
+					isset($occupiedSeatIds[$seatId]) === true
+				) {
+					$assignable = false;
+					break;
+				}
+				if ($partySize === 2 && $counterArea !== null && $counterArea !== $currentArea) {
+					$assignable = false;
+					break;
+				}
+				$counterArea = $currentArea;
+				$counterAreas[$currentArea] = true;
+				$seatIds[] = $seatId;
+			}
+			if ($assignable === false || count($seatIds) !== $partySize) {
+				continue;
+			}
+			$counterAreaKeys = array_keys($counterAreas);
+			$counterCandidateAreaKey = implode('/', $counterAreaKeys);
+			if (isset($counterCandidateAreas[$counterCandidateAreaKey]) === true) {
+				continue;
+			}
+			$comparisonIds = $seatIds;
+			sort($comparisonIds, SORT_NUMERIC);
+			if ($comparisonIds === $currentSeatIdSet) {
+				continue;
+			}
+			$counterCandidateAreas[$counterCandidateAreaKey] = true;
+			$counterLabel = count($counterAreaKeys) === 1
+				? 'カウンター' . $counterAreaKeys[0]
+				: 'カウンター' . $counterAreaKeys[0] . '〜' . $counterAreaKeys[count($counterAreaKeys) - 1];
+			$candidates[] = [
+				'seat_ids' => $seatIds,
+				'label' => $counterLabel,
+				'type' => 'counter',
+			];
+		}
+	}
+
+	return $candidates;
 }
 
 /**
@@ -711,11 +961,18 @@ function executeReservationRegistration($shopId = null, $reservationData = [], $
 	if ($shopId === null || isReservationDateString($reservationDate) === false || $partySize === null || $reservationRoute === null) {
 		return makeReservationRegistrationResult(false, null, 'invalid_input');
 	}
-	foreach (['customer_last_name', 'customer_first_name', 'customer_last_kana', 'customer_first_kana', 'customer_tel'] as $requiredKey) {
+	foreach (['customer_name', 'customer_kana', 'customer_tel'] as $requiredKey) {
 		if (array_key_exists($requiredKey, $reservationData) === false || $reservationData[$requiredKey] === null) {
 			return makeReservationRegistrationResult(false, null, 'invalid_input');
 		}
 	}
+	$customerName = normalizeReservationCustomerIdentityValue($reservationData['customer_name']);
+	$customerKana = normalizeReservationCustomerIdentityValue($reservationData['customer_kana']);
+	if ($customerName === null || $customerKana === null) {
+		return makeReservationRegistrationResult(false, null, 'invalid_input');
+	}
+	$reservationData['customer_name'] = $customerName;
+	$reservationData['customer_kana'] = $customerKana;
 	foreach (['getShopReservationSettings', 'checkAndAssignSeat', 'replaceReservationSeats', 'insertReservation', 'insertReservationSeats', 'insertReservationMenus'] as $requiredFunction) {
 		if (function_exists($requiredFunction) === false) {
 			return makeReservationRegistrationResult(false, null, 'invalid_input');

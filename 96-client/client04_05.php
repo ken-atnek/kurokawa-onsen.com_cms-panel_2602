@@ -164,7 +164,7 @@ print <<<HTML
               <div class="box-name" style="border-right: 1px solid #e8e7e2">
                 <dt>お客様名</dt>
                 <dd>
-                    <input type="text" name="searchCustomerName" maxlength="100" />
+                    <input type="text" name="searchCustomerName" maxlength="101" />
                 </dd>
               </div>
               <div class="box-name" style="border-right: 1px solid #e8e7e2">

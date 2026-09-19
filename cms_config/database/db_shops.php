@@ -256,3 +256,51 @@ function getReservationShopForOccupancy($shopId = null)
 		return false;
 	}
 }
+
+/**
+ * 予約メール用店舗情報取得
+ *  予約成立後の通知に必要な店舗名と店舗メールアドレスだけを返す
+ */
+function getReservationMailShop($shopId = null)
+{
+	global $DB_CONNECT;
+	try {
+		if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1) {
+			return null;
+		}
+		$shopId = (int)$shopId;
+
+		$strSQL = "
+			SELECT
+				shop_id,
+				shop_name,
+				email
+			FROM
+				shops
+			WHERE
+				shop_id = :shop_id
+			LIMIT 1
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$shop = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		if ($shop === false) {
+			return null;
+		}
+		if (
+			(int)($shop['shop_id'] ?? 0) !== $shopId ||
+			is_string($shop['shop_name'] ?? null) === false ||
+			$shop['shop_name'] === '' ||
+			(($shop['email'] ?? null) !== null && is_string($shop['email']) === false)
+		) {
+			return false;
+		}
+
+		$shop['shop_id'] = $shopId;
+		return $shop;
+	} catch (PDOException $e) {
+		return false;
+	}
+}

@@ -70,10 +70,8 @@
     return {
       reservationRoute: form.querySelector('input[name="reservationRoute"]:checked')?.value ?? "",
       reservationPerson: partySize === null ? "" : String(partySize),
-      customerLastName: getValue(form, '[name="customerLastName"]'),
-      customerFirstName: getValue(form, '[name="customerFirstName"]'),
-      customerLastKana: getValue(form, '[name="customerLastKana"]'),
-      customerFirstKana: getValue(form, '[name="customerFirstKana"]'),
+      customerName: getValue(form, '[name="customerName"]'),
+      customerKana: getValue(form, '[name="customerKana"]'),
       customerTel: getValue(form, '[name="customerTel"]'),
       customerEmail: getValue(form, '[name="customerEmail"]'),
       reservationMenu: menuValues,
@@ -160,10 +158,8 @@
     }
 
     const requiredFields = [
-      [state.customerLastName, 50],
-      [state.customerFirstName, 50],
-      [state.customerLastKana, 50],
-      [state.customerFirstKana, 50],
+      [state.customerName, 101],
+      [state.customerKana, 101],
       [state.customerTel, 20],
     ];
     if (requiredFields.some(([value, maxLength]) => isBlank(value) || stringLength(value) > maxLength)) {
@@ -198,10 +194,8 @@
     formData.append("detailEditVersion", values.detailEditVersion);
     formData.append("reservationRoute", values.state.reservationRoute);
     formData.append("reservationPerson", values.state.reservationPerson);
-    formData.append("customerLastName", values.state.customerLastName);
-    formData.append("customerFirstName", values.state.customerFirstName);
-    formData.append("customerLastKana", values.state.customerLastKana);
-    formData.append("customerFirstKana", values.state.customerFirstKana);
+    formData.append("customerName", values.state.customerName);
+    formData.append("customerKana", values.state.customerKana);
     formData.append("customerTel", values.state.customerTel);
     formData.append("customerEmail", values.state.customerEmail);
     if (values.menuSelectionType !== 0) {

@@ -22,11 +22,12 @@ function getReservationsForOccupancy($shopId = null, $reservationDate = null)
 				r.status,
 				rs.id AS reservation_seat_id,
 				rs.seat_id,
+				s.id AS matched_seat_id,
 				s.is_temp_move AS seat_is_temp_move
 			FROM
 				reservations r
 				LEFT JOIN reservation_seats rs ON r.id = rs.reservation_id
-				LEFT JOIN seats s ON rs.seat_id = s.id
+				LEFT JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id
 			WHERE
 				r.shop_id = :shop_id
 				AND r.reservation_date = :reservation_date
@@ -43,6 +44,144 @@ function getReservationsForOccupancy($shopId = null, $reservationDate = null)
 		$newStmt->closeCursor();
 
 		return $reservations ?: [];
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+
+/**
+ * 店舗内の仮移動ガード状態を取得
+ *  temp行または参照先master不整合が1件でもあれば管理画面ガード対象とする
+ */
+function getReservationTempMoveGuardState($shopId = null)
+{
+	global $DB_CONNECT;
+	try {
+		$shopId = normalizeReservationDbIntegerForReservations($shopId, 1, null);
+		if ($shopId === null) {
+			return false;
+		}
+		$strSQL = "
+			SELECT
+				EXISTS(
+					SELECT 1
+					FROM reservations r
+					INNER JOIN reservation_seats rs ON r.id = rs.reservation_id
+					INNER JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id
+					WHERE r.shop_id = :temp_shop_id AND s.is_temp_move = 1
+				) AS has_temp_move,
+				EXISTS(
+					SELECT 1
+					FROM reservations r
+					INNER JOIN reservation_seats rs ON r.id = rs.reservation_id
+					LEFT JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id
+					WHERE r.shop_id = :invalid_shop_id AND s.id IS NULL
+				) AS has_invalid_reference,
+				(SELECT COUNT(DISTINCT r.id) FROM reservations r INNER JOIN reservation_seats rs ON r.id = rs.reservation_id INNER JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id WHERE r.shop_id = :count_shop_id AND s.is_temp_move = 1) AS temp_reservation_count,
+				(SELECT COUNT(*) FROM reservations r INNER JOIN reservation_seats rs ON r.id = rs.reservation_id INNER JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id WHERE r.shop_id = :row_count_shop_id AND s.is_temp_move = 1) AS temp_row_count,
+				(SELECT MIN(r.id) FROM reservations r INNER JOIN reservation_seats rs ON r.id = rs.reservation_id INNER JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id WHERE r.shop_id = :reservation_shop_id AND s.is_temp_move = 1) AS guard_reservation_id,
+				COALESCE(
+					(SELECT MIN(r.reservation_date) FROM reservations r INNER JOIN reservation_seats rs ON r.id = rs.reservation_id INNER JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id WHERE r.shop_id = :date_temp_shop_id AND s.is_temp_move = 1),
+					(SELECT MIN(r.reservation_date) FROM reservations r INNER JOIN reservation_seats rs ON r.id = rs.reservation_id LEFT JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id WHERE r.shop_id = :date_invalid_shop_id AND s.id IS NULL)
+				) AS guard_reservation_date
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':temp_shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':invalid_shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':date_temp_shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':date_invalid_shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':count_shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':row_count_shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':reservation_shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$row = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		if ($row === false) {
+			return false;
+		}
+		$hasTempMove = normalizeReservationDbIntegerForReservations($row['has_temp_move'] ?? null, 0, 1);
+		$hasInvalidReference = normalizeReservationDbIntegerForReservations($row['has_invalid_reference'] ?? null, 0, 1);
+		$tempReservationCount = normalizeReservationDbIntegerForReservations($row['temp_reservation_count'] ?? null, 0, null);
+		$tempRowCount = normalizeReservationDbIntegerForReservations($row['temp_row_count'] ?? null, 0, null);
+		$guardReservationId = normalizeReservationDbIntegerForReservations($row['guard_reservation_id'] ?? null, 1, null);
+		if ($hasTempMove === null || $hasInvalidReference === null || $tempReservationCount === null || $tempRowCount === null || ($tempReservationCount > 0 && $guardReservationId === null)) {
+			return false;
+		}
+		return [
+			'active' => $hasTempMove === 1 || $hasInvalidReference === 1,
+			'has_temp_move' => $hasTempMove === 1,
+			'has_invalid_reference' => $hasInvalidReference === 1,
+			'temp_reservation_count' => $tempReservationCount,
+			'temp_row_count' => $tempRowCount,
+			'guard_reservation_id' => $guardReservationId,
+			'guard_reservation_date' => isReservationDbDateStringForReservations($row['guard_reservation_date'] ?? null) ? $row['guard_reservation_date'] : null,
+		];
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+
+/**
+ * 仮移動更新用の対象予約席行をfresh取得
+ *  transactionと店舗mutex取得後にmaster整合・temp件数を判定する元データを返す
+ */
+function getReservationSeatRowsForTempMoveWrite($shopId = null, $reservationId = null)
+{
+	global $DB_CONNECT;
+	try {
+		$shopId = normalizeReservationDbIntegerForReservations($shopId, 1, null);
+		$reservationId = normalizeReservationDbIntegerForReservations($reservationId, 1, null);
+		if ($shopId === null || $reservationId === null || is_object($DB_CONNECT) === false || method_exists($DB_CONNECT, 'inTransaction') === false || $DB_CONNECT->inTransaction() !== true) {
+			return false;
+		}
+		$strSQL = "
+			SELECT rs.id AS reservation_seat_id, rs.seat_id, s.id AS matched_seat_id, s.is_temp_move
+			FROM reservations r
+			INNER JOIN reservation_seats rs ON r.id = rs.reservation_id
+			LEFT JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id
+			WHERE r.id = :reservation_id AND r.shop_id = :shop_id
+			ORDER BY rs.id ASC
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':reservation_id', $reservationId, PDO::PARAM_INT);
+		$newStmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$rows = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		return $rows;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+
+/**
+ * 対象予約のtemp席行だけを削除
+ *  元実席行を維持し、呼出側が指定したfresh件数との一致も確認する
+ */
+function deleteReservationTempMoveRows($shopId = null, $reservationId = null, $expectedCount = null)
+{
+	global $DB_CONNECT;
+	try {
+		$shopId = normalizeReservationDbIntegerForReservations($shopId, 1, null);
+		$reservationId = normalizeReservationDbIntegerForReservations($reservationId, 1, null);
+		$expectedCount = normalizeReservationDbIntegerForReservations($expectedCount, 1, null);
+		if ($shopId === null || $reservationId === null || $expectedCount === null || is_object($DB_CONNECT) === false || method_exists($DB_CONNECT, 'inTransaction') === false || $DB_CONNECT->inTransaction() !== true) {
+			return false;
+		}
+		$strSQL = "
+			DELETE rs
+			FROM reservation_seats rs
+			INNER JOIN reservations r ON rs.reservation_id = r.id AND r.shop_id = :shop_id
+			INNER JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id AND s.is_temp_move = 1
+			WHERE rs.reservation_id = :reservation_id
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->bindValue(':reservation_id', $reservationId, PDO::PARAM_INT);
+		$result = $newStmt->execute();
+		$deletedCount = $newStmt->rowCount();
+		$newStmt->closeCursor();
+		return $result === true && $deletedCount === $expectedCount;
 	} catch (PDOException $e) {
 		return false;
 	}
@@ -79,24 +218,18 @@ function insertReservation($shopId = null, $reservationData = [])
 		}
 		$status = (int)$status;
 		if (
-			array_key_exists('customer_last_name', $reservationData) === false ||
-			array_key_exists('customer_first_name', $reservationData) === false ||
-			array_key_exists('customer_last_kana', $reservationData) === false ||
-			array_key_exists('customer_first_kana', $reservationData) === false ||
+			array_key_exists('customer_name', $reservationData) === false ||
+			array_key_exists('customer_kana', $reservationData) === false ||
 			array_key_exists('customer_tel', $reservationData) === false ||
-			$reservationData['customer_last_name'] === null ||
-			$reservationData['customer_first_name'] === null ||
-			$reservationData['customer_last_kana'] === null ||
-			$reservationData['customer_first_kana'] === null ||
+			$reservationData['customer_name'] === null ||
+			$reservationData['customer_kana'] === null ||
 			$reservationData['customer_tel'] === null
 		) {
 			return false;
 		}
 
-		$customerLastName = (string)$reservationData['customer_last_name'];
-		$customerFirstName = (string)$reservationData['customer_first_name'];
-		$customerLastKana = (string)$reservationData['customer_last_kana'];
-		$customerFirstKana = (string)$reservationData['customer_first_kana'];
+		$customerName = (string)$reservationData['customer_name'];
+		$customerKana = (string)$reservationData['customer_kana'];
 		$customerTel = (string)$reservationData['customer_tel'];
 		$customerEmail = array_key_exists('customer_email', $reservationData) ? $reservationData['customer_email'] : null;
 		$accommodationName = array_key_exists('accommodation_name', $reservationData) ? $reservationData['accommodation_name'] : null;
@@ -116,10 +249,8 @@ function insertReservation($shopId = null, $reservationData = [])
 					shop_id,
 					reservation_date,
 					party_size,
-					customer_last_name,
-					customer_first_name,
-					customer_last_kana,
-					customer_first_kana,
+					customer_name,
+					customer_kana,
 					customer_tel,
 					customer_email,
 					accommodation_name,
@@ -133,10 +264,8 @@ function insertReservation($shopId = null, $reservationData = [])
 				:shop_id,
 				:reservation_date,
 				:party_size,
-				:customer_last_name,
-				:customer_first_name,
-				:customer_last_kana,
-				:customer_first_kana,
+				:customer_name,
+				:customer_kana,
 				:customer_tel,
 				:customer_email,
 				:accommodation_name,
@@ -152,10 +281,8 @@ function insertReservation($shopId = null, $reservationData = [])
 		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
 		$newStmt->bindValue(':reservation_date', $reservationDate, PDO::PARAM_STR);
 		$newStmt->bindValue(':party_size', (int)$partySize, PDO::PARAM_INT);
-		$newStmt->bindValue(':customer_last_name', $customerLastName, PDO::PARAM_STR);
-		$newStmt->bindValue(':customer_first_name', $customerFirstName, PDO::PARAM_STR);
-		$newStmt->bindValue(':customer_last_kana', $customerLastKana, PDO::PARAM_STR);
-		$newStmt->bindValue(':customer_first_kana', $customerFirstKana, PDO::PARAM_STR);
+		$newStmt->bindValue(':customer_name', $customerName, PDO::PARAM_STR);
+		$newStmt->bindValue(':customer_kana', $customerKana, PDO::PARAM_STR);
 		$newStmt->bindValue(':customer_tel', $customerTel, PDO::PARAM_STR);
 		$newStmt->bindValue(':customer_email', $customerEmail, $customerEmail === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$newStmt->bindValue(':accommodation_name', $accommodationName, $accommodationName === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
@@ -508,6 +635,146 @@ function getReservationStatusForWrite($shopId = null, $reservationId = null)
 }
 
 /**
+ * 席変更用fresh予約取得
+ *  caller所有transactionとshops mutexの後で対象予約の判定値を返す
+ */
+function getReservationSeatChangeForWrite($shopId = null, $reservationId = null)
+{
+	global $DB_CONNECT;
+	try {
+		$shopId = normalizeReservationDbIntegerForReservations($shopId, 1, null);
+		$reservationId = normalizeReservationDbIntegerForReservations($reservationId, 1, null);
+		if ($shopId === null || $reservationId === null) {
+			return null;
+		}
+		if (is_object($DB_CONNECT) === false || method_exists($DB_CONNECT, 'inTransaction') === false || $DB_CONNECT->inTransaction() !== true) {
+			return false;
+		}
+
+		$strSQL = "
+			SELECT
+				id,
+				shop_id,
+				reservation_date,
+				party_size,
+				status
+			FROM
+				reservations
+			WHERE
+				id = :reservation_id
+				AND shop_id = :shop_id
+			LIMIT 1
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':reservation_id', $reservationId, PDO::PARAM_INT);
+		$newStmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$reservation = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		if ($reservation === false) {
+			return null;
+		}
+
+		$rowReservationId = normalizeReservationDbIntegerForReservations($reservation['id'] ?? null, 1, null);
+		$rowShopId = normalizeReservationDbIntegerForReservations($reservation['shop_id'] ?? null, 1, null);
+		$partySize = normalizeReservationDbIntegerForReservations($reservation['party_size'] ?? null, 1, 4);
+		$status = normalizeReservationDbIntegerForReservations($reservation['status'] ?? null, 1, 4);
+		if (
+			$rowReservationId !== $reservationId ||
+			$rowShopId !== $shopId ||
+			$partySize === null ||
+			$status === null ||
+			isReservationDbDateStringForReservations($reservation['reservation_date'] ?? null) === false
+		) {
+			return false;
+		}
+
+		return [
+			'id' => $rowReservationId,
+			'shop_id' => $rowShopId,
+			'reservation_date' => $reservation['reservation_date'],
+			'party_size' => $partySize,
+			'status' => $status,
+		];
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+
+/**
+ * 実席変更前の現在席整合性確認
+ *  DELETE前に重複・master不存在・他店舗席・temp混入・実席欠落を拒否する
+ */
+function validateReservationSeatChangeRowsForWrite($shopId = null, $reservationId = null)
+{
+	global $DB_CONNECT;
+	try {
+		$shopId = normalizeReservationDbIntegerForReservations($shopId, 1, null);
+		$reservationId = normalizeReservationDbIntegerForReservations($reservationId, 1, null);
+		if ($shopId === null || $reservationId === null) {
+			return false;
+		}
+		if (is_object($DB_CONNECT) === false || method_exists($DB_CONNECT, 'inTransaction') === false || $DB_CONNECT->inTransaction() !== true) {
+			return false;
+		}
+
+		$strSQL = "
+			SELECT
+				rs.id AS reservation_seat_id,
+				rs.seat_id,
+				s.id AS matched_seat_id,
+				s.is_temp_move
+			FROM
+				reservations r
+				INNER JOIN reservation_seats rs ON r.id = rs.reservation_id
+				LEFT JOIN seats s ON rs.seat_id = s.id AND s.shop_id = r.shop_id
+			WHERE
+				r.id = :reservation_id
+				AND r.shop_id = :shop_id
+			ORDER BY
+				rs.id ASC
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':reservation_id', $reservationId, PDO::PARAM_INT);
+		$newStmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$rows = $newStmt->fetchAll(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+		if (empty($rows) === true) {
+			return false;
+		}
+
+		$reservationSeatIds = [];
+		$seatIds = [];
+		$normalSeatCount = 0;
+		foreach ($rows as $row) {
+			$reservationSeatId = normalizeReservationDbIntegerForReservations($row['reservation_seat_id'] ?? null, 1, null);
+			$seatId = normalizeReservationDbIntegerForReservations($row['seat_id'] ?? null, 1, null);
+			$matchedSeatId = normalizeReservationDbIntegerForReservations($row['matched_seat_id'] ?? null, 1, null);
+			$isTempMove = normalizeReservationDbIntegerForReservations($row['is_temp_move'] ?? null, 0, 1);
+			if (
+				$reservationSeatId === null ||
+				$seatId === null ||
+				$matchedSeatId !== $seatId ||
+				$isTempMove === null ||
+				isset($reservationSeatIds[$reservationSeatId]) === true ||
+				isset($seatIds[$seatId]) === true ||
+				$isTempMove !== 0
+			) {
+				return false;
+			}
+			$reservationSeatIds[$reservationSeatId] = true;
+			$seatIds[$seatId] = true;
+			$normalSeatCount++;
+		}
+
+		return $normalSeatCount > 0;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+
+/**
  * 予約ステータス更新
  *  caller所有のtransaction内でstatusとcancelled_atだけを更新する
  */
@@ -683,10 +950,8 @@ function getReservationDetailEditForWrite($shopId = null, $reservationId = null)
 				reservation_route,
 				reservation_date,
 				party_size,
-				customer_last_name,
-				customer_first_name,
-				customer_last_kana,
-				customer_first_kana,
+				customer_name,
+				customer_kana,
 				customer_tel,
 				customer_email,
 				accommodation_name,
@@ -716,7 +981,7 @@ function getReservationDetailEditForWrite($shopId = null, $reservationId = null)
 		$reservation['reservation_route'] = normalizeReservationDbIntegerForReservations($reservation['reservation_route'] ?? null, 1, 3);
 		$reservation['party_size'] = normalizeReservationDbIntegerForReservations($reservation['party_size'] ?? null, 1, 4);
 		$reservation['status'] = normalizeReservationDbIntegerForReservations($reservation['status'] ?? null, 1, 4);
-		$requiredStrings = ['customer_last_name', 'customer_first_name', 'customer_last_kana', 'customer_first_kana', 'customer_tel'];
+		$requiredStrings = ['customer_name', 'customer_kana', 'customer_tel'];
 		$nullableStrings = ['customer_email', 'accommodation_name', 'customer_note', 'shop_memo'];
 		if ($reservation['id'] !== $reservationId || $reservation['shop_id'] !== $shopId || $reservation['reservation_route'] === null || isReservationDbDateStringForReservations($reservation['reservation_date'] ?? null) === false || $reservation['party_size'] === null || $reservation['status'] === null) {
 			return false;
@@ -847,10 +1112,8 @@ function updateReservationDetailFields($shopId = null, $reservationId = null, $c
 		$columnTypes = [
 			'reservation_route' => 'int',
 			'party_size' => 'int',
-			'customer_last_name' => 'string',
-			'customer_first_name' => 'string',
-			'customer_last_kana' => 'string',
-			'customer_first_kana' => 'string',
+			'customer_name' => 'string',
+			'customer_kana' => 'string',
 			'customer_tel' => 'string',
 			'customer_email' => 'nullable_string',
 			'accommodation_name' => 'nullable_string',
@@ -1018,6 +1281,66 @@ function deleteReservationMenusForDetailEdit($shopId = null, $reservationId = nu
 		foreach (array_values($normalizedGuestNos) as $index => $guestNo) {
 			$newStmt->bindValue(':guest_no_' . $index, $guestNo, PDO::PARAM_INT);
 		}
+		$result = $newStmt->execute();
+		$newStmt->closeCursor();
+		return $result === true;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+
+/**
+ * 予約メール送信結果登録
+ *  COMMIT後に宛先単位の初回送信結果をreservation_mail_logsへ記録する
+ */
+function insertReservationMailLog($reservationId = null, $recipientType = null, $recipientAddress = null, $status = null, $lastError = null)
+{
+	global $DB_CONNECT;
+	try {
+		$reservationId = normalizeReservationDbIntegerForReservations($reservationId, 1, null);
+		$recipientType = normalizeReservationDbIntegerForReservations($recipientType, 1, 4);
+		$status = normalizeReservationDbIntegerForReservations($status, 1, 3);
+		if (
+			$reservationId === null ||
+			$recipientType === null ||
+			$status === null ||
+			($recipientAddress !== null && (is_string($recipientAddress) === false || strlen($recipientAddress) > 255)) ||
+			($lastError !== null && is_string($lastError) === false)
+		) {
+			return false;
+		}
+
+		$sentAt = null;
+		if ($status === 1) {
+			$sentAt = (new DateTimeImmutable('now', new DateTimeZone('Asia/Tokyo')))->format('Y-m-d H:i:s');
+		}
+
+		$strSQL = "
+			INSERT INTO reservation_mail_logs (
+				reservation_id,
+				recipient_type,
+				recipient_address,
+				status,
+				attempt_count,
+				last_error,
+				sent_at
+			) VALUES (
+				:reservation_id,
+				:recipient_type,
+				:recipient_address,
+				:status,
+				1,
+				:last_error,
+				:sent_at
+			)
+		";
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':reservation_id', $reservationId, PDO::PARAM_INT);
+		$newStmt->bindValue(':recipient_type', $recipientType, PDO::PARAM_INT);
+		$newStmt->bindValue(':recipient_address', $recipientAddress, $recipientAddress === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+		$newStmt->bindValue(':status', $status, PDO::PARAM_INT);
+		$newStmt->bindValue(':last_error', $lastError, $lastError === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+		$newStmt->bindValue(':sent_at', $sentAt, $sentAt === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$result = $newStmt->execute();
 		$newStmt->closeCursor();
 		return $result === true;

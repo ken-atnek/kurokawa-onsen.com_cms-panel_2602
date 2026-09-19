@@ -330,6 +330,9 @@
                     grid-column: span 2;
                     padding-block: 1.6rem;
                     gap: 0 5rem;
+                    &[hidden] {
+                        display: none;
+                    }
                     &:not(:last-of-type) {
                         border-bottom: 1px solid #e8e7e2;
                     }

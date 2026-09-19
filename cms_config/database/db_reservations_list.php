@@ -48,18 +48,26 @@ function getReservationWithSeatsReadRowsByDateRange($shopId = null, $startDate =
 				r.id AS reservation_id,
 				r.reservation_date,
 				r.party_size,
-				r.customer_last_name,
-				r.customer_first_name,
+				r.customer_name,
 				r.customer_tel,
 				r.reservation_route,
 				r.status,
 				rs.id AS reservation_seat_id,
 				rs.seat_id,
 				rs.seat_name_snapshot,
+				s.id AS matched_seat_id,
 				CASE
 					WHEN rs.id IS NULL THEN NULL
-					ELSE COALESCE(s.is_temp_move, 0)
-				END AS seat_is_temp_move
+					ELSE s.is_temp_move
+				END AS seat_is_temp_move,
+				CASE
+					WHEN rs.id IS NULL THEN NULL
+					ELSE s.type
+				END AS seat_type,
+				CASE
+					WHEN rs.id IS NULL THEN NULL
+					ELSE s.counter_area
+				END AS seat_counter_area
 			FROM
 				reservations r
 				LEFT JOIN reservation_seats rs ON r.id = rs.reservation_id
@@ -226,7 +234,7 @@ function buildReservationListSearchWhere($shopId = null, $searchConditions = nul
 		|| ($conditions['reception_start_day'] !== '' && $conditions['reception_end_day'] !== '' && $conditions['reception_start_day'] > $conditions['reception_end_day'])) {
 		return false;
 	}
-	if (mb_strlen($conditions['customer_name'], 'UTF-8') > 100 || mb_strlen($conditions['customer_tel'], 'UTF-8') > 20) {
+	if (mb_strlen($conditions['customer_name'], 'UTF-8') > 101 || mb_strlen($conditions['customer_tel'], 'UTF-8') > 20) {
 		return false;
 	}
 	if (($conditions['reservation_route'] !== null && in_array($conditions['reservation_route'], [1, 2, 3], true) === false)
@@ -264,21 +272,26 @@ function buildReservationListSearchWhere($shopId = null, $searchConditions = nul
 	}
 	if ($conditions['customer_name'] !== '') {
 		$customerNameLike = makeReservationListLiteralLikePattern($conditions['customer_name']);
-		if ($customerNameLike === false) {
+		$customerNameWithoutSpaces = preg_replace('/[\s\p{Z}\x{FEFF}]+/u', '', $conditions['customer_name']);
+		$customerNameWithoutSpacesLike = is_string($customerNameWithoutSpaces)
+			? makeReservationListLiteralLikePattern($customerNameWithoutSpaces)
+			: false;
+		if ($customerNameLike === false || $customerNameWithoutSpacesLike === false) {
 			return false;
 		}
 		$where[] = "
 			(
-				r.customer_last_name LIKE :customer_last_name ESCAPE '\\\\'
-				OR r.customer_first_name LIKE :customer_first_name ESCAPE '\\\\'
-				OR r.customer_last_kana LIKE :customer_last_kana ESCAPE '\\\\'
-				OR r.customer_first_kana LIKE :customer_first_kana ESCAPE '\\\\'
-				OR CONCAT(r.customer_last_name, r.customer_first_name) LIKE :customer_full_name ESCAPE '\\\\'
-				OR CONCAT(r.customer_last_kana, r.customer_first_kana) LIKE :customer_full_kana ESCAPE '\\\\'
+				r.customer_name LIKE :customer_name ESCAPE '\\\\'
+				OR r.customer_kana LIKE :customer_kana ESCAPE '\\\\'
+				OR REPLACE(REPLACE(r.customer_name, ' ', ''), '　', '') LIKE :customer_name_without_spaces ESCAPE '\\\\'
+				OR REPLACE(REPLACE(r.customer_kana, ' ', ''), '　', '') LIKE :customer_kana_without_spaces ESCAPE '\\\\'
 			)
 		";
-		foreach ([':customer_last_name', ':customer_first_name', ':customer_last_kana', ':customer_first_kana', ':customer_full_name', ':customer_full_kana'] as $parameterName) {
+		foreach ([':customer_name', ':customer_kana'] as $parameterName) {
 			$params[$parameterName] = [$customerNameLike, PDO::PARAM_STR];
+		}
+		foreach ([':customer_name_without_spaces', ':customer_kana_without_spaces'] as $parameterName) {
+			$params[$parameterName] = [$customerNameWithoutSpacesLike, PDO::PARAM_STR];
 		}
 	}
 	if ($conditions['customer_tel'] !== '') {
@@ -377,8 +390,7 @@ function searchReservationListRows($shopId = null, $searchConditions = null, $pa
 				r.id AS reservation_id,
 				r.reservation_date,
 				r.party_size,
-				r.customer_last_name,
-				r.customer_first_name,
+				r.customer_name,
 				r.customer_tel,
 				r.reservation_route,
 				r.status,

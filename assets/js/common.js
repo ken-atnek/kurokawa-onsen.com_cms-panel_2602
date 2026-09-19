@@ -206,8 +206,6 @@ const tooltip = document.createElement('div');
 tooltip.className = 'global-tooltip';
 document.body.appendChild(tooltip);
 
-const targets = document.querySelectorAll('[data-tooltip], [data-tooltip-on], [data-tooltip-off]');
-
 const getTooltipText = el => {
   if (el.dataset.tooltip) {
     return el.dataset.tooltip;
@@ -251,24 +249,37 @@ const hideTooltip = () => {
   tooltip.classList.remove('is-show');
 };
 
-targets.forEach(el => {
-  el.addEventListener('mouseenter', () => showTooltip(el));
-  el.addEventListener('mouseleave', hideTooltip);
-
-  if (el.matches('button, [tabindex], input, select, textarea, a')) {
-    el.addEventListener('focus', () => showTooltip(el));
-    el.addEventListener('blur', hideTooltip);
-  } else {
-    el.addEventListener('focusin', () => showTooltip(el));
-    el.addEventListener('focusout', hideTooltip);
+window.initTooltips = (root = document) => {
+  const scope = root && root.querySelectorAll ? root : document;
+  const selector = '[data-tooltip], [data-tooltip-on], [data-tooltip-off]';
+  const targets = Array.from(scope.querySelectorAll(selector));
+  if (scope.matches && scope.matches(selector)) {
+    targets.unshift(scope);
   }
 
-  const checkbox = el.querySelector('input[type="checkbox"]');
-  if (checkbox) {
-    checkbox.addEventListener('change', () => {
-      if (tooltip.classList.contains('is-show')) {
-        showTooltip(el);
-      }
-    });
-  }
-});
+  targets.forEach(el => {
+    if (el.dataset.tooltipInitialized === '1') return;
+    el.dataset.tooltipInitialized = '1';
+    el.addEventListener('mouseenter', () => showTooltip(el));
+    el.addEventListener('mouseleave', hideTooltip);
+
+    if (el.matches('button, [tabindex], input, select, textarea, a')) {
+      el.addEventListener('focus', () => showTooltip(el));
+      el.addEventListener('blur', hideTooltip);
+    } else {
+      el.addEventListener('focusin', () => showTooltip(el));
+      el.addEventListener('focusout', hideTooltip);
+    }
+
+    const checkbox = el.querySelector('input[type="checkbox"]');
+    if (checkbox) {
+      checkbox.addEventListener('change', () => {
+        if (tooltip.classList.contains('is-show')) {
+          showTooltip(el);
+        }
+      });
+    }
+  });
+};
+
+window.initTooltips(document);

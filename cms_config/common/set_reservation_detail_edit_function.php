@@ -3,6 +3,7 @@
  * [cms_config/common/set_reservation_detail_edit_function.php]
  *  飲食店予約詳細編集のpure共通処理
  */
+require_once __DIR__ . '/set_reservation_function.php';
 
 /**
  * 予約詳細編集用整数正規化
@@ -100,8 +101,8 @@ function isReservationDetailEditPostSyntaxValid($post)
 {
 	$allowedKeys = [
 		'noUpDateKey', 'csrfToken', 'reservationId', 'detailEditVersion',
-		'reservationRoute', 'reservationPerson', 'customerLastName', 'customerFirstName',
-		'customerLastKana', 'customerFirstKana', 'customerTel', 'customerEmail',
+		'reservationRoute', 'reservationPerson', 'customerName', 'customerKana',
+		'customerTel', 'customerEmail',
 		'reservationMenu', 'accommodationName', 'reservationNote', 'shopMemo',
 	];
 	$requiredScalarKeys = array_values(array_diff($allowedKeys, ['reservationMenu']));
@@ -146,19 +147,16 @@ function isReservationDetailEditPostSyntaxValid($post)
 		return false;
 	}
 
-	$requiredFields = [
-		'customerLastName' => 50,
-		'customerFirstName' => 50,
-		'customerLastKana' => 50,
-		'customerFirstKana' => 50,
-		'customerTel' => 20,
-	];
-	foreach ($requiredFields as $key => $maxLength) {
-		$blank = reservationDetailEditBlankResult($post[$key]);
-		$length = reservationDetailEditStringLength($post[$key]);
-		if ($blank !== false || $length === null || $length > $maxLength) {
-			return false;
-		}
+	if (
+		normalizeReservationCustomerIdentityValue($post['customerName']) === null ||
+		normalizeReservationCustomerIdentityValue($post['customerKana']) === null
+	) {
+		return false;
+	}
+	$customerTelBlank = reservationDetailEditBlankResult($post['customerTel']);
+	$customerTelLength = reservationDetailEditStringLength($post['customerTel']);
+	if ($customerTelBlank !== false || $customerTelLength === null || $customerTelLength > 20) {
+		return false;
 	}
 
 	$optionalFields = ['customerEmail', 'accommodationName', 'reservationNote', 'shopMemo'];
@@ -201,6 +199,8 @@ function normalizeReservationDetailEditPost($post)
 	$accommodationName = normalizeReservationDetailEditOptionalString($post['accommodationName']);
 	$customerNote = normalizeReservationDetailEditOptionalString($post['reservationNote']);
 	$shopMemo = normalizeReservationDetailEditOptionalString($post['shopMemo']);
+	$customerName = normalizeReservationCustomerIdentityValue($post['customerName']);
+	$customerKana = normalizeReservationCustomerIdentityValue($post['customerKana']);
 	$menuSlots = [];
 	foreach (($post['reservationMenu'] ?? []) as $menuValue) {
 		if ($menuValue === '') {
@@ -221,10 +221,8 @@ function normalizeReservationDetailEditPost($post)
 		'reservation_data' => [
 			'reservation_route' => $routeMap[$post['reservationRoute']],
 			'party_size' => $partySize,
-			'customer_last_name' => $post['customerLastName'],
-			'customer_first_name' => $post['customerFirstName'],
-			'customer_last_kana' => $post['customerLastKana'],
-			'customer_first_kana' => $post['customerFirstKana'],
+			'customer_name' => $customerName,
+			'customer_kana' => $customerKana,
 			'customer_tel' => $post['customerTel'],
 			'customer_email' => $email,
 			'accommodation_name' => $accommodationName,
@@ -365,12 +363,18 @@ function buildReservationDetailEditCanonicalState($reservation, $menuRows, $menu
 		return false;
 	}
 
-	$requiredStrings = ['customer_last_name', 'customer_first_name', 'customer_last_kana', 'customer_first_kana', 'customer_tel'];
+	$requiredStrings = ['customer_name', 'customer_kana', 'customer_tel'];
 	$nullableStrings = ['customer_email', 'accommodation_name', 'customer_note', 'shop_memo'];
 	foreach ($requiredStrings as $key) {
 		if (array_key_exists($key, $reservation) === false || reservationDetailEditStringLength($reservation[$key]) === null) {
 			return false;
 		}
+	}
+	if (
+		normalizeReservationCustomerIdentityValue($reservation['customer_name']) !== $reservation['customer_name'] ||
+		normalizeReservationCustomerIdentityValue($reservation['customer_kana']) !== $reservation['customer_kana']
+	) {
+		return false;
 	}
 	foreach ($nullableStrings as $key) {
 		if (array_key_exists($key, $reservation) === false || ($reservation[$key] !== null && reservationDetailEditStringLength($reservation[$key]) === null)) {
@@ -406,10 +410,8 @@ function buildReservationDetailEditCanonicalState($reservation, $menuRows, $menu
 			'shop_id' => $shopId,
 			'reservation_route' => $reservationRoute,
 			'party_size' => $partySize,
-			'customer_last_name' => $reservation['customer_last_name'],
-			'customer_first_name' => $reservation['customer_first_name'],
-			'customer_last_kana' => $reservation['customer_last_kana'],
-			'customer_first_kana' => $reservation['customer_first_kana'],
+			'customer_name' => $reservation['customer_name'],
+			'customer_kana' => $reservation['customer_kana'],
 			'customer_tel' => $reservation['customer_tel'],
 			'customer_email' => $reservation['customer_email'],
 			'accommodation_name' => $reservation['accommodation_name'],
@@ -446,8 +448,8 @@ function buildReservationDetailEditVersion($reservation, $menuRows, $menuSelecti
 function buildReservationDetailEditReservationChanges($freshReservation, $requestedReservationData)
 {
 	$allowedColumns = [
-		'reservation_route', 'party_size', 'customer_last_name', 'customer_first_name',
-		'customer_last_kana', 'customer_first_kana', 'customer_tel', 'customer_email',
+		'reservation_route', 'party_size', 'customer_name', 'customer_kana',
+		'customer_tel', 'customer_email',
 		'accommodation_name', 'customer_note', 'shop_memo',
 	];
 	if (is_array($freshReservation) === false || is_array($requestedReservationData) === false || array_keys($requestedReservationData) !== $allowedColumns) {

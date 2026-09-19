@@ -68,12 +68,22 @@ function clientReservationReadHasOnlyFields($post, $allowedFields)
  * 予約参照共通master取得
  *  店舗・設定・席を取得し、DB failureと店舗不在を失敗として返す
  */
-function clientReservationReadLoadBase($shopId)
+function clientReservationReadLoadBase($shopId, &$failureReason = null)
 {
+	$failureReason = null;
   $shop = getReservationShopForOccupancy($shopId);
+	if ($shop === false || $shop === null) {
+		$failureReason = 'shop';
+		return false;
+	}
   $settings = getShopReservationSettings($shopId);
+	if ($settings === false) {
+		$failureReason = 'settings';
+		return false;
+	}
   $seats = getSeatsForReservationOccupancy($shopId);
-  if ($shop === false || $shop === null || $settings === false || $seats === false) {
+	if ($seats === false) {
+		$failureReason = 'seats';
     return false;
   }
   return [
@@ -204,9 +214,19 @@ if ($action === 'readMonth') {
   }
 }
 
-$baseData = clientReservationReadLoadBase($shopId);
+$baseDataFailureReason = null;
+$baseData = clientReservationReadLoadBase($shopId, $baseDataFailureReason);
 if ($baseData === false) {
-  clientReservationReadExit('取得エラー', '予約情報を取得できませんでした。', $noUpDateKey);
+	$baseDataErrorMessages = [
+		'shop' => '店舗情報を取得できませんでした。',
+		'settings' => '予約基本設定を取得できませんでした。',
+		'seats' => '席情報を取得できませんでした。',
+	];
+	clientReservationReadExit(
+		'取得エラー',
+		$baseDataErrorMessages[$baseDataFailureReason] ?? '予約情報を取得できませんでした。',
+		$noUpDateKey
+	);
 }
 
 if ($action === 'previewSeat') {
@@ -306,8 +326,11 @@ if ($action === 'previewSeat') {
 if ($action === 'readMonth') {
   $reservationWithSeatRows = getReservationWithSeatsReadRowsByDateRange($shopId, $range['grid_start_date'], $range['grid_end_date']);
   $overrideRows = getReservationCalendarReadRowsByDateRange($shopId, $range['grid_start_date'], $range['grid_end_date']);
-  if ($reservationWithSeatRows === false || $overrideRows === false) {
-    clientReservationReadExit('取得エラー', '予約情報を取得できませんでした。', $noUpDateKey);
+	if ($reservationWithSeatRows === false) {
+		clientReservationReadExit('取得エラー', '予約一覧を取得できませんでした。', $noUpDateKey);
+	}
+	if ($overrideRows === false) {
+		clientReservationReadExit('取得エラー', 'カレンダー設定を取得できませんでした。', $noUpDateKey);
   }
   $readData = buildReservationReadDays(
     $shopId,
@@ -327,7 +350,7 @@ if ($action === 'readMonth') {
       $readData['shop_eligibility']['eligible']
     );
   if ($readData === false || $tag === null) {
-    clientReservationReadExit('取得エラー', '予約情報を取得できませんでした。', $noUpDateKey);
+		clientReservationReadExit('取得エラー', '予約カレンダーを生成できませんでした。', $noUpDateKey);
   }
 
   $response = clientReservationReadResponse('success', '', '', $noUpDateKey);
@@ -342,8 +365,14 @@ if ($action === 'readMonth') {
 $reservationWithSeatRows = getReservationWithSeatsReadRowsByDateRange($shopId, $selectedDate, $selectedDate);
 $reservationMenuRows = getReservationMenuReadRowsByDateRange($shopId, $selectedDate, $selectedDate);
 $overrideRows = getReservationCalendarReadRowsByDateRange($shopId, $selectedDate, $selectedDate);
-if ($reservationWithSeatRows === false || $reservationMenuRows === false || $overrideRows === false) {
-  clientReservationReadExit('取得エラー', '予約情報を取得できませんでした。', $noUpDateKey);
+if ($reservationWithSeatRows === false) {
+	clientReservationReadExit('取得エラー', '予約一覧を取得できませんでした。', $noUpDateKey);
+}
+if ($reservationMenuRows === false) {
+	clientReservationReadExit('取得エラー', '予約メニュー情報を取得できませんでした。', $noUpDateKey);
+}
+if ($overrideRows === false) {
+	clientReservationReadExit('取得エラー', 'カレンダー設定を取得できませんでした。', $noUpDateKey);
 }
 $readData = buildReservationReadDays(
   $shopId,
@@ -361,7 +390,7 @@ $statusTag = $selectedDay === null
   ? null
   : clientReservationReadRenderStatusTag($selectedDay, $readData['shop_eligibility']['eligible']);
 if ($readData === false || $selectedDay === null || $tag === null || $statusTag === null) {
-  clientReservationReadExit('取得エラー', '予約情報を取得できませんでした。', $noUpDateKey);
+	clientReservationReadExit('取得エラー', '選択日の予約情報を生成できませんでした。', $noUpDateKey);
 }
 
 $response = clientReservationReadResponse('success', '', '', $noUpDateKey);

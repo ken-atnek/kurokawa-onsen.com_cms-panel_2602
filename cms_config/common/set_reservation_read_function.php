@@ -121,7 +121,11 @@ function buildReservationReadReservationIndex($reservationSeatRows, $menuRows = 
 	$reservationsByDate = [];
 	$reservationDatesById = [];
 	$reservationSeatIds = [];
+	$reservationSeatIdsByReservation = [];
 	$seatlessReservationIds = [];
+	$tempSeatCounts = [];
+	$tempSeatIdsByReservation = [];
+	$normalSeatCounts = [];
 	foreach ($reservationSeatRows as $row) {
 		if (is_array($row) === false) {
 			return false;
@@ -135,32 +139,36 @@ function buildReservationReadReservationIndex($reservationSeatRows, $menuRows = 
 			return false;
 		}
 
-		$customerLastName = (string)($row['customer_last_name'] ?? '');
-		$customerFirstName = (string)($row['customer_first_name'] ?? '');
+		$customerName = (string)($row['customer_name'] ?? '');
 		$customerTel = (string)($row['customer_tel'] ?? '');
 		if (isset($reservationDatesById[$reservationId]) === false) {
 			$reservationDatesById[$reservationId] = $reservationDate;
 			$reservationsByDate[$reservationDate][$reservationId] = [
 				'reservation_id' => $reservationId,
 				'party_size' => $partySize,
-				'customer_last_name' => $customerLastName,
-				'customer_first_name' => $customerFirstName,
+				'customer_name' => $customerName,
 				'customer_tel' => $customerTel,
 				'reservation_route' => $reservationRoute,
 				'status' => $status,
 				'seat_ids' => [],
 				'seats' => [],
 				'has_temp_move' => false,
+				'seat_data_error' => false,
+				'seat_data_error_types' => [],
+				'duplicate_temp_recoverable' => false,
 				'menus' => [],
 			];
+			$reservationSeatIdsByReservation[$reservationId] = [];
+			$tempSeatCounts[$reservationId] = 0;
+			$tempSeatIdsByReservation[$reservationId] = [];
+			$normalSeatCounts[$reservationId] = 0;
 		} else {
 			$baseReservation = $reservationsByDate[$reservationDatesById[$reservationId]][$reservationId] ?? null;
 			if (
 				is_array($baseReservation) === false ||
 				$reservationDatesById[$reservationId] !== $reservationDate ||
 				$baseReservation['party_size'] !== $partySize ||
-				$baseReservation['customer_last_name'] !== $customerLastName ||
-				$baseReservation['customer_first_name'] !== $customerFirstName ||
+				$baseReservation['customer_name'] !== $customerName ||
 				$baseReservation['customer_tel'] !== $customerTel ||
 				$baseReservation['reservation_route'] !== $reservationRoute ||
 				$baseReservation['status'] !== $status
@@ -174,30 +182,72 @@ function buildReservationReadReservationIndex($reservationSeatRows, $menuRows = 
 		if ($reservationSeatIdValue === null && $seatIdValue === null) {
 			if (
 				($row['seat_name_snapshot'] ?? null) !== null ||
+				($row['matched_seat_id'] ?? null) !== null ||
 				($row['seat_is_temp_move'] ?? null) !== null ||
+				($row['seat_type'] ?? null) !== null ||
+				($row['seat_counter_area'] ?? null) !== null ||
 				isset($seatlessReservationIds[$reservationId]) === true ||
 				empty($reservationsByDate[$reservationDate][$reservationId]['seats']) === false
 			) {
-				return false;
+				$reservationsByDate[$reservationDate][$reservationId]['seat_data_error'] = true;
 			}
 			$seatlessReservationIds[$reservationId] = true;
+			$reservationsByDate[$reservationDate][$reservationId]['seat_data_error'] = true;
+			$reservationsByDate[$reservationDate][$reservationId]['seat_data_error_types']['missing_normal_seat'] = true;
 			continue;
 		}
 
 		$reservationSeatId = normalizeReservationRegistrationInteger($reservationSeatIdValue, 1, null);
 		$seatId = normalizeReservationRegistrationInteger($seatIdValue, 1, null);
-		$seatIsTempMove = normalizeReservationRegistrationInteger($row['seat_is_temp_move'] ?? null, 0, 1);
-		if ($reservationSeatId === null || $seatId === null || $seatIsTempMove === null || isset($seatlessReservationIds[$reservationId]) === true || isset($reservationSeatIds[$reservationSeatId]) === true) {
+		if ($reservationSeatId === null || isset($reservationSeatIds[$reservationSeatId]) === true) {
 			return false;
 		}
 		$reservationSeatIds[$reservationSeatId] = true;
-		$reservationsByDate[$reservationDate][$reservationId]['seat_ids'][] = $seatId;
+		if ($seatId === null) {
+			$reservationsByDate[$reservationDate][$reservationId]['seat_data_error'] = true;
+			$reservationsByDate[$reservationDate][$reservationId]['seat_data_error_types']['invalid_seat_reference'] = true;
+			$reservationsByDate[$reservationDate][$reservationId]['seats'][] = [
+				'reservation_seat_id' => $reservationSeatId,
+				'seat_id' => 0,
+				'seat_name_snapshot' => (string)($row['seat_name_snapshot'] ?? ''),
+				'seat_is_temp_move' => null,
+				'seat_type' => null,
+				'seat_counter_area' => null,
+			];
+			continue;
+		}
+		$matchedSeatId = normalizeReservationRegistrationInteger($row['matched_seat_id'] ?? null, 1, null);
+		$seatIsTempMove = normalizeReservationRegistrationInteger($row['seat_is_temp_move'] ?? null, 0, 1);
+		$seatType = normalizeReservationRegistrationInteger($row['seat_type'] ?? null, 1, 2);
+		$seatCounterArea = $row['seat_counter_area'] ?? null;
+		$seatMatchesShop = $matchedSeatId !== null && $matchedSeatId === $seatId && $seatIsTempMove !== null;
+		if (isset($seatlessReservationIds[$reservationId]) === true || $seatMatchesShop === false) {
+			$reservationsByDate[$reservationDate][$reservationId]['seat_data_error'] = true;
+			$reservationsByDate[$reservationDate][$reservationId]['seat_data_error_types']['invalid_seat_reference'] = true;
+		}
+		if (isset($reservationSeatIdsByReservation[$reservationId][$seatId]) === true) {
+			if ($seatMatchesShop === false || $seatIsTempMove !== 1) {
+				$reservationsByDate[$reservationDate][$reservationId]['seat_data_error'] = true;
+				$reservationsByDate[$reservationDate][$reservationId]['seat_data_error_types']['duplicate_normal_seat'] = true;
+			}
+		} else {
+			$reservationSeatIdsByReservation[$reservationId][$seatId] = true;
+			$reservationsByDate[$reservationDate][$reservationId]['seat_ids'][] = $seatId;
+		}
 		$reservationsByDate[$reservationDate][$reservationId]['seats'][] = [
 			'reservation_seat_id' => $reservationSeatId,
+			'seat_id' => $seatId,
 			'seat_name_snapshot' => (string)($row['seat_name_snapshot'] ?? ''),
+			'seat_is_temp_move' => $seatMatchesShop ? $seatIsTempMove : null,
+			'seat_type' => $seatMatchesShop ? $seatType : null,
+			'seat_counter_area' => $seatMatchesShop ? $seatCounterArea : null,
 		];
-		if ($seatIsTempMove === 1) {
+		if ($seatMatchesShop === true && $seatIsTempMove === 1) {
+			$tempSeatCounts[$reservationId]++;
+			$tempSeatIdsByReservation[$reservationId][$seatId] = true;
 			$reservationsByDate[$reservationDate][$reservationId]['has_temp_move'] = true;
+		} elseif ($seatMatchesShop === true && $seatIsTempMove === 0) {
+			$normalSeatCounts[$reservationId]++;
 		}
 	}
 
@@ -232,6 +282,22 @@ function buildReservationReadReservationIndex($reservationSeatRows, $menuRows = 
 
 	foreach ($reservationsByDate as &$reservations) {
 		foreach ($reservations as &$reservation) {
+			$reservationId = (int)($reservation['reservation_id'] ?? 0);
+			if (($normalSeatCounts[$reservationId] ?? 0) < 1) {
+				$reservation['seat_data_error'] = true;
+				$reservation['seat_data_error_types']['missing_normal_seat'] = true;
+			}
+			if (($tempSeatCounts[$reservationId] ?? 0) > 1) {
+				$reservation['seat_data_error'] = true;
+				$reservation['seat_data_error_types']['duplicate_temp'] = true;
+				if (count($tempSeatIdsByReservation[$reservationId] ?? []) !== 1) {
+					$reservation['seat_data_error_types']['multiple_temp_masters'] = true;
+				}
+			}
+			$reservation['seat_data_error_types'] = array_keys($reservation['seat_data_error_types']);
+			$reservation['duplicate_temp_recoverable'] = $reservation['seat_data_error_types'] === ['duplicate_temp']
+				&& ($normalSeatCounts[$reservationId] ?? 0) > 0
+				&& ($tempSeatCounts[$reservationId] ?? 0) > 1;
 			usort($reservation['seats'], function ($left, $right) {
 				return (int)($left['reservation_seat_id'] ?? 0) <=> (int)($right['reservation_seat_id'] ?? 0);
 			});
@@ -287,6 +353,7 @@ function buildReservationReadSeatIndex($seatRows)
 		}
 		$seatsById[$seatId] = [
 			'id' => $seatId,
+			'name' => (string)($seatRow['name'] ?? ''),
 			'type' => (int)($seatRow['type'] ?? 0),
 			'capacity' => (int)($seatRow['capacity'] ?? 0),
 			'counter_area' => $seatRow['counter_area'] ?? null,
@@ -404,6 +471,7 @@ function buildReservationReadDays($shopId, $dates, $shop, $settings, $seatRows, 
 	}
 
 	$regularHolidays = normalizeRegularHolidays($shop['closed_weekdays'] ?? null);
+	$today = (new DateTimeImmutable('today', new DateTimeZone('Asia/Tokyo')))->format('Y-m-d');
 	$days = [];
 	foreach ($dates as $date) {
 		$date = normalizeReservationReadSelectedDate($date);
@@ -423,6 +491,35 @@ function buildReservationReadDays($shopId, $dates, $shop, $settings, $seatRows, 
 		if ($availability === false) {
 			return false;
 		}
+
+		foreach ($reservations as $reservationId => &$reservation) {
+			$reservation['seat_change_date_allowed'] = $date >= $today;
+			if (($reservation['seat_data_error'] ?? false) === true) {
+				$reservation['seat_change_candidates'] = [];
+				$reservation['seat_change_version'] = '';
+				continue;
+			}
+			$candidateState = $occupancyState;
+			if (($reservation['has_temp_move'] ?? false) === true && isset($candidateState['reservationsById'][$reservationId])) {
+				$candidateState['reservationsById'][$reservationId]['has_temp_move'] = false;
+			}
+			$candidates = buildReservationSeatChangeCandidates($candidateState, $reservationId);
+			$version = makeReservationSeatChangeVersion(
+				$reservationId,
+				$date,
+				$reservation['party_size'] ?? null,
+				$reservation['status'] ?? null,
+				$reservation['seat_ids'] ?? [],
+				(bool)($reservation['has_temp_move'] ?? false)
+			);
+			if ($candidates === null || $version === null) {
+				unset($reservation);
+				return false;
+			}
+			$reservation['seat_change_candidates'] = $date < $today ? [] : $candidates;
+			$reservation['seat_change_version'] = $version;
+		}
+		unset($reservation);
 
 		$reservationCount = 0;
 		$guestCount = 0;

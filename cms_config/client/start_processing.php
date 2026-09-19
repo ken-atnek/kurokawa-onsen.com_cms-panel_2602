@@ -78,6 +78,18 @@ if ($loginCheck == 1) {
 	}
 }
 
+if ($loginCheck == 1 && isset($_SESSION['client_login']['shop_id'])) {
+	require_once __DIR__ . '/../common/set_reservation_temp_move_guard_function.php';
+	$guardScriptName = basename($_SERVER['SCRIPT_FILENAME'] ?? '');
+	if (reservationTempMoveGuardRequestNeedsState($guardScriptName, $_POST ?? []) === true) {
+		require_once __DIR__ . '/../database/db_reservations.php';
+		$guardShopId = normalizeReservationDbIntegerForReservations($_SESSION['client_login']['shop_id'], 1, null);
+		if ($guardShopId !== null) {
+			applyReservationTempMoveRequestGuard($guardShopId, $guardScriptName, $_POST ?? []);
+		}
+	}
+}
+
 $clientPageDir = realpath(__DIR__ . '/../../96-client');
 $requestedScript = realpath($_SERVER['SCRIPT_FILENAME'] ?? '');
 if ($loginCheck == 1 && is_string($clientPageDir) && is_string($requestedScript) &&
