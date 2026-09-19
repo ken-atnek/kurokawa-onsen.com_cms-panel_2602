@@ -159,3 +159,100 @@ function getShops_FindById($shopId = null)
 		exit;
 	}
 }
+/**
+ * 初期JSON生成の候補となる公開中の飲食店IDを取得
+ *  予約利用可否の最終判定は呼び出し側で行う。
+ */
+function getReservationJsonBackfillShopIds()
+{
+	global $DB_CONNECT;
+	try {
+		$stmt = $DB_CONNECT->prepare("SELECT shop_id FROM shops WHERE shop_type = :shop_type AND is_active = 1 AND is_public = 1 ORDER BY shop_id ASC");
+		if ($stmt === false) {
+			return false;
+		}
+		$stmt->bindValue(':shop_type', 'food', PDO::PARAM_STR);
+		if ($stmt->execute() !== true) {
+			return false;
+		}
+		$shopIds = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+		$stmt->closeCursor();
+		return array_map('intval', $shopIds);
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/**
+ * 予約処理用店舗行ロック取得
+ *  transaction開始後に対象店舗行をFOR UPDATEでロックする
+ */
+function getReservationShopForUpdate($shopId = null)
+{
+	global $DB_CONNECT;
+	try {
+		if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1) {
+			return null;
+		}
+		if (is_object($DB_CONNECT) === false || method_exists($DB_CONNECT, 'inTransaction') === false || $DB_CONNECT->inTransaction() !== true) {
+			return false;
+		}
+
+		$strSQL = "
+			SELECT
+				shop_id
+			FROM
+				shops
+			WHERE
+				shop_id = :shop_id
+			LIMIT 1
+			FOR UPDATE
+		";
+
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$shop = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+
+		return $shop ?: null;
+	} catch (PDOException $e) {
+		return false;
+	}
+}
+/**
+ * 予約共通判定用店舗情報取得
+ *  DBエラー時はfalseを返し店舗なしと区別する
+ */
+function getReservationShopForOccupancy($shopId = null)
+{
+	global $DB_CONNECT;
+	try {
+		if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1) {
+			return null;
+		}
+
+		$strSQL = "
+			SELECT
+				shop_id,
+				is_public,
+				shop_type,
+				closed_weekdays,
+				is_active
+			FROM
+				shops
+			WHERE
+				shop_id = :shop_id
+			LIMIT 1
+		";
+
+		$newStmt = $DB_CONNECT->prepare($strSQL);
+		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
+		$newStmt->execute();
+		$shop = $newStmt->fetch(PDO::FETCH_ASSOC);
+		$newStmt->closeCursor();
+
+		return $shop ?: null;
+	} catch (PDOException $e) {
+		return false;
+	}
+}

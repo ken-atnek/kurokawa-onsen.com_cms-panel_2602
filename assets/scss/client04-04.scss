@@ -281,6 +281,10 @@
                 .btn-is-add {
                     @include main-button(confirm);
                     padding: 0.8rem 2rem 0.8rem 4rem;
+                    &:disabled {
+                        cursor: not-allowed;
+                        opacity: 0.45;
+                    }
                     span {
                         position: relative;
                         font-size: 1.4rem;
@@ -321,6 +325,20 @@
                             rotate: 45deg;
                         }
                     }
+                }
+            }
+            .reservation-add-message {
+                font-size: fz(14);
+                color: $caution-red;
+                background-color: #fff4f4;
+                border: 1px solid #f0caca;
+                border-radius: 6px;
+                margin-top: 1rem;
+                padding: 1em;
+                a {
+                    color: inherit;
+                    font-weight: 600;
+                    text-decoration: underline;
                 }
             }
             .list-customer {
@@ -412,6 +430,9 @@
                 font-size: inherit;
                 display: flex;
                 flex-direction: column;
+                &[hidden] {
+                    display: none;
+                }
                 h4 {
                     font-size: fz(16);
                     font-weight: 600;
@@ -440,6 +461,19 @@
                             dt {
                                 font-size: fz(14);
                                 align-self: center;
+                                &.is-required {
+                                    display: flex;
+                                    align-items: center;
+                                    &::before {
+                                        content: "必須";
+                                        font-size: fz(12);
+                                        color: #fff;
+                                        background-color: $caution-red;
+                                        border-radius: 4px;
+                                        margin-right: 0.5em;
+                                        padding: 0.2em 0.5em;
+                                    }
+                                }
                                 &.position-top {
                                     align-self: stretch;
                                     display: flex;
@@ -450,8 +484,18 @@
                             dd {
                                 font-size: inherit;
                                 display: flex;
-                                input[type="text"] {
+                                input[type="text"],
+                                input[type="tel"],
+                                input[type="email"] {
                                     max-width: 30rem;
+                                }
+                                &.input-pair {
+                                    flex-wrap: wrap;
+                                    gap: 1rem;
+                                    input {
+                                        flex: 1 1 14rem;
+                                        min-width: 0;
+                                    }
                                 }
                                 textarea {
                                     font-size: fz(16);
@@ -501,6 +545,27 @@
                             }
                             &.item-menu {
                                 dd {
+                                    .menu-slot-list {
+                                        display: flex;
+                                        flex-direction: column;
+                                        width: 100%;
+                                        gap: 1rem;
+                                    }
+                                    .menu-slot {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 1rem;
+                                        &[hidden] {
+                                            display: none;
+                                        }
+                                    }
+                                    .menu-slot__label {
+                                        flex: 0 0 6rem;
+                                        font-size: fz(14);
+                                    }
+                                    .menu-slot__fixed-value {
+                                        color: #5f5e5a;
+                                    }
                                     .select-menu {
                                         width: 30rem;
                                         @include select-list-box(
@@ -527,6 +592,11 @@
                             border-radius: 6px;
                             transition: 0.3s ease-out;
 
+                            &:disabled {
+                                cursor: not-allowed;
+                                opacity: 0.45;
+                            }
+
                             &.btn-cancel {
                                 background-color: #fff;
                                 border: 1px solid $base-black;
@@ -545,6 +615,38 @@
                                 width: 12rem;
                                 &:hover {
                                     opacity: 0.8;
+                                }
+                            }
+                        }
+                    }
+                }
+                @media (max-width: 1025px) {
+                    form {
+                        padding: 2em 1.5em;
+                        dl {
+                            & > div {
+                                gap: 0 2rem;
+                                dd.input-pair {
+                                    flex-direction: column;
+                                    input {
+                                        flex-basis: auto;
+                                        width: 100%;
+                                    }
+                                }
+                                &.item-menu {
+                                    dd {
+                                        .menu-slot {
+                                            align-items: stretch;
+                                            flex-direction: column;
+                                        }
+                                        .menu-slot__label {
+                                            flex-basis: auto;
+                                        }
+                                        .select-menu {
+                                            max-width: 100%;
+                                            width: 100%;
+                                        }
+                                    }
                                 }
                             }
                         }

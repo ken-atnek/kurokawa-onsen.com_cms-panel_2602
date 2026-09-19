@@ -13,6 +13,7 @@ require_once dirname(__DIR__) . '/../../cms_config/common/define.php';
 #***** 定数・関数宣言ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_function.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_reservation_function.php';
 #***** JSON出力ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeShopJson.php';
 #***** DB設定ファイル：インクルード *****#
@@ -24,6 +25,9 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/client/start_processing.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_accounts.php';
 #店舗情報
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_shops.php';
+#予約カレンダー
+require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_reservation_calender.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeReservationJson.php';
 
 #================#
 # 応答用タグ初期化
@@ -235,6 +239,10 @@ switch ($action) {
         exit;
       }
       #更新開始
+      $shopJsonCommitted = false;
+      $reservationSyncNeeded = false;
+      $reservationRefreshMonths = false;
+      $reservationWasEnabled = false;
       try {
         #トランザクション開始
         # 1 = BEGIN／ 2 = COMMIT／ 3 = ROLLBACK
@@ -385,6 +393,25 @@ switch ($action) {
                   break;
                 }
                 $shopId = (int)$shopId;
+                #予約処理と同じ店舗mutexを取得し、更新前の定休日を保持する
+                $lockedReservationShop = getReservationShopForUpdate($shopId);
+                $previousReservationShop = is_array($lockedReservationShop) ? getReservationShopForOccupancy($shopId) : false;
+                if (
+                  is_array($lockedReservationShop) === false ||
+                  (int)($lockedReservationShop['shop_id'] ?? 0) !== $shopId ||
+                  is_array($previousReservationShop) === false ||
+                  (int)($previousReservationShop['shop_id'] ?? 0) !== $shopId
+                ) {
+                  $data = [
+                    'pageName' => 'proc_client01_02',
+                    'reason' => '店舗mutexまたは更新前定休日取得失敗',
+                  ];
+                  makeLog($data);
+                  $dbCompleteFlg = false;
+                  break;
+                }
+                $previousClosedWeekdays = normalizeRegularHolidays($previousReservationShop['closed_weekdays'] ?? null);
+                $reservationWasEnabled = isReservationEnabledForShop($shopId);
                 #登録用配列：初期化
                 $dbFiledData = array();
                 #登録情報セット
@@ -422,6 +449,38 @@ switch ($action) {
                 $dbSuccessFlg = SQL_Process($DB_CONNECT, "shops", $dbFiledData, $dbFiledValue, $processFlg, $exeFlg);
                 #基本情報の更新が成功したらログイン情報の登録処理に進む
                 if ($dbSuccessFlg == 1) {
+                  #保存後の定休日を正として、不要になった当日以降の定休日解除だけを削除する
+                  $savedReservationShop = getReservationShopForOccupancy($shopId);
+                  if (is_array($savedReservationShop) === false || (int)($savedReservationShop['shop_id'] ?? 0) !== $shopId) {
+                    $data = [
+                      'pageName' => 'proc_client01_02',
+                      'reason' => '更新後定休日取得失敗',
+                    ];
+                    makeLog($data);
+                    $dbCompleteFlg = false;
+                    break;
+                  }
+                  $savedClosedWeekdays = normalizeRegularHolidays($savedReservationShop['closed_weekdays'] ?? null);
+                  $reservationRefreshMonths = array_diff($previousClosedWeekdays, $savedClosedWeekdays) !== [] ||
+                    array_diff($savedClosedWeekdays, $previousClosedWeekdays) !== [];
+                  $reservationSyncNeeded = $reservationRefreshMonths ||
+                    ($previousReservationShop['shop_type'] ?? null) !== ($savedReservationShop['shop_type'] ?? null) ||
+                    (int)($previousReservationShop['is_public'] ?? 0) !== (int)($savedReservationShop['is_public'] ?? 0) ||
+                    (int)($previousReservationShop['is_active'] ?? 0) !== (int)($savedReservationShop['is_active'] ?? 0);
+                  $reservationRefreshMonths = $reservationSyncNeeded;
+                  $removedClosedWeekdays = array_values(array_diff($previousClosedWeekdays, $savedClosedWeekdays));
+                  if (empty($removedClosedWeekdays) === false) {
+                    $reservationCleanupToday = (new DateTimeImmutable('now', new DateTimeZone('Asia/Tokyo')))->format('Y-m-d');
+                    if (deleteObsoleteReservationCalendarReleaseOverrides($shopId, $savedClosedWeekdays, $reservationCleanupToday) !== true) {
+                      $data = [
+                        'pageName' => 'proc_client01_02',
+                        'reason' => '不要な定休日解除override削除失敗',
+                      ];
+                      makeLog($data);
+                      $dbCompleteFlg = false;
+                      break;
+                    }
+                  }
                   #パスワードが変更されている場合のみ更新処理を行う
                   #既存のアカウント情報を取得（login_id 変更判定用）
                   $accountData = accounts_FindById(null, $shopId);
@@ -481,10 +540,16 @@ switch ($action) {
               break;
           }
           #全ての処理成功
+          if ($dbCompleteFlg == true && DB_Transaction(2) !== true) {
+            $data = [
+              'pageName' => 'proc_client01_02',
+              'reason' => 'コミット失敗',
+            ];
+            makeLog($data);
+            $dbCompleteFlg = false;
+          }
           if ($dbCompleteFlg == true) {
-            #DBコミット
-            # 1 = BEGIN／ 2 = COMMIT／ 3 = ROLLBACK
-            DB_Transaction(2);
+            $shopJsonCommitted = true;
             #応答用タグセット
             $makeTag['status'] = 'success';
             switch ($method) {
@@ -501,10 +566,6 @@ switch ($action) {
                 }
                 break;
             }
-            #----------------------------
-            # DB更新完了のJSONファイル作成
-            #----------------------------
-            syncFrontendShopJson($makeTag, $shopId);
           } else {
             #失敗時はROLLBACK
             DB_Transaction(3);
@@ -528,6 +589,27 @@ switch ($action) {
         $makeTag['status'] = 'error';
         $makeTag['title'] = '登録エラー';
         $makeTag['msg'] = '登録処理に失敗しました。';
+      }
+      if ($shopJsonCommitted) {
+        $shopJsonShopId = $method === 'new' ? $newShopId : $shopId;
+        try {
+          syncFrontendShopJson($makeTag, $shopJsonShopId);
+        } catch (Throwable $e) {
+          appendFrontendJsonWarningMessage($makeTag);
+        }
+        if ($reservationSyncNeeded) {
+          try {
+            if (
+              (($previousReservationShop['shop_type'] ?? null) === 'food' || ($savedReservationShop['shop_type'] ?? null) === 'food') &&
+              getShopReservationSettings($shopId) !== null
+            ) {
+              syncFrontendReservationBasicJson($makeTag, $shopId);
+              syncFrontendReservationAvailabilityMonthsJson($makeTag, $shopId, $reservationWasEnabled, $reservationRefreshMonths);
+            }
+          } catch (Throwable $e) {
+            appendFrontendJsonWarningMessage($makeTag);
+          }
+        }
       }
     }
     break;

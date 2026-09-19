@@ -40,34 +40,33 @@
           >
           <a href="./client04_04.html"><span>予約カレンダー</span></a>
           <a href="./client04_05.html"><span>予約一覧</span></a>
-          <a href="./client04_01.html"><span>予約詳細</span></a>
         </nav>
       </section>
       <div class="main-contents menu-color04">
         <div class="block_inner">
-          <h2>予約基本設定</h2>
+          <h2>食事メニュー管理</h2>
 
           <form>
             <h3>メニュー情報</h3>
             <dl>
               <div class="box-name">
-                <dt>メニュー名</dt>
+                <dt class="is-required">メニュー名</dt>
                 <dd>
                   <input type="text" name="menuName" />
                 </dd>
               </div>
               <div class="box-price">
-                <dt>料金</dt>
+                <dt class="is-required">料金</dt>
                 <dd><input type="text" name="menuPrice" />円</dd>
               </div>
               <div class="box-image">
-                <dt class="position-top">画像</dt>
+                <dt class="position-top is-required">画像</dt>
                 <dd>
                   <div class="select-image">
                     <h4>画像をここにドラッグ＆ドロップ</h4>
                     <span>または</span>
-                    <button>＋ファイルを選択</button>
-                    <span>JPG / PNG / WebP｜最大5MB｜最大8枚</span>
+                    <button type="button">＋ファイルを選択</button>
+                    <span>JPG / PNG / WebP｜最大5MB｜1枚</span>
                     <!-- NOTE 警告用表示 -->
                     <!-- <div class="wrap-caution">
                     <h5>ファイルサイズが大きすぎます</h5>
@@ -81,7 +80,7 @@
                         <source srcset="../assets/images/_dummy/item203.webp" />
                         <img
                           src="../assets/images/_dummy/item203.webp"
-                          alt="商品画像"
+                          alt="メニュー画像"
                         />
                       </picture>
                     </li>
@@ -89,13 +88,13 @@
                 </dd>
               </div>
               <div>
-                <dt class="position-top">説明文</dt>
+                <dt class="position-top is-required">説明文</dt>
                 <dd>
                   <textarea name="menuDescription"></textarea>
                 </dd>
               </div>
               <div class="box-periode">
-                <dt class="position-top">掲載期間</dt>
+                <dt class="position-top is-required">掲載期間</dt>
                 <dd>
                   <div class="wrap-dd-top">
                     <input
@@ -125,7 +124,7 @@
                 </dd>
               </div>
               <div class="box-status">
-                <dt>状態</dt>
+                <dt class="is-required">状態</dt>
                 <dd>
                   <div class="item-toggle">
                     <div
@@ -142,8 +141,8 @@
               </div>
             </dl>
             <div class="box-btn">
-              <button class="btn-cancel">キャンセル</button>
-              <button class="btn-confirmed">保存</button>
+              <button type="button" class="btn-cancel">キャンセル</button>
+              <button type="submit" class="btn-confirmed">保存</button>
             </div>
           </form>
 

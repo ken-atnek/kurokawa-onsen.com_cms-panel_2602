@@ -9,6 +9,9 @@
  *   - fileError: エラー表示エリア要素 or セレクタ
  */
 function initDropZone(options) {
+    if (options && options.foodMenu === true) {
+        return initFoodMenuDropZone(options);
+    }
     //要素取得
     const dropZone = typeof options.dropZone === "string" ? document.querySelector(options.dropZone) : options.dropZone;
     const selectFileButton = typeof options.selectFileButton === "string" ? document.querySelector(options.selectFileButton) : options.selectFileButton;
@@ -517,6 +520,136 @@ function initDropZone(options) {
     //初期バインド
     bindPreviewButtons();
     updateDropZoneState();
+}
+
+/**
+ * Food Menuの単一画像draftを扱うopt-in経路。
+ * 無指定の既存product経路には影響させない。
+ */
+function initFoodMenuDropZone(options) {
+    const zone = document.querySelector(options.dropZone);
+    const button = document.querySelector(options.selectFileButton);
+    const input = document.querySelector(options.fileInput);
+    if (!zone || !button || !input) return null;
+    let busy = false;
+    let hasDraft = false;
+    let finalized = false;
+    let abandonRequested = false;
+    let abandonConfirmed = false;
+    const request = action => {
+        const data = new FormData();
+        data.append('noUpDateKey', options.noUpDateKey);
+        data.append('csrfToken', options.csrfToken);
+        data.append('action', action);
+        return data;
+    };
+    const upload = async file => {
+        if (busy || !file || finalized || abandonRequested) return;
+        const extension = file.name.split('.').pop().toLowerCase();
+        const types = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+        if (!Object.hasOwn(types, extension) || file.type !== types[extension] ||
+            file.size < 1 || file.size > 5 * 1024 * 1024) {
+            options.onError('JPG・PNG・WebPの5MB以下の画像を選択してください。');
+            return;
+        }
+        busy = true;
+        options.onBusy(true);
+        try {
+            const data = request('uploadTempImage');
+            data.append('menuImage', file);
+            const response = await fetch(options.endpoint, { method: 'POST', body: data, cache: 'no-store' });
+            if (!response.ok) throw new Error('http_error');
+            const result = await response.json();
+            if (result && result.status === 'error') {
+                options.onError(typeof result.msg === 'string' ? result.msg : '画像を保存できませんでした。');
+                return;
+            }
+            if (!result || result.status !== 'success' ||
+                typeof result.file_url !== 'string' || typeof result.file_name !== 'string') {
+                throw new Error('upload_failed');
+            }
+            if (abandonRequested) return;
+            hasDraft = true;
+            options.onUpload(result);
+        } catch (error) {
+            options.onUncertain('画像の結果を確認できません。ページを再読み込みして確認してください。');
+        } finally {
+            busy = false;
+            options.onBusy(false);
+            input.value = '';
+        }
+    };
+    const discard = async () => {
+        if (busy || !hasDraft) return !busy;
+        busy = true;
+        options.onBusy(true);
+        try {
+            const response = await fetch(options.endpoint, {
+                method: 'POST', body: request('discardTempImage'), cache: 'no-store',
+            });
+            if (!response.ok) throw new Error('http_error');
+            const result = await response.json();
+            if (!result || result.status !== 'success') throw new Error('discard_failed');
+            hasDraft = false;
+            options.onDiscard();
+            return true;
+        } catch (error) {
+            options.onUncertain('画像の破棄結果を確認できません。ページを再読み込みしてください。');
+            return false;
+        } finally {
+            busy = false;
+            options.onBusy(false);
+        }
+    };
+    /**
+     * 未保存page instanceを破棄する。
+     * 後着uploadはserver側の離脱状態で拒否する。
+     */
+    const abandon = async () => {
+        if (finalized || abandonConfirmed) return true;
+        abandonRequested = true;
+        try {
+            const response = await fetch(options.endpoint, {
+                method: 'POST', body: request('abandonTempImage'), cache: 'no-store',
+            });
+            if (!response.ok) throw new Error('http_error');
+            const result = await response.json();
+            if (!result || result.status !== 'success') throw new Error('abandon_failed');
+            hasDraft = false;
+            abandonConfirmed = true;
+            return true;
+        } catch (error) {
+            return false;
+        }
+    };
+    button.addEventListener('click', () => { if (!busy) input.click(); });
+    input.addEventListener('change', () => {
+        if (input.files.length !== 1) {
+            options.onError('画像を1枚選択してください。');
+            return;
+        }
+        upload(input.files[0]);
+    });
+    zone.addEventListener('dragover', event => { event.preventDefault(); });
+    zone.addEventListener('drop', event => {
+        event.preventDefault();
+        if (event.dataTransfer.files.length !== 1) {
+            options.onError('画像を1枚選択してください。');
+            return;
+        }
+        upload(event.dataTransfer.files[0]);
+    });
+    window.addEventListener('pagehide', () => {
+        if (finalized || abandonConfirmed) return;
+        abandonRequested = true;
+        const data = request('abandonTempImage');
+        if (!navigator.sendBeacon || !navigator.sendBeacon(options.endpoint, data)) {
+            fetch(options.endpoint, { method: 'POST', body: data, keepalive: true }).catch(() => {});
+        }
+    });
+    window.addEventListener('pageshow', event => { if (event.persisted && abandonRequested) window.location.reload(); });
+    return { discard, abandon, isBusy: () => busy, hasDraft: () => hasDraft,
+        markFinalized: () => { finalized = true; hasDraft = false; } };
 }
 //既存ページの後方互換：1領域用（従来のIDで初期化）
 document.addEventListener("DOMContentLoaded", () => {

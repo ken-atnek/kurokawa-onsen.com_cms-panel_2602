@@ -36,7 +36,7 @@ $_SESSION['sKey'] = $noUpDateKey;
 #不要なセッション削除（uploadドラフトtmpも回収）
 $tmpUploadRoot = realpath(dirname(__DIR__) . '/tmp_upload');
 foreach ($_SESSION as $key => $val) {
-  if ($key === 'sKey' || $key === 'client_login' || $key === $noUpDateKey) {
+  if ($key === 'sKey' || $key === 'client_login' || $key === 'client_csrf_token' || $key === $noUpDateKey) {
     continue;
   }
   #uploadドラフト（proc_client01_01_01.php が保存する形式）から tmp を削除
@@ -103,12 +103,14 @@ if ($shopId !== null) {
 # 店舗名
 #-------#
 $headerShopName = "";
+$headerShopType = "";
 if (!isset($shopData) || empty($shopData)) {
   #店舗データが無い場合は不正アクセス：ログインページへリダイレクト
   header("Location: ./logout.php");
   exit;
 } else {
   $headerShopName = htmlspecialchars($shopData['shop_name'], ENT_QUOTES, 'UTF-8');
+  $headerShopType = htmlspecialchars($shopData['shop_type'], ENT_QUOTES, 'UTF-8');
 }
 
 #-------------#

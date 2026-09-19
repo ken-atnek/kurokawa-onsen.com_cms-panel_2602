@@ -13,6 +13,9 @@ require_once dirname(__DIR__) . '/../../cms_config/common/define.php';
 #***** 定数・関数宣言ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_function.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_contents.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/set_reservation_function.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeShopJson.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeReservationJson.php';
 #***** DB設定ファイル：インクルード *****#
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/set_db.php';
 #***** ★ 処理開始：セッション宣言ファイルインクルード ★ *****#
@@ -84,6 +87,9 @@ if ($action == 'changeStatus') {
 		echo json_encode($makeTag);
 		exit;
 	}
+	$statusChangeCommitted = false;
+	$publicChanged = false;
+	$reservationWasEnabled = false;
 	try {
 		#トランザクション開始
 		# 1 = BEGIN／ 2 = COMMIT／ 3 = ROLLBACK
@@ -99,6 +105,16 @@ if ($action == 'changeStatus') {
 			$makeTag['title'] = '公開設定変更エラー';
 			$makeTag['msg'] = 'トランザクション開始に失敗しました。';
 		} else {
+			$lockedShop = getReservationShopForUpdate((int)$statusChangeShopId);
+			if (!is_array($lockedShop) || (int)($lockedShop['shop_id'] ?? 0) !== (int)$statusChangeShopId) {
+				throw new RuntimeException('shop_lock_failed');
+			}
+			$previousShop = getReservationShopForOccupancy((int)$statusChangeShopId);
+			if (!is_array($previousShop)) {
+				throw new RuntimeException('shop_read_failed');
+			}
+			$publicChanged = (int)$previousShop['is_public'] !== (int)$changeStatus;
+			$reservationWasEnabled = isReservationEnabledForShop((int)$statusChangeShopId);
 			#***** ステータス変更 *****#
 			#登録用配列：初期化
 			$dbFiledData = array();
@@ -117,7 +133,10 @@ if ($action == 'changeStatus') {
 			if ($dbSuccessFlg == 1) {
 				#DBコミット
 				# 1 = BEGIN／ 2 = COMMIT／ 3 = ROLLBACK
-				DB_Transaction(2);
+				if (DB_Transaction(2) !== true) {
+					throw new RuntimeException('commit_failed');
+				}
+				$statusChangeCommitted = true;
 				$makeTag['status'] = 'success';
 				$makeTag['title'] = '公開設定変更';
 				$shopNameEsc = htmlspecialchars((string)$statusChangeShopName, ENT_QUOTES, 'UTF-8');
@@ -146,6 +165,21 @@ if ($action == 'changeStatus') {
 		$makeTag['status'] = 'error';
 		$makeTag['title'] = '公開設定変更エラー';
 		$makeTag['msg'] = 'トランザクション開始に失敗しました。';
+	}
+	if ($statusChangeCommitted && $publicChanged) {
+		try {
+			syncFrontendShopJson($makeTag, (int)$statusChangeShopId);
+		} catch (Throwable $e) {
+			appendFrontendJsonWarningMessage($makeTag);
+		}
+		try {
+			if (($previousShop['shop_type'] ?? null) === 'food' && getShopReservationSettings((int)$statusChangeShopId) !== null) {
+				syncFrontendReservationBasicJson($makeTag, (int)$statusChangeShopId);
+				syncFrontendReservationAvailabilityMonthsJson($makeTag, (int)$statusChangeShopId, $reservationWasEnabled, true);
+			}
+		} catch (Throwable $e) {
+			appendFrontendJsonWarningMessage($makeTag);
+		}
 	}
 }
 #-------------#

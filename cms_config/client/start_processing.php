@@ -78,6 +78,19 @@ if ($loginCheck == 1) {
 	}
 }
 
+$clientPageDir = realpath(__DIR__ . '/../../96-client');
+$requestedScript = realpath($_SERVER['SCRIPT_FILENAME'] ?? '');
+if ($loginCheck == 1 && is_string($clientPageDir) && is_string($requestedScript) &&
+	dirname($requestedScript) === $clientPageDir &&
+	preg_match('/\Aclient[0-9_]+\.php\z/D', basename($requestedScript)) === 1) {
+	require_once __DIR__ . '/../common/set_food_menu_temp_function.php';
+	foodMenuCleanupDraftsOnPageEntry();
+	if (in_array(basename($requestedScript), ['client04_03.php', 'client04_03_01.php'], true) ||
+		random_int(1, 64) === 1) {
+		foodMenuSweepExpiredTempImages();
+	}
+}
+
 /*
  * [ログ情報作成]
  *  引数
