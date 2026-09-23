@@ -7,6 +7,7 @@
  *   - fileInput: input[type=file]要素 or セレクタ
  *   - previewBlock: プレビュー表示エリア要素 or セレクタ
  *   - fileError: エラー表示エリア要素 or セレクタ
+ *   - getPreviewItemCount: 登録済み画像数を返す関数（省略時は li 数）
  */
 function initDropZone(options) {
     if (options && options.foodMenu === true) {
@@ -23,6 +24,10 @@ function initDropZone(options) {
     if (!dropZone || !selectFileButton || !fileInput || !previewBlock) {
         return;
     }
+    const getPreviewItemCount =
+        typeof options.getPreviewItemCount === "function"
+            ? () => options.getPreviewItemCount(previewBlock)
+            : () => previewBlock.querySelectorAll("li").length;
     const alreadyInitialized = dropZone.dataset.dropzoneInitialized === "1";
     dropZone.dataset.dropzoneInitialized = "1";
     //hidden値の有無判定
@@ -106,7 +111,7 @@ function initDropZone(options) {
     if (!alreadyInitialized) {
         selectFileButton.addEventListener("click", () => {
             const upImageMode = inputMode ? inputMode.value : "";
-            const liCount = previewBlock.querySelectorAll("li").length;
+            const liCount = getPreviewItemCount();
             if ((upImageMode === "only" && liCount >= 1) || (upImageMode === "multiple" && liCount >= maxUploadImages)) {
                 showUploadError("画像は最大8枚までアップロードできます。");
                 updateDropZoneState();
@@ -140,7 +145,7 @@ function initDropZone(options) {
             event.preventDefault();
             dropZone.classList.remove("dragover");
             const upImageMode = inputMode ? inputMode.value : "";
-            const liCount = previewBlock.querySelectorAll("li").length;
+            const liCount = getPreviewItemCount();
             if ((upImageMode === "only" && liCount >= 1) || (upImageMode === "multiple" && liCount >= maxUploadImages)) {
                 showUploadError("画像は最大8枚までアップロードできます。");
                 updateDropZoneState();
@@ -215,7 +220,7 @@ function initDropZone(options) {
                             li.remove();
                             bindPreviewButtons();
                             updateDropZoneState();
-                            if (previewBlock.querySelectorAll("li").length === 0) {
+                            if (getPreviewItemCount() === 0) {
                                 fileInput.value = "";
                             }
                             previewBlock.dispatchEvent(
@@ -339,7 +344,7 @@ function initDropZone(options) {
     }
     //アップロードエリアの表示状態更新
     function updateDropZoneState() {
-        const liCount = previewBlock.querySelectorAll("li").length;
+        const liCount = getPreviewItemCount();
         const upImageMode = inputMode ? inputMode.value : "";
         const isDisabled = (upImageMode === "only" && liCount >= 1) || (upImageMode === "multiple" && liCount >= maxUploadImages);
         if (isDisabled) {
@@ -413,7 +418,7 @@ function initDropZone(options) {
                     showUploadError("画像ファイルを選択してください。");
                     return;
                 }
-                const currentCount = previewBlock.querySelectorAll("li").length;
+                const currentCount = getPreviewItemCount();
                 const availableCount = Math.max(0, maxUploadImages - currentCount);
                 if (availableCount <= 0) {
                     showUploadError("画像は最大8枚までアップロードできます。");

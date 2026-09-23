@@ -65,6 +65,7 @@ function initPhotoFileSelect(area = "photoImage") {
         inputArea: inputArea,
         previewBlock: previewBlock,
         fileError: fileError,
+        getPreviewItemCount: (block) => block.querySelectorAll(".btn_close").length,
     });
 }
 /**
@@ -279,6 +280,7 @@ function deleteFile(el) {
     if (dropZone) {
         dropZone.classList.remove("is-active");
     }
+    initPhotoFileSelect("photoImage");
 }
 /**
  * 写真更新用ファンクション再生成

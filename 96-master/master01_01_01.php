@@ -378,9 +378,9 @@ print <<<HTML
       </div>
     </article>
     <script src="../assets/js/common.js" defer></script>
-    <script src="../assets/js/dropZone.js" defer></script>
+    <script src="../assets/js/dropZone.js?2026092301" defer></script>
     <script src="../assets/js/modal.js" defer></script>
-    <script src="./assets/js/master01_01_01.js?46081621022026" defer></script>
+    <script src="./assets/js/master01_01_01.js?2026092301" defer></script>
   </body>
 </html>
 

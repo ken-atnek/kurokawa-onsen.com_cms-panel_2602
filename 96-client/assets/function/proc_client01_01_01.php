@@ -578,7 +578,7 @@ switch ($action) {
 					if (!file_exists($tmpDir)) mkdir($tmpDir, 0777, true);
 					$uniqueName = 'photo_' . date('YmdHis') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 					$savePath = $tmpDir . $uniqueName;
-					$previewUrl = '/tmp_upload/' . $uniqueName;
+					$previewUrl = '../tmp_upload/' . $uniqueName;
 					if (move_uploaded_file($file['tmp_name'], $savePath)) {
 						$imgInfo = @getimagesize($savePath);
 						$imgMime = is_array($imgInfo) && isset($imgInfo['mime']) && is_string($imgInfo['mime']) ? (string)$imgInfo['mime'] : '';
@@ -685,7 +685,7 @@ HTML;
 			}
 			$uniqueName = 'photo_' . date('YmdHis') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 			$savePath = $tmpDir . $uniqueName;
-			$previewUrl = '/tmp_upload/' . $uniqueName;
+			$previewUrl = '../tmp_upload/' . $uniqueName;
 			if (!move_uploaded_file($file['tmp_name'], $savePath)) {
 				$makeTag['status'] = 'error';
 				$makeTag['title'] = 'アップロード失敗';
@@ -1567,7 +1567,7 @@ HTML;
 							if (file_exists($abs) && is_file($abs)) {
 								$_SESSION[$targetImageUploadSessionKey] = [[
 									'tmp_name' => $abs,
-									'preview' => '/tmp_upload/' . $postedDraftName,
+									'preview' => '../tmp_upload/' . $postedDraftName,
 									'name' => $postedDraftName,
 									'original' => $postedDraftName,
 									'uploaded_at' => time(),
@@ -1768,7 +1768,7 @@ HTML;
 								}
 								$uniqueName = 'photo_' . date('YmdHis') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 								$savePath = $tmpDir . $uniqueName;
-								$previewUrl = '/tmp_upload/' . $uniqueName;
+								$previewUrl = '../tmp_upload/' . $uniqueName;
 								if (@move_uploaded_file($tmpName, $savePath)) {
 									$imgInfo = @getimagesize($savePath);
 									$imgMime = is_array($imgInfo) && isset($imgInfo['mime']) && is_string($imgInfo['mime']) ? (string)$imgInfo['mime'] : '';
