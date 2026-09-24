@@ -13,6 +13,7 @@ function getShopList()
 				postal_code, address1, address2, address3, tel, fax, email, is_email_public, website_url, 
 				lunch_open_time, lunch_close_time, lunch_note, 
 				dinner_open_time, dinner_close_time, dinner_note, 
+				business_hours_types, 
 				regular_holiday_display, closed_weekdays, sort_order, created_at 
 			FROM 
 				shops 
@@ -52,6 +53,7 @@ function searchShopList($searchConditions)
 				postal_code, address1, address2, address3, tel, fax, email, is_email_public, website_url, 
 				lunch_open_time, lunch_close_time, lunch_note, 
 				dinner_open_time, dinner_close_time, dinner_note, 
+				business_hours_types, 
 				regular_holiday_display, closed_weekdays, sort_order, created_at 
 			FROM 
 				shops WHERE is_active = 1
@@ -132,6 +134,7 @@ function getShops_FindById($shopId = null)
 					postal_code, address1, address2, address3, tel, fax, email, is_email_public, website_url, 
 					lunch_open_time, lunch_close_time, lunch_note, 
 					dinner_open_time, dinner_close_time, dinner_note, 
+					business_hours_types, 
 					regular_holiday_display, closed_weekdays, sort_order, is_active, created_at 
 				FROM 
 					shops 

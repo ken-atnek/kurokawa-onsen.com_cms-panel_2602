@@ -108,6 +108,12 @@ if (!isset($shopData) || empty($shopData)) {
   $menuTitle = htmlspecialchars($shopData['shop_name'], ENT_QUOTES, 'UTF-8');
 }
 
+#HTML表示用エスケープ
+$shopDetailsDataHtml = array();
+foreach ($shopDetailsData as $key => $value) {
+  $shopDetailsDataHtml[$key] = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
+
 #-------------#
 #inline JS用エスケープ宣言
 $jsonHex = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -154,13 +160,13 @@ print <<<HTML
                 <div class="box_comment">
                   <dt class="required">紹介文章</dt>
                   <dd>
-                    <textarea name="form01" class="required-item" required>{$shopDetailsData['intro_body']}</textarea>
+                    <textarea name="form01" class="required-item" required>{$shopDetailsDataHtml['intro_body']}</textarea>
                   </dd>
                 </div>
                 <div class="box_comment">
                   <dt class="required">紹介文章（英語）</dt>
                   <dd>
-                    <textarea name="form01_01" class="required-item" required>{$shopDetailsData['intro_body_en']}</textarea>
+                    <textarea name="form01_01" class="required-item" required>{$shopDetailsDataHtml['intro_body_en']}</textarea>
                   </dd>
                 </div>
                 <div class="box_image">
@@ -171,7 +177,7 @@ HTML;
 $mainImage = "";
 if ($shopDetailsData['main_image_path'] != "") {
   #画像サムネイル
-  $mainImage = DOMAIN_NAME_PREVIEW . $shopDetailsData['main_image_path'];
+  $mainImage = DOMAIN_NAME_PREVIEW . $shopDetailsDataHtml['main_image_path'];
 } else {
   #NG画像
   $mainImage =  "../assets/images/no-image.webp";
@@ -219,7 +225,7 @@ for ($i = 1; $i <= 3; $i++) {
   $imagePath = "";
   if ($shopDetailsData[$imagePathKey] != "") {
     #画像サムネイル
-    $imagePath = DOMAIN_NAME_PREVIEW . $shopDetailsData[$imagePathKey];
+    $imagePath = DOMAIN_NAME_PREVIEW . $shopDetailsDataHtml[$imagePathKey];
     print <<<HTML
                       <li id="select_image_{$imagePathKey}">
                         <div class="check-details">
@@ -260,13 +266,13 @@ print <<<HTML
                 <div class="box-map">
                   <dt class="required">地図URL</dt>
                   <dd>
-                    <textarea name="form02" class="required-item" required>{$shopDetailsData['map_url']}</textarea>
+                    <textarea name="form02" class="required-item" required>{$shopDetailsDataHtml['map_url']}</textarea>
                   </dd>
                 </div>
                 <div>
                   <dt class="required">地図URL<span>（リンク用）</span></dt>
                   <dd>
-                    <input type="text" name="form03" value="{$shopDetailsData['map_link_url']}" class="required-item" required>
+                    <input type="text" name="form03" value="{$shopDetailsDataHtml['map_link_url']}" class="required-item" required>
                   </dd>
                 </div>
               </dl>
@@ -274,13 +280,13 @@ print <<<HTML
             <input type="hidden" name="action" value="sendInput">
             <input type="hidden" name="method" value="{$method}">
             <input type="hidden" name="shopId" value="{$shopId}">
-            <input type="hidden" name="main_image_path" value="{$shopDetailsData['main_image_path']}">
-            <input type="hidden" name="image_path_1" value="{$shopDetailsData['image_path_1']}">
-            <input type="hidden" name="image_title_1" value="{$shopDetailsData['image_title_1']}">
-            <input type="hidden" name="image_path_2" value="{$shopDetailsData['image_path_2']}">
-            <input type="hidden" name="image_title_2" value="{$shopDetailsData['image_title_2']}">
-            <input type="hidden" name="image_path_3" value="{$shopDetailsData['image_path_3']}">
-            <input type="hidden" name="image_title_3" value="{$shopDetailsData['image_title_3']}">
+            <input type="hidden" name="main_image_path" value="{$shopDetailsDataHtml['main_image_path']}">
+            <input type="hidden" name="image_path_1" value="{$shopDetailsDataHtml['image_path_1']}">
+            <input type="hidden" name="image_title_1" value="{$shopDetailsDataHtml['image_title_1']}">
+            <input type="hidden" name="image_path_2" value="{$shopDetailsDataHtml['image_path_2']}">
+            <input type="hidden" name="image_title_2" value="{$shopDetailsDataHtml['image_title_2']}">
+            <input type="hidden" name="image_path_3" value="{$shopDetailsDataHtml['image_path_3']}">
+            <input type="hidden" name="image_title_3" value="{$shopDetailsDataHtml['image_title_3']}">
             <input type="hidden" name="noUpDateKey" value="{$noUpDateKey}">
             <div class="box-btn">
               <button type="button" class="btn-return" onclick="history.back()">戻る</button>

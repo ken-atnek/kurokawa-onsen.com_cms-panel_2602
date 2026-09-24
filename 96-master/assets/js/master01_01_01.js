@@ -3,6 +3,8 @@
  *
  */
 const requestURL = "./assets/function/proc_master01_01_01.php";
+//登録・更新処理の送信中フラグ
+let isAlbumSubmitting = false;
 
 /**
  * モーダル共通ヘルパ
@@ -73,6 +75,7 @@ function initPhotoFileSelect(area = "photoImage") {
  *
  */
 async function addFolders(el, action) {
+    if (isAlbumSubmitting) return;
     //フォルダ名入力チェック
     let folderName = document.querySelector("input[name='addFolderName']").value;
     if (folderName == "") {
@@ -83,6 +86,8 @@ async function addFolders(el, action) {
     const addFolder = document.querySelector("form[name='addFolder']");
     let sFd = new FormData(addFolder);
     sFd.append("action", action);
+    isAlbumSubmitting = true;
+    if (el) el.disabled = true;
     try {
         const response = await fetch(requestURL, {
             method: "POST",
@@ -104,6 +109,9 @@ async function addFolders(el, action) {
     } catch (error) {
         console.error("送信エラー:", error);
         alert("通信エラーが発生しました。ページを再読み込みしてください。");
+    } finally {
+        isAlbumSubmitting = false;
+        if (el) el.disabled = false;
     }
 }
 /**
@@ -111,6 +119,7 @@ async function addFolders(el, action) {
  *
  */
 async function editFolderNames() {
+    if (isAlbumSubmitting) return;
     //フォルダ名入力チェック
     let folderName = document.querySelector("input[name='addFolderName']").value;
     if (folderName == "") {
@@ -119,7 +128,10 @@ async function editFolderNames() {
     }
     //送信用フォーム生成
     let addFolder = document.querySelector("form[name='addFolder']");
+    const submitButton = addFolder.querySelector(".btn_submit");
     let sFd = new FormData(addFolder);
+    isAlbumSubmitting = true;
+    if (submitButton) submitButton.disabled = true;
     try {
         const response = await fetch(requestURL, {
             method: "POST",
@@ -144,6 +156,9 @@ async function editFolderNames() {
     } catch (error) {
         console.error("送信エラー:", error);
         alert("通信エラーが発生しました。ページを再読み込みしてください。");
+    } finally {
+        isAlbumSubmitting = false;
+        if (submitButton) submitButton.disabled = false;
     }
 }
 /**
@@ -169,6 +184,10 @@ async function setEditFolderName(el, action, shopId, folderId, folderName, noUpD
             list = JSON.parse(list);
         }
         //console.log(list);
+        if (list["status"] === "error") {
+            showModalMessage(list["msg"] || "フォルダ情報を取得できませんでした。ページを再読み込みしてください。");
+            return;
+        }
         //表示変更
         document.getElementById("block01").remove();
         document.getElementById("block02").remove();
@@ -213,6 +232,9 @@ async function deleteFolder(el, action, shopId, folderId, folderName, noUpDateKe
         }
         clearModalDeleteButton();
         showModalMessage(list["msg"]);
+        if (list["status"] === "error") {
+            return;
+        }
         document.getElementById("block01").remove();
         document.getElementById("block02").remove();
         document.querySelector(".block_inner h2").insertAdjacentHTML("afterend", list["tag"]);
@@ -246,6 +268,10 @@ async function changeFolder(el, action, shopId, folderId, folderName, noUpDateKe
             list = JSON.parse(list);
         }
         //console.log(list);
+        if (list["status"] === "error") {
+            showModalMessage(list["msg"] || "フォルダ情報を取得できませんでした。ページを再読み込みしてください。");
+            return;
+        }
         //表示変更
         document.getElementById("block02").remove();
         document.getElementById("block01").insertAdjacentHTML("afterend", list["tag"]);
@@ -416,6 +442,10 @@ async function deleteFile_for_checkPage(el, action, type, shopId, folderId, fold
         if (typeof list === "string") {
             list = JSON.parse(list);
         }
+        if (list["status"] === "error") {
+            showModalMessage(list["msg"] || "画像情報を取得できませんでした。ページを再読み込みしてください。");
+            return;
+        }
         //表示変更
         document.getElementById("block01").remove();
         document.getElementById("block02").remove();
@@ -458,6 +488,10 @@ async function editPhotoDetail(el, action, type, shopId, folderId, folderName, p
         if (typeof list === "string") {
             list = JSON.parse(list);
         }
+        if (list["status"] === "error") {
+            showModalMessage(list["msg"] || "画像情報を取得できませんでした。ページを再読み込みしてください。");
+            return;
+        }
         //表示変更
         document.getElementById("block01").remove();
         document.getElementById("block02").remove();
@@ -474,9 +508,13 @@ async function editPhotoDetail(el, action, type, shopId, folderId, folderName, p
  *
  */
 async function sendSubmit() {
+    if (isAlbumSubmitting) return;
     //送信用フォーム生成
     let addPhoto = document.querySelector("form[name='addPhoto']");
+    const submitButton = addPhoto.querySelector(".btn_submit");
     let sFd = new FormData(addPhoto);
+    isAlbumSubmitting = true;
+    if (submitButton) submitButton.disabled = true;
     //送信先
     try {
         const response = await fetch(requestURL, {
@@ -503,6 +541,9 @@ async function sendSubmit() {
     } catch (error) {
         console.error("送信エラー:", error);
         alert("通信エラーが発生しました。ページを再読み込みしてください。");
+    } finally {
+        isAlbumSubmitting = false;
+        if (submitButton) submitButton.disabled = false;
     }
 }
 /**
@@ -510,6 +551,7 @@ async function sendSubmit() {
  *
  */
 async function checkSubmit() {
+    if (isAlbumSubmitting) return;
     //格納フォルダ選択チェック
     let folderKey = "";
     const selected = document.querySelector('input[name="selectFolder"]:checked');
@@ -528,7 +570,10 @@ async function checkSubmit() {
     }
     //送信用フォーム生成
     let addPhoto = document.querySelector("form[name='addPhoto']");
+    const submitButton = addPhoto.querySelector(".btn_submit");
     let sFd = new FormData(addPhoto);
+    isAlbumSubmitting = true;
+    if (submitButton) submitButton.disabled = true;
     //送信先
     try {
         const response = await fetch(requestURL, {
@@ -553,6 +598,9 @@ async function checkSubmit() {
     } catch (error) {
         console.error("送信エラー:", error);
         alert("通信エラーが発生しました。ページを再読み込みしてください。");
+    } finally {
+        isAlbumSubmitting = false;
+        if (submitButton) submitButton.disabled = false;
     }
 }
 /**
@@ -590,6 +638,9 @@ async function deletePhoto(el, action, shopId, folderName, photoKey, photoName, 
         }
         clearModalDeleteButton();
         showModalMessage(list["msg"]);
+        if (list["status"] === "error") {
+            return;
+        }
         document.getElementById("block01").remove();
         document.getElementById("block02").remove();
         document.querySelector(".block_inner h2").insertAdjacentHTML("afterend", list["tag"]);

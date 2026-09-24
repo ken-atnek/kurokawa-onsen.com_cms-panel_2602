@@ -65,6 +65,7 @@ function writeEmptyShopJsonFile($saveDir, $fileName): bool
  */
 function generateShopJson($shopId): bool
 {
+	global $shopBusinessHoursTypeList;
 	$shopId = (int)$shopId;
 	if ($shopId < 1) {
 		return false;
@@ -212,10 +213,27 @@ function generateShopJson($shopId): bool
 			'detailJsonPath' => '/db/shops/articles/' . $sId . '/' . (int)$row['article_id'] . '/article.json',
 		];
 	}
+	$businessHoursTypes = [];
+	$businessHoursTypeLabels = [];
+	$businessHoursRaw = isset($shop['business_hours_types']) ? (string)$shop['business_hours_types'] : '';
+	if (($shop['shop_type'] ?? '') === 'food' && $businessHoursRaw !== '' && isset($shopBusinessHoursTypeList) && is_array($shopBusinessHoursTypeList)) {
+		$businessHoursParts = array_values(array_filter(array_map('trim', explode(',', $businessHoursRaw)), static function ($v) {
+			return $v !== '';
+		}));
+		foreach ($businessHoursParts as $businessHoursType) {
+			if (array_key_exists($businessHoursType, $shopBusinessHoursTypeList) === false) {
+				continue;
+			}
+			$businessHoursTypes[] = $businessHoursType;
+			$businessHoursTypeLabels[] = $shopBusinessHoursTypeList[$businessHoursType];
+		}
+	}
 	$writeData = [
 		'id' => $sId,
 		'slug' => $shopNameEng,
 		'category' => $shop['shop_type'] ?? '',
+		'businessHoursTypes' => $businessHoursTypes,
+		'businessHoursTypeLabels' => $businessHoursTypeLabels,
 		'name' => formatTextareaForDB((string)($shop['shop_name'] ?? '')),
 		'statusFallbackKey' => 'open',
 		'heroImage' => $shop['main_image_path'] ?? '',

@@ -3,12 +3,15 @@
  *
  */
 const requestURL = "./assets/function/proc_client01_02.php";
+//送信中フラグ
+let isSending = false;
 
 /**
  * 送信
  *
  */
 async function sendInput() {
+    if (isSending) return;
     //.validationForm を指定した form 要素が存在すれば
     if (!validationForm) return;
     //HTMLのrequired等を最優先でチェック（radio等のグループも含む）
@@ -55,6 +58,9 @@ async function sendInput() {
         }
     }
     if (errFlag === 0) {
+        isSending = true;
+        const submitButton = validationForm.querySelector(".btn-submit");
+        if (submitButton) submitButton.disabled = true;
         //送信用FormData生成
         const sFd = new FormData(validationForm);
         sFd.append("action", "sendInput");
@@ -105,6 +111,9 @@ async function sendInput() {
             //通信エラー時の処理
             console.error("送信エラー:", error);
             alert("通信エラーが発生しました。ページを再読み込みしてください。");
+        } finally {
+            isSending = false;
+            if (submitButton) submitButton.disabled = false;
         }
     }
 }
@@ -124,3 +133,28 @@ function togglePassword(el, target) {
         el.classList.add("is-close");
     }
 }
+/**
+ * 営業時間帯表示切替
+ *
+ */
+function toggleBusinessHoursTypes() {
+    const businessHoursBlock = document.getElementById("blockBusinessHoursTypes");
+    if (!businessHoursBlock) return;
+    const checkedShopType = document.querySelector('input[name="form02"]:checked');
+    const isFoodShop = checkedShopType && checkedShopType.value === "food";
+    const checkboxGroup = businessHoursBlock.querySelector("dd");
+    const checkboxes = businessHoursBlock.querySelectorAll('input[type="checkbox"]');
+    businessHoursBlock.style.display = isFoodShop ? "" : "none";
+    if (checkboxGroup) {
+        checkboxGroup.classList.toggle("required-checkbox", isFoodShop);
+    }
+    checkboxes.forEach((checkbox) => {
+        checkbox.disabled = !isFoodShop;
+    });
+}
+document.addEventListener("DOMContentLoaded", () => {
+    toggleBusinessHoursTypes();
+    document.querySelectorAll('input[name="form02"]').forEach((radio) => {
+        radio.addEventListener("change", toggleBusinessHoursTypes);
+    });
+});

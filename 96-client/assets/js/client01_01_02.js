@@ -3,12 +3,39 @@
  *
  */
 const requestURL = "./assets/function/proc_client01_01_02.php";
+//送信中フラグ
+let isSending = false;
+
+/**
+ * 画像選択処理エラー表示
+ *  既存のアラートモーダルへエラー内容を表示する
+ */
+function showImageSelectError(list) {
+    const blockModal = document.getElementById("modalBlock");
+    const title = String(list["title"] || "画像選択エラー");
+    const msg = String(list["msg"] || "画像情報を取得できませんでした。ページを再読み込みしてください。");
+    if (!blockModal) {
+        alert(title + "\n" + msg);
+        return;
+    }
+    blockModal.querySelector(".box-title p").textContent = title;
+    blockModal.querySelector(".box-details p").textContent = msg;
+    const buttonArea = blockModal.querySelector(".box-btn");
+    buttonArea.querySelectorAll("button").forEach((button) => {
+        button.remove();
+    });
+    buttonArea.insertAdjacentHTML("beforeend", '<button type="button" class="btn-cancel" onclick="closeModal();">閉じる</button>');
+    blockModal.querySelector(".box-title button").setAttribute("onclick", "closeModal()");
+    blockModal.classList.add("is-active");
+    document.documentElement.style.overflow = "hidden";
+}
 
 /**
  * 送信
  *
  */
 async function sendInput() {
+    if (isSending) return;
     //.validationForm を指定した form 要素が存在すれば
     if (!validationForm) return;
     //HTMLのrequired等を最優先でチェック（radio等のグループも含む）
@@ -23,6 +50,9 @@ async function sendInput() {
         errFlag = 1;
     }
     if (errFlag === 0) {
+        isSending = true;
+        const submitButton = validationForm.querySelector(".btn-submit");
+        if (submitButton) submitButton.disabled = true;
         //送信用FormData生成
         const sFd = new FormData(validationForm);
         // hiddenのactionが存在しても上書きできるよう set を使う
@@ -74,6 +104,9 @@ async function sendInput() {
             //通信エラー時の処理
             console.error("送信エラー:", error);
             alert("通信エラーが発生しました。ページを再読み込みしてください。");
+        } finally {
+            isSending = false;
+            if (submitButton) submitButton.disabled = false;
         }
     }
 }
@@ -98,6 +131,10 @@ async function selectFileModal(el, action, type, target, shopId, noUpDateKey) {
         let list = await response.json();
         if (typeof list === "string") {
             list = JSON.parse(list);
+        }
+        if (list["status"] === "error") {
+            showImageSelectError(list);
+            return;
         }
         //表示変更
         const modal = document.getElementById("modalSelectBlock");
@@ -138,6 +175,10 @@ async function changeFolder(el, action, shopId, folderId, folderName, noUpDateKe
         let list = await response.json();
         if (typeof list === "string") {
             list = JSON.parse(list);
+        }
+        if (list["status"] === "error") {
+            showImageSelectError(list);
+            return;
         }
         //表示変更
         const modal = document.getElementById("modalSelectBlock");

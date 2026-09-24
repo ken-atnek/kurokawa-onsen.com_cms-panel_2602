@@ -93,7 +93,7 @@ print <<<HTML
     <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon/apple-touch-icon.png">
     <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
-    <link rel="stylesheet" href="../assets/css/master01-02.css">
+    <link rel="stylesheet" href="../assets/css/master01-02.css?59531824092026">
   </head>
 
   <body>
@@ -176,9 +176,43 @@ $escDinnerNote = htmlspecialchars($shopData['dinner_note'], ENT_QUOTES, 'UTF-8')
 $escRegularHolidayDisplay = htmlspecialchars($shopData['regular_holiday_display'], ENT_QUOTES, 'UTF-8');
 $escLoginId = htmlspecialchars($accountData['login_id'], ENT_QUOTES, 'UTF-8');
 $escPassword = htmlspecialchars($accountData['password'], ENT_QUOTES, 'UTF-8');
+$businessHoursTypes = [];
+if (isset($shopData['business_hours_types']) && $shopData['business_hours_types'] !== '') {
+  $businessHoursTypes = array_filter(array_map('trim', explode(',', $shopData['business_hours_types'])));
+}
+$businessHoursTypesStyle = ($shopData['shop_type'] == 'food') ? '' : ' style="display:none;"';
 print <<<HTML
                   </dd>
                 </div>
+
+HTML;
+print <<<HTML
+                <div class="box_businessHours" id="blockBusinessHoursTypes"{$businessHoursTypesStyle}>
+                  <dt class="required">営業時間帯</dt>
+                  <dd class="required-checkbox">
+
+HTML;
+#営業時間帯
+if (isset($shopBusinessHoursTypeList) && is_array($shopBusinessHoursTypeList)) {
+  foreach ($shopBusinessHoursTypeList as $businessHoursKey => $businessHoursName) {
+    $businessHoursKeyHtml = htmlspecialchars($businessHoursKey, ENT_QUOTES, 'UTF-8');
+    $businessHoursNameHtml = htmlspecialchars($businessHoursName, ENT_QUOTES, 'UTF-8');
+    $checked = in_array($businessHoursKey, $businessHoursTypes, true) ? 'checked' : '';
+    print <<<HTML
+                    <div>
+                      <input type="checkbox" name="businessHours[]" value="{$businessHoursKeyHtml}" id="businessHours_{$businessHoursKeyHtml}" {$checked}>
+                      <label for="businessHours_{$businessHoursKeyHtml}">{$businessHoursNameHtml}</label>
+                    </div>
+
+HTML;
+  }
+}
+print <<<HTML
+                  </dd>
+                </div>
+
+HTML;
+print <<<HTML
                 <div style="margin-top: 1rem" class="box_name">
                   <dt class="required">店舗名</dt>
                   <dd>
@@ -685,7 +719,7 @@ print <<<HTML
     <script src="../assets/js/common.js" defer></script>
     <script src="../assets/js/modal.js" defer></script>
     <script src="../assets/js/form.js" defer></script>
-    <script src="./assets/js/client01_02.js" defer></script>
+    <script src="./assets/js/client01_02.js?59531824092026" defer></script>
   </body>
 </html>
 
