@@ -25,6 +25,10 @@ function db_connect()
 		$connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$connect->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 	} catch (PDOException $e) {
+		if (defined('DB_CONNECT_THROW_ON_ERROR') && DB_CONNECT_THROW_ON_ERROR === true) {
+			throw $e;
+		}
+
 		echo $e->getMessage();
 		echo "現在、ページを表示できません。<br>\n";
 		exit;

@@ -496,7 +496,7 @@ function checkAndAssignSeat($shopId, $date, $partySize, $mode, $occupancyState =
 
 /**
  * 共通席割当core
- *  table優先、relocation、counterの順で割当計画を返す
+ *  1名はcounter専用、2〜4名はtable優先、relocation、counterの順で割当計画を返す
  */
 function calculateSeatAssignment($shopId, $date, $partySize, $occupancyState)
 {
@@ -533,6 +533,13 @@ function calculateSeatAssignment($shopId, $date, $partySize, $occupancyState)
 		if (in_array((int)date('w', strtotime($date)), $regularHolidays, true) === true) {
 			return makeReservationAssignmentResult(false, [], [], 'regular_holiday');
 		}
+	}
+
+	if ($partySize === 1) {
+		$counterAssignment = findCounterAssignment($occupancyState, $partySize);
+		return empty($counterAssignment) === false
+			? makeReservationAssignmentResult(true, $counterAssignment, [], null)
+			: makeReservationAssignmentResult(false, [], [], 'full');
 	}
 
 	$tableAssignment = findTableAssignment($occupancyState, $partySize, true);
