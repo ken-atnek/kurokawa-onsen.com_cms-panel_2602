@@ -188,8 +188,8 @@ print <<<HTML
 HTML;
 print <<<HTML
                 <div class="box_businessHours" id="blockBusinessHoursTypes"{$businessHoursTypesStyle}>
-                  <dt class="required">営業時間帯</dt>
-                  <dd class="required-checkbox">
+                  <dt>営業時間帯</dt>
+                  <dd>
 
 HTML;
 #営業時間帯

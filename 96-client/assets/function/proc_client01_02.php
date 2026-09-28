@@ -250,9 +250,7 @@ switch ($action) {
           }
         }
         $normalizedBusinessHours = array_values(array_unique($normalizedBusinessHours));
-        if (count($normalizedBusinessHours) < 1) {
-          $validationErrors[] = '営業時間帯は必須です。';
-        } else {
+        if (count($normalizedBusinessHours) > 0) {
           $businessHoursTypes = implode(',', $normalizedBusinessHours);
         }
       }

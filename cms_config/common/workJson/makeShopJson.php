@@ -213,6 +213,8 @@ function generateShopJson($shopId): bool
 			'detailJsonPath' => '/db/shops/articles/' . $sId . '/' . (int)$row['article_id'] . '/article.json',
 		];
 	}
+	#フロントエンド側のJSON仕様確定まで営業時間帯の書き出しを停止する（将来再開用に処理を保持）
+	/*
 	$businessHoursTypes = [];
 	$businessHoursTypeLabels = [];
 	$businessHoursRaw = isset($shop['business_hours_types']) ? (string)$shop['business_hours_types'] : '';
@@ -228,12 +230,13 @@ function generateShopJson($shopId): bool
 			$businessHoursTypeLabels[] = $shopBusinessHoursTypeList[$businessHoursType];
 		}
 	}
+	*/
 	$writeData = [
 		'id' => $sId,
 		'slug' => $shopNameEng,
 		'category' => $shop['shop_type'] ?? '',
-		'businessHoursTypes' => $businessHoursTypes,
-		'businessHoursTypeLabels' => $businessHoursTypeLabels,
+		// 'businessHoursTypes' => $businessHoursTypes,
+		// 'businessHoursTypeLabels' => $businessHoursTypeLabels,
 		'name' => formatTextareaForDB((string)($shop['shop_name'] ?? '')),
 		'statusFallbackKey' => 'open',
 		'heroImage' => $shop['main_image_path'] ?? '',

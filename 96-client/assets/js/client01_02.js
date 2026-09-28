@@ -142,12 +142,8 @@ function toggleBusinessHoursTypes() {
     if (!businessHoursBlock) return;
     const checkedShopType = document.querySelector('input[name="form02"]:checked');
     const isFoodShop = checkedShopType && checkedShopType.value === "food";
-    const checkboxGroup = businessHoursBlock.querySelector("dd");
     const checkboxes = businessHoursBlock.querySelectorAll('input[type="checkbox"]');
     businessHoursBlock.style.display = isFoodShop ? "" : "none";
-    if (checkboxGroup) {
-        checkboxGroup.classList.toggle("required-checkbox", isFoodShop);
-    }
     checkboxes.forEach((checkbox) => {
         checkbox.disabled = !isFoodShop;
     });
