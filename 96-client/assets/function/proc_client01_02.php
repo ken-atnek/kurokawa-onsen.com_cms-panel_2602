@@ -236,8 +236,14 @@ switch ($action) {
       $normalizedBusinessHours = [];
       $allowedBusinessHoursTypes = (isset($shopBusinessHoursTypeList) && is_array($shopBusinessHoursTypeList)) ? array_keys($shopBusinessHoursTypeList) : [];
       if ((string)$form02 === 'food') {
-        if (is_array($businessHours)) {
+        if (isset($_POST['businessHours']) && !is_array($businessHours)) {
+          $validationErrors[] = '営業時間帯の値が不正です。';
+        } elseif (is_array($businessHours)) {
           foreach ($businessHours as $businessHoursType) {
+            if (!is_string($businessHoursType)) {
+              $validationErrors[] = '営業時間帯の値が不正です。';
+              continue;
+            }
             $businessHoursType = trim((string)$businessHoursType);
             if ($businessHoursType === '') {
               continue;
@@ -254,6 +260,7 @@ switch ($action) {
           $businessHoursTypes = implode(',', $normalizedBusinessHours);
         }
       }
+      $businessHoursTypesBindType = ($businessHoursTypes === null) ? 2 : 0;
       #バリデーションエラーがあれば処理中断
       if (!empty($validationErrors)) {
         $makeTag['status'] = 'error';
@@ -337,7 +344,7 @@ switch ($action) {
                 $dbFiledData['dinner_open_time'] = array(':dinner_open_time', $dinnerOpenTime, 1);
                 $dbFiledData['dinner_close_time'] = array(':dinner_close_time', $dinnerCloseTime, 1);
                 $dbFiledData['dinner_note'] = array(':dinner_note', $form08_02_note, 1);
-                $dbFiledData['business_hours_types'] = array(':business_hours_types', $businessHoursTypes, 1);
+                $dbFiledData['business_hours_types'] = array(':business_hours_types', $businessHoursTypes, $businessHoursTypesBindType);
                 $dbFiledData['regular_holiday_display'] = array(':regular_holiday_display', $form09, 0);
                 $dbFiledData['closed_weekdays'] = array(':closed_weekdays', $closedWeekdays, 0);
                 $dbFiledData['created_at'] = array(':created_at', date("Y-m-d H:i:s"), 0);
@@ -461,7 +468,7 @@ switch ($action) {
                 $dbFiledData['dinner_open_time'] = array(':dinner_open_time', $dinnerOpenTime, 1);
                 $dbFiledData['dinner_close_time'] = array(':dinner_close_time', $dinnerCloseTime, 1);
                 $dbFiledData['dinner_note'] = array(':dinner_note', $form08_02_note, 1);
-                $dbFiledData['business_hours_types'] = array(':business_hours_types', $businessHoursTypes, 1);
+                $dbFiledData['business_hours_types'] = array(':business_hours_types', $businessHoursTypes, $businessHoursTypesBindType);
                 $dbFiledData['regular_holiday_display'] = array(':regular_holiday_display', $form09, 0);
                 $dbFiledData['closed_weekdays'] = array(':closed_weekdays', $closedWeekdays, 0);
                 $dbFiledData['updated_at'] = array(':updated_at', date("Y-m-d H:i:s"), 0);

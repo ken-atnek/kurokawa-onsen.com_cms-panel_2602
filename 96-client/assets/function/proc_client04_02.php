@@ -17,6 +17,7 @@ require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_seats.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_food_menus.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/database/db_reservation_calender.php';
 require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeReservationJson.php';
+require_once DOCUMENT_ROOT_PATH . '/cms_config/common/workJson/makeShopJson.php';
 
 date_default_timezone_set('Asia/Tokyo');
 header('Content-Type: application/json; charset=UTF-8');
@@ -57,6 +58,28 @@ function normalizeClientReservationSettingsEnum($value, $allowedValues)
 	}
 	$normalized = (int)$value;
 	return in_array($normalized, $allowedValues, true) === true ? $normalized : null;
+}
+/**
+ * 平均予算表示文言を保存用に正規化
+ *  改行をLFへ統一し、Unicode空白だけはnull、本文は100文字以内に限定する
+ */
+function normalizeClientReservationAverageBudgetText($value)
+{
+	if (is_string($value) === false || function_exists('mb_strlen') === false || preg_match('//u', $value) !== 1) {
+		return false;
+	}
+	if (preg_match('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F-\x9F]/u', $value) !== 0) {
+		return false;
+	}
+	$value = str_replace(["\r\n", "\r"], "\n", $value);
+	$normalized = preg_replace('/\A[\s\p{Z}\x{FEFF}]+|[\s\p{Z}\x{FEFF}]+\z/u', '', $value);
+	if (is_string($normalized) === false) {
+		return false;
+	}
+	if ($normalized === '') {
+		return null;
+	}
+	return mb_strlen($normalized, 'UTF-8') <= 100 ? $normalized : false;
 }
 /**
  * checkbox配列を曜日番号配列へ正規化
@@ -150,6 +173,7 @@ function normalizeClientReservationSettingsRequest($postData)
 		'menuSelectionType',
 		'acceptStartDaysBefore',
 		'acceptEndDaysBefore',
+		'averageBudgetText',
 		'guestMin',
 		'guestMax',
 		'closedWeekdays',
@@ -160,7 +184,7 @@ function normalizeClientReservationSettingsRequest($postData)
 			return false;
 		}
 	}
-	foreach (['noUpDateKey', 'csrfToken', 'reservationEnabled', 'menuSelectionType', 'acceptStartDaysBefore', 'acceptEndDaysBefore', 'guestMin', 'guestMax'] as $requiredKey) {
+	foreach (['noUpDateKey', 'csrfToken', 'reservationEnabled', 'menuSelectionType', 'acceptStartDaysBefore', 'acceptEndDaysBefore', 'averageBudgetText', 'guestMin', 'guestMax'] as $requiredKey) {
 		if (array_key_exists($requiredKey, $postData) === false || is_string($postData[$requiredKey]) === false) {
 			return false;
 		}
@@ -170,6 +194,7 @@ function normalizeClientReservationSettingsRequest($postData)
 	$acceptStartRaw = $postData['acceptStartDaysBefore'];
 	$acceptStartDaysBefore = $acceptStartRaw === 'unlimited' ? null : normalizeClientReservationSettingsEnum($acceptStartRaw, [90, 60, 30]);
 	$acceptEndDaysBefore = normalizeClientReservationSettingsEnum($postData['acceptEndDaysBefore'], [0, 1, 3, 7]);
+	$averageBudgetText = normalizeClientReservationAverageBudgetText($postData['averageBudgetText']);
 	$guestMin = normalizeClientReservationSettingsEnum($postData['guestMin'], [1, 2, 3, 4]);
 	$guestMax = normalizeClientReservationSettingsEnum($postData['guestMax'], [1, 2, 3, 4]);
 	$closedWeekdays = normalizeClientReservationSettingsClosedWeekdays($postData['closedWeekdays'] ?? null);
@@ -179,6 +204,7 @@ function normalizeClientReservationSettingsRequest($postData)
 		$menuSelectionType === null ||
 		($acceptStartRaw !== 'unlimited' && $acceptStartDaysBefore === null) ||
 		$acceptEndDaysBefore === null ||
+		$averageBudgetText === false ||
 		$guestMin === null ||
 		$guestMax === null ||
 		$guestMin > $guestMax ||
@@ -196,6 +222,7 @@ function normalizeClientReservationSettingsRequest($postData)
 			'menu_selection_type' => $menuSelectionType,
 			'accept_start_days_before' => $acceptStartDaysBefore,
 			'accept_end_days_before' => $acceptEndDaysBefore,
+			'average_budget_text' => $averageBudgetText,
 			'guest_min' => $guestMin,
 			'guest_max' => $guestMax,
 		],
@@ -248,6 +275,7 @@ $transactionStarted = false;
 $committed = false;
 $wasEnabled = false;
 $closedWeekdaysChanged = false;
+$averageBudgetChanged = false;
 $response = clientReservationSettingsResponse('error', '保存エラー', '予約基本設定を保存できませんでした。ページを再読み込みしてください。');
 try {
 	if (DB_Transaction(1) !== true) {
@@ -275,6 +303,8 @@ try {
 	if ($currentSettingsRaw !== null && $currentSettings === false) {
 		throw new RuntimeException('settings_invalid');
 	}
+	$currentAverageBudgetText = $currentSettings === null ? null : $currentSettings['average_budget_text'];
+	$averageBudgetChanged = $currentAverageBudgetText !== $settingsData['average_budget_text'];
 	$oversizedSeats = getNormalSeatsExceedingCapacity($shopId, $settingsData['guest_max']);
 	$activeMenuCount = getActiveFoodMenuCountForReservation($shopId);
 	if ($oversizedSeats === false || $activeMenuCount === false) {
@@ -350,6 +380,16 @@ try {
 if ($committed) {
 	syncFrontendReservationBaseJson($response, $shopId);
 	syncFrontendReservationAvailabilityMonthsJson($response, $shopId, $wasEnabled, $closedWeekdaysChanged);
+	if ($averageBudgetChanged === true) {
+		try {
+			syncFrontendShopDetailJson($response, $shopId);
+		} catch (Throwable $e) {
+			appendFrontendJsonWarningMessage($response);
+			logFrontendJsonError('shop_detail_json_export_exception', $shopId, null, [
+				'error_message' => $e->getMessage(),
+			]);
+		}
+	}
 }
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE);

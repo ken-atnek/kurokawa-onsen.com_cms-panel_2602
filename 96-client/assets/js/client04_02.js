@@ -93,6 +93,7 @@ function buildReservationSettingsFormData(form, confirmedWarnings = []) {
     formData.append("menuSelectionType", getCheckedValue("menuSelectionType"));
     formData.append("acceptStartDaysBefore", getValue("acceptStartDaysBefore"));
     formData.append("acceptEndDaysBefore", getValue("acceptEndDaysBefore"));
+    formData.append("averageBudgetText", getValue("averageBudgetText"));
     formData.append("guestMin", getValue("guestMin"));
     formData.append("guestMax", getValue("guestMax"));
     form.querySelectorAll('input[name="closedWeekdays[]"]:checked').forEach((input) => {
@@ -109,7 +110,7 @@ function buildReservationSettingsFormData(form, confirmedWarnings = []) {
  */
 function captureReservationSettingsFormState(form) {
     const data = buildReservationSettingsFormData(form);
-    return JSON.stringify([data.get("reservationEnabled"), data.get("menuSelectionType"), data.get("acceptStartDaysBefore"), data.get("acceptEndDaysBefore"), data.get("guestMin"), data.get("guestMax"), data.getAll("closedWeekdays[]").sort()]);
+    return JSON.stringify([data.get("reservationEnabled"), data.get("menuSelectionType"), data.get("acceptStartDaysBefore"), data.get("acceptEndDaysBefore"), data.get("averageBudgetText"), data.get("guestMin"), data.get("guestMax"), data.getAll("closedWeekdays[]").sort()]);
 }
 /**
  * 予約基本設定のclient-side値域検証
@@ -120,12 +121,14 @@ function validateReservationSettingsFormData(formData) {
     const menuSelectionType = formData.get("menuSelectionType");
     const acceptStart = formData.get("acceptStartDaysBefore");
     const acceptEnd = formData.get("acceptEndDaysBefore");
+    const averageBudgetText = formData.get("averageBudgetText");
     const guestMin = formData.get("guestMin");
     const guestMax = formData.get("guestMax");
     if (!["0", "1"].includes(reservationEnabled)) return false;
     if (!["0", "1", "2"].includes(menuSelectionType)) return false;
     if (!["unlimited", "90", "60", "30"].includes(acceptStart)) return false;
     if (!["0", "1", "3", "7"].includes(acceptEnd)) return false;
+    if (typeof averageBudgetText !== "string" || Array.from(averageBudgetText).length > 100 || /[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f-\u009f]/u.test(averageBudgetText)) return false;
     if (!["1", "2", "3", "4"].includes(guestMin)) return false;
     if (!["1", "2", "3", "4"].includes(guestMax)) return false;
     if (Number(guestMin) > Number(guestMax)) return false;

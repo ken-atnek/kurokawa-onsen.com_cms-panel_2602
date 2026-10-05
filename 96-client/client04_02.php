@@ -101,6 +101,7 @@ if ($settingsRaw === false) {
     'menu_selection_type' => 0,
     'accept_start_days_before' => null,
     'accept_end_days_before' => 0,
+    'average_budget_text' => null,
     'guest_min' => 1,
     'guest_max' => 4,
   ];
@@ -132,6 +133,7 @@ $displaySettings = $settings ?: [
   'menu_selection_type' => 0,
   'accept_start_days_before' => null,
   'accept_end_days_before' => 0,
+  'average_budget_text' => null,
   'guest_min' => 1,
   'guest_max' => 4,
 ];
@@ -139,6 +141,7 @@ $closedWeekdays = is_array($closedWeekdays) ? $closedWeekdays : [];
 $acceptStartValue = $displaySettings['accept_start_days_before'] === null ? 'unlimited' : (string)$displaySettings['accept_start_days_before'];
 $acceptStartSelect = renderClientReservationSettingsSelect('acceptStartDaysBefore', ['unlimited' => '無期限', 90 => '90日', 60 => '60日', 30 => '30日'], $acceptStartValue, 'acceptStart', $saveEnabled === false);
 $acceptEndSelect = renderClientReservationSettingsSelect('acceptEndDaysBefore', [0 => '当日', 1 => '1日前', 3 => '3日前', 7 => '1週間前'], $displaySettings['accept_end_days_before'], 'acceptEnd', $saveEnabled === false);
+$averageBudgetText = htmlspecialchars((string)($displaySettings['average_budget_text'] ?? ''), ENT_QUOTES, 'UTF-8');
 $guestMinSelect = renderClientReservationSettingsSelect('guestMin', [1 => '1名', 2 => '2名', 3 => '3名', 4 => '4名'], $displaySettings['guest_min'], 'guestMin', $saveEnabled === false);
 $guestMaxSelect = renderClientReservationSettingsSelect('guestMax', [1 => '1名', 2 => '2名', 3 => '3名', 4 => '4名'], $displaySettings['guest_max'], 'guestMax', $saveEnabled === false);
 $disabled = $saveEnabled ? '' : ' disabled';
@@ -191,17 +194,43 @@ print <<<HTML
           <input type="hidden" name="csrfToken" value="{$csrfTokenHtml}">
           <h3>予約基本設定</h3>
           <dl>
-            <div class="box-name"><dt>店舗名</dt><dd><span>{$headerShopName}</span></dd></div>
-            <div class="box-check"><dt>予約受付</dt><dd>
-              <div><input type="radio" name="reservationEnabled" id="reservationEnabled0" value="0"{$disabled}{$reservationEnabled0Checked}><label for="reservationEnabled0">使用しない</label></div>
-              <div><input type="radio" name="reservationEnabled" id="reservationEnabled1" value="1"{$disabled}{$reservationEnabled1Checked}><label for="reservationEnabled1">使用する</label></div>
-            </dd></div>
-            <div class="box-check"><dt>食事メニュー選択</dt><dd>
-              <div><input type="radio" name="menuSelectionType" id="menuSelectionType0" value="0"{$disabled}{$menuSelectionType0Checked}><label for="menuSelectionType0">利用しない</label></div>
-              <div><input type="radio" name="menuSelectionType" id="menuSelectionType1" value="1"{$disabled}{$menuSelectionType1Checked}><label for="menuSelectionType1">利用する（任意）</label></div>
-              <div><input type="radio" name="menuSelectionType" id="menuSelectionType2" value="2"{$disabled}{$menuSelectionType2Checked}><label for="menuSelectionType2">利用する（必須）</label></div>
-            </dd></div>
-            <div class="box-periode"><dt>予約受付期間</dt><dd><div class="wrap-dd"><span>何日前から受付</span>{$acceptStartSelect}</div><i>〜</i><div class="wrap-dd"><span>何日前まで受付</span>{$acceptEndSelect}</div></dd></div>
+            <div class="box-name">
+              <dt>店舗名</dt>
+              <dd><span>{$headerShopName}</span></dd>
+            </div>
+            <div class="box-check">
+              <dt>予約受付</dt>
+              <dd>
+                <div><input type="radio" name="reservationEnabled" id="reservationEnabled0" value="0"{$disabled}{$reservationEnabled0Checked}><label for="reservationEnabled0">使用しない</label></div>
+                <div><input type="radio" name="reservationEnabled" id="reservationEnabled1" value="1"{$disabled}{$reservationEnabled1Checked}><label for="reservationEnabled1">使用する</label></div>
+              </dd>
+            </div>
+            <div class="box-check">
+              <dt>食事メニュー選択</dt>
+              <dd>
+                <div><input type="radio" name="menuSelectionType" id="menuSelectionType0" value="0"{$disabled}{$menuSelectionType0Checked}><label for="menuSelectionType0">利用しない</label></div>
+                <div><input type="radio" name="menuSelectionType" id="menuSelectionType1" value="1"{$disabled}{$menuSelectionType1Checked}><label for="menuSelectionType1">利用する（任意）</label></div>
+                <div><input type="radio" name="menuSelectionType" id="menuSelectionType2" value="2"{$disabled}{$menuSelectionType2Checked}><label for="menuSelectionType2">利用する（必須）</label></div>
+              </dd>
+            </div>
+            <div class="box-periode">
+              <dt>予約受付期間</dt>
+              <dd>
+                <div class="wrap-dd">
+                  <span>何日前から受付</span>{$acceptStartSelect}
+                </div>
+                <i>〜</i>
+                <div class="wrap-dd">
+                  <span>何日前まで受付</span>{$acceptEndSelect}
+                </div>
+              </dd>
+            </div>
+            <div>
+              <dt>平均予算</dt>
+              <dd>
+                <textarea name="averageBudgetText" id="averageBudgetText" maxlength="100" style="min-height:3lh;"{$disabled}>{$averageBudgetText}</textarea>
+              </dd>
+            </div>
             <div class="box-person"><dt>最小予約人数</dt><dd>{$guestMinSelect}</dd></div>
             <div class="box-person"><dt>最大予約人数</dt><dd>{$guestMaxSelect}</dd></div>
             <div class="box-holiday"><dt>定休日</dt><dd>
@@ -240,7 +269,7 @@ print <<<HTML
     </div>
   </article>
   <script src="../assets/js/common.js" defer></script>
-  <script src="./assets/js/client04_02.js" defer></script>
+  <script src="./assets/js/client04_02.js?06422030092026" defer></script>
 </body>
 </html>
 

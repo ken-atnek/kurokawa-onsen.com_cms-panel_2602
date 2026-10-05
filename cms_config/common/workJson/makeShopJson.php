@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../database/db_shops_ec.php';
 require_once __DIR__ . '/../../database/db_folders.php';
 require_once __DIR__ . '/../../database/db_photos.php';
 require_once __DIR__ . '/../../database/db_shop_articles.php';
+require_once __DIR__ . '/../../database/db_reservation_settings.php';
 require_once __DIR__ . '/makeShopIndexJson.php';
 
 /*
@@ -76,17 +77,21 @@ function generateShopJson($shopId): bool
 	}
 	$saveDir = DEFINE_JSON_DIR_PATH . '/shops/details';
 	$shopJson = sprintf('%03d', $shopId) . '.json';
-	if (!is_dir($saveDir) && mkdir($saveDir, 0777, true) === false) {
-		return false;
-	}
-	if (!file_exists($saveDir . '/' . $shopJson) && createShopJsonFileIfMissing($saveDir, $shopJson) === false) {
-		return false;
-	}
 	if (!is_array($shopData) || count($shopData) < 1) {
 		return writeEmptyShopJsonFile($saveDir, $shopJson);
 	}
 	if ((int)($shopData['is_active'] ?? 0) !== 1) {
 		return writeEmptyShopJsonFile($saveDir, $shopJson);
+	}
+	$reservationSettings = getShopReservationSettings($shopId);
+	if ($reservationSettings === false) {
+		return false;
+	}
+	if (!is_dir($saveDir) && mkdir($saveDir, 0777, true) === false) {
+		return false;
+	}
+	if (!file_exists($saveDir . '/' . $shopJson) && createShopJsonFileIfMissing($saveDir, $shopJson) === false) {
+		return false;
 	}
 	$shopDetailsData = getShopDetailsData($shopId);
 	if (is_array($shopDetailsData) && count($shopDetailsData) > 0) {
@@ -140,6 +145,13 @@ function generateShopJson($shopId): bool
 			'value' => $shop['regular_holiday_display'] ?? ''
 		]
 	];
+	$averageBudgetText = is_array($reservationSettings) ? ($reservationSettings['average_budget_text'] ?? null) : null;
+	if ($averageBudgetText !== null) {
+		$infoData['hours'][] = [
+			'label' => '平均予算',
+			'value' => str_replace(["\r\n", "\r"], "\n", (string)$averageBudgetText),
+		];
+	}
 	$closedWeekdays = [];
 	$closedRaw = $shop['closed_weekdays'] ?? null;
 	if (is_string($closedRaw) && $closedRaw !== '') {
@@ -213,30 +225,24 @@ function generateShopJson($shopId): bool
 			'detailJsonPath' => '/db/shops/articles/' . $sId . '/' . (int)$row['article_id'] . '/article.json',
 		];
 	}
-	#フロントエンド側のJSON仕様確定まで営業時間帯の書き出しを停止する（将来再開用に処理を保持）
-	/*
-	$businessHoursTypes = [];
-	$businessHoursTypeLabels = [];
+	#飲食店：営業時間帯
+	$mealPeriods = [];
 	$businessHoursRaw = isset($shop['business_hours_types']) ? (string)$shop['business_hours_types'] : '';
 	if (($shop['shop_type'] ?? '') === 'food' && $businessHoursRaw !== '' && isset($shopBusinessHoursTypeList) && is_array($shopBusinessHoursTypeList)) {
 		$businessHoursParts = array_values(array_filter(array_map('trim', explode(',', $businessHoursRaw)), static function ($v) {
 			return $v !== '';
 		}));
-		foreach ($businessHoursParts as $businessHoursType) {
-			if (array_key_exists($businessHoursType, $shopBusinessHoursTypeList) === false) {
-				continue;
+		foreach (array_keys($shopBusinessHoursTypeList) as $businessHoursType) {
+			if (in_array($businessHoursType, $businessHoursParts, true)) {
+				$mealPeriods[] = $businessHoursType;
 			}
-			$businessHoursTypes[] = $businessHoursType;
-			$businessHoursTypeLabels[] = $shopBusinessHoursTypeList[$businessHoursType];
 		}
 	}
-	*/
 	$writeData = [
 		'id' => $sId,
 		'slug' => $shopNameEng,
 		'category' => $shop['shop_type'] ?? '',
-		// 'businessHoursTypes' => $businessHoursTypes,
-		// 'businessHoursTypeLabels' => $businessHoursTypeLabels,
+		'mealPeriods' => $mealPeriods,
 		'name' => formatTextareaForDB((string)($shop['shop_name'] ?? '')),
 		'statusFallbackKey' => 'open',
 		'heroImage' => $shop['main_image_path'] ?? '',

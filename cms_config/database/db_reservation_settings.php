@@ -40,6 +40,7 @@ function getShopReservationSettings($shopId = null)
 				menu_selection_type,
 				accept_start_days_before,
 				accept_end_days_before,
+				average_budget_text,
 				guest_min,
 				guest_max,
 				created_at,
@@ -88,6 +89,8 @@ function normalizeShopReservationSettingsData($settingsData)
 	$acceptStartRaw = $settingsData['accept_start_days_before'] ?? null;
 	$acceptStartDaysBefore = $acceptStartRaw === null ? null : $normalizeInteger($acceptStartRaw);
 	$acceptEndDaysBefore = $normalizeInteger($settingsData['accept_end_days_before'] ?? null);
+	$averageBudgetText = array_key_exists('average_budget_text', $settingsData) && $settingsData['average_budget_text'] !== null
+		? (string)$settingsData['average_budget_text'] : null;
 	$guestMin = $normalizeInteger($settingsData['guest_min'] ?? null);
 	$guestMax = $normalizeInteger($settingsData['guest_max'] ?? null);
 
@@ -109,6 +112,7 @@ function normalizeShopReservationSettingsData($settingsData)
 		'menu_selection_type' => $menuSelectionType,
 		'accept_start_days_before' => $acceptStartDaysBefore,
 		'accept_end_days_before' => $acceptEndDaysBefore,
+		'average_budget_text' => $averageBudgetText,
 		'guest_min' => $guestMin,
 		'guest_max' => $guestMax,
 	];
@@ -136,6 +140,7 @@ function insertShopReservationSettings($shopId = null, $settingsData = [])
 		$menuSelectionType = isset($settingsData['menu_selection_type']) ? (int)$settingsData['menu_selection_type'] : 0;
 		$acceptStartDaysBefore = array_key_exists('accept_start_days_before', $settingsData) ? $settingsData['accept_start_days_before'] : null;
 		$acceptEndDaysBefore = isset($settingsData['accept_end_days_before']) ? (int)$settingsData['accept_end_days_before'] : 0;
+		$averageBudgetText = array_key_exists('average_budget_text', $settingsData) ? $settingsData['average_budget_text'] : null;
 		$guestMin = isset($settingsData['guest_min']) ? (int)$settingsData['guest_min'] : 1;
 		$guestMax = isset($settingsData['guest_max']) ? (int)$settingsData['guest_max'] : 4;
 
@@ -151,6 +156,9 @@ function insertShopReservationSettings($shopId = null, $settingsData = [])
 		if ($acceptStartDaysBefore !== null && ($acceptStartDaysBefore === '' || is_numeric($acceptStartDaysBefore) === false)) {
 			return false;
 		}
+		if ($averageBudgetText !== null && is_string($averageBudgetText) === false) {
+			return false;
+		}
 		$acceptStartDaysBefore = $acceptStartDaysBefore === null ? null : (int)$acceptStartDaysBefore;
 
 		$strSQL = "
@@ -161,6 +169,7 @@ function insertShopReservationSettings($shopId = null, $settingsData = [])
 					menu_selection_type,
 					accept_start_days_before,
 					accept_end_days_before,
+					average_budget_text,
 					guest_min,
 					guest_max
 				)
@@ -170,6 +179,7 @@ function insertShopReservationSettings($shopId = null, $settingsData = [])
 				:menu_selection_type,
 				:accept_start_days_before,
 				:accept_end_days_before,
+				:average_budget_text,
 				:guest_min,
 				:guest_max
 			)
@@ -185,6 +195,7 @@ function insertShopReservationSettings($shopId = null, $settingsData = [])
 			$newStmt->bindValue(':accept_start_days_before', $acceptStartDaysBefore, PDO::PARAM_INT);
 		}
 		$newStmt->bindValue(':accept_end_days_before', $acceptEndDaysBefore, PDO::PARAM_INT);
+		$newStmt->bindValue(':average_budget_text', $averageBudgetText, $averageBudgetText === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$newStmt->bindValue(':guest_min', $guestMin, PDO::PARAM_INT);
 		$newStmt->bindValue(':guest_max', $guestMax, PDO::PARAM_INT);
 		$result = $newStmt->execute();
@@ -230,6 +241,7 @@ function updateShopReservationSettings($shopId = null, $settingsData = [], $chan
 			'menu_selection_type' => 'menu_selection_type',
 			'accept_start_days_before' => 'accept_start_days_before',
 			'accept_end_days_before' => 'accept_end_days_before',
+			'average_budget_text' => 'average_budget_text',
 			'guest_min' => 'guest_min',
 			'guest_max' => 'guest_max',
 		];
@@ -263,7 +275,8 @@ function updateShopReservationSettings($shopId = null, $settingsData = [], $chan
 		$newStmt = $DB_CONNECT->prepare($strSQL);
 		foreach ($validatedFields as $field) {
 			$value = $normalizedData[$field];
-			$newStmt->bindValue(':' . $field, $value, $value === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+			$type = $value === null ? PDO::PARAM_NULL : ($field === 'average_budget_text' ? PDO::PARAM_STR : PDO::PARAM_INT);
+			$newStmt->bindValue(':' . $field, $value, $type);
 		}
 		$newStmt->bindValue(':shop_id', (int)$shopId, PDO::PARAM_INT);
 		$result = $newStmt->execute();
