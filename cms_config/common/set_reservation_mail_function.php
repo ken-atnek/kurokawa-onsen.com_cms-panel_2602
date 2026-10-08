@@ -137,6 +137,7 @@ function buildReservationMailMemoText($value)
  */
 function buildReservationCreatedMailMessages($context)
 {
+	global $reservationNationalityList;
 	if (
 		is_array($context) === false ||
 		is_array($context['reservation'] ?? null) === false ||
@@ -147,6 +148,11 @@ function buildReservationCreatedMailMessages($context)
 		return false;
 	}
 	$reservation = $context['reservation'];
+	$nationalityCode = $reservation['customer_nationality_code'] ?? null;
+	if (is_string($nationalityCode) === false || is_array($reservationNationalityList ?? null) === false || array_key_exists($nationalityCode, $reservationNationalityList) === false) {
+		return false;
+	}
+	$nationalityName = $reservationNationalityList[$nationalityCode];
 	$shop = $context['shop'];
 	$dateLabels = buildReservationMailDateLabels($reservation['reservation_date'] ?? null);
 	$menuSummary = buildReservationMailMenuSummary($reservation['party_size'] ?? null, $context['menu_rows']);
@@ -226,6 +232,7 @@ function buildReservationCreatedMailMessages($context)
 		'',
 		'代表者氏名：' . $customerName . ' 様',
 		'ふりがな：' . $reservation['customer_kana'],
+		'国籍：' . $nationalityName,
 		'電話番号：' . $reservation['customer_tel'],
 		'メールアドレス：' . $reservation['customer_email'],
 		'ご予約人数：' . number_format($reservation['party_size']) . '名',

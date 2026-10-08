@@ -204,6 +204,7 @@ function clientReservationNormalizePost($post, $today)
     'reservation_route' => $routeMap[$route],
     'customer_name' => $customerName,
     'customer_kana' => $customerKana,
+    'customer_nationality_code' => null,
     'customer_tel' => $customerTel,
     'customer_email' => $email,
     'accommodation_name' => $accommodationName,

@@ -214,6 +214,25 @@ if ($reservationDetailHasError === true) {
     $customerKanaHtml = clientReservationReadEscape($reservationDetail['customer_kana']);
     $customerTelHtml = clientReservationReadEscape($reservationDetail['customer_tel']);
     $customerEmailHtml = clientReservationReadEscape($reservationDetail['customer_email'] ?? '');
+    $customerNationalityCode = $reservationDetail['customer_nationality_code'];
+    $customerNationalityOptionsHtml = '<option value=""' . ($customerNationalityCode === null ? ' selected' : '') . '>未設定</option>';
+    $priorityNationalityCodes = ['JP', 'KR', 'TW', 'CN', 'HK', 'US', 'AU', 'SG', 'TH'];
+    $priorityNationalityList = [];
+    foreach ($priorityNationalityCodes as $nationalityCode) {
+      $priorityNationalityList[$nationalityCode] = $reservationNationalityList[$nationalityCode];
+    }
+    $otherNationalityList = array_diff_key($reservationNationalityList, $priorityNationalityList);
+    foreach (['主な国・地域' => $priorityNationalityList, 'その他の国・地域' => $otherNationalityList] as $groupLabel => $nationalityList) {
+      $otherGroupAttribute = $groupLabel === 'その他の国・地域' ? ' data-nationality-other-options' : '';
+      $customerNationalityOptionsHtml .= '<optgroup label="' . clientReservationReadEscape($groupLabel) . '"' . $otherGroupAttribute . '>';
+      foreach ($nationalityList as $nationalityCode => $nationalityName) {
+        $nationalityCodeHtml = clientReservationReadEscape($nationalityCode);
+        $nationalityNameHtml = clientReservationReadEscape($nationalityName);
+        $nationalitySelected = $customerNationalityCode === $nationalityCode ? ' selected' : '';
+        $customerNationalityOptionsHtml .= '<option value="' . $nationalityCodeHtml . '"' . $nationalitySelected . '>' . $nationalityNameHtml . '</option>';
+      }
+      $customerNationalityOptionsHtml .= '</optgroup>';
+    }
     $partySizeHtml = (int)$reservationDetail['party_size'];
     $menuLabelHtml = clientReservationReadEscape($menuLabel);
     $accommodationNameHtml = clientReservationReadEscape($reservationDetail['accommodation_name'] ?? '');
@@ -491,6 +510,10 @@ HTML;
                 <dt>メールアドレス</dt>
                 <dd><input type="text" name="customerEmail" value="{$customerEmailHtml}" maxlength="255" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
               </div>
+              <div>
+                <dt>国籍</dt>
+                <dd><select name="customerNationalityCode" aria-label="国籍" data-reservation-detail-field{$reservationDetailEditControlDisabled}>{$customerNationalityOptionsHtml}</select></dd>
+              </div>
               <div class="item-channel">
                 <dt>予約経路</dt>
                 <dd>{$reservationRouteOptionsHtml}</dd>
@@ -573,6 +596,18 @@ print <<<HTML
       </div>
     </div>
   </main>
+  <article class="modal-alert" data-nationality-clear-modal role="dialog" aria-modal="true" aria-label="国籍変更の確認">
+    <div class="inner-modal">
+      <div class="box-title"><p>国籍の変更確認</p><button type="button" class="btn-top-close" data-nationality-clear-cancel aria-label="閉じる"></button></div>
+      <div class="box-details">
+        <p>国名を「未選択」に変更します。<br>本当に変更しますか？</p>
+        <div class="box-btn">
+          <button type="button" class="btn-cancel" data-nationality-clear-cancel>キャンセル</button>
+          <button type="button" class="btn-confirm" data-nationality-clear-confirm>変更する</button>
+        </div>
+      </div>
+    </div>
+  </article>
   <script src="../assets/js/common.js?v=20260919-1" defer></script>
   <script src="./assets/js/client04_05_01.js?v=20260919-1" defer></script>
   <script src="./assets/js/client04_05_01_status.js" defer></script>

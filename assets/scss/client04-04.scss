@@ -343,8 +343,8 @@
             }
             .list-customer {
                 @include layout-table-list(
-                    1fr auto auto auto auto auto auto auto,
-                    8
+                    1fr auto auto auto auto auto auto auto auto,
+                    9
                 );
                 border-left: 1px solid $border-gray;
                 border-right: 1px solid $border-gray;

@@ -118,6 +118,7 @@ function clientReservationListRenderTag($reservations, $menuRows)
     '            <li>',
     '              <div>来店日</div>',
     '              <div>お客様名</div>',
+    '              <div class="item-nationality">国籍</div>',
     '              <div>電話番号</div>',
     '              <div>人数</div>',
     '              <div>メニュー</div>',
@@ -150,6 +151,10 @@ function clientReservationListRenderTag($reservations, $menuRows)
     if ($customerName === '') {
       $customerName = '---';
     }
+    $nationalityLabel = clientReservationReadNationalityLabel($reservation['customer_nationality_code'] ?? null);
+    if ($nationalityLabel === null) {
+      return null;
+    }
     $customerTel = (string)($reservation['customer_tel'] ?? '');
     if ($customerTel === '') {
       $customerTel = '---';
@@ -161,6 +166,7 @@ function clientReservationListRenderTag($reservations, $menuRows)
 
     $reservationDateHtml = clientReservationReadEscape($reservationDateLabel);
     $customerNameHtml = clientReservationReadEscape($customerName);
+    $nationalityHtml = clientReservationReadEscape($nationalityLabel);
     $customerTelHtml = clientReservationReadEscape($customerTel);
     $menuLabelHtml = str_replace("\n", '<br>', clientReservationReadEscape($menuLabel));
     $routeLabelHtml = clientReservationReadEscape($routeLabel);
@@ -170,6 +176,7 @@ function clientReservationListRenderTag($reservations, $menuRows)
     $lines[] = '            <li>';
     $lines[] = '              <div><span>' . $reservationDateHtml . '</span></div>';
     $lines[] = '              <div><span>' . $customerNameHtml . '</span></div>';
+    $lines[] = '              <div class="item-nationality"><span>' . $nationalityHtml . '</span></div>';
     $lines[] = '              <div>' . $customerTelHtml . '</div>';
     $lines[] = '              <div class="item-person">' . $partySize . '名</div>';
     $lines[] = '              <div><span>' . $menuLabelHtml . '</span></div>';
@@ -194,6 +201,7 @@ function clientReservationListRenderErrorTag()
     '            <li>',
     '              <div>来店日</div>',
     '              <div>お客様名</div>',
+    '              <div class="item-nationality">国籍</div>',
     '              <div>電話番号</div>',
     '              <div>人数</div>',
     '              <div>メニュー</div>',

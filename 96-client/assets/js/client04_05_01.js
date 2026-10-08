@@ -34,6 +34,20 @@
   }
 
   /**
+   * フロントと同じ日本語名順で「その他の国・地域」を並べる
+   */
+  function sortOtherNationalityOptions(form) {
+    const select = form.querySelector('[name="customerNationalityCode"]');
+    const group = select?.querySelector("[data-nationality-other-options]");
+    if (!group) return;
+    const selectedCode = select.value;
+    Array.from(group.querySelectorAll("option"))
+      .sort((a, b) => a.textContent.localeCompare(b.textContent, "ja"))
+      .forEach(option => group.appendChild(option));
+    select.value = selectedCode;
+  }
+
+  /**
    * 現在の人数を1～4の整数として取得する
    */
   function getPartySize(form) {
@@ -74,6 +88,7 @@
       customerKana: getValue(form, '[name="customerKana"]'),
       customerTel: getValue(form, '[name="customerTel"]'),
       customerEmail: getValue(form, '[name="customerEmail"]'),
+      customerNationalityCode: getValue(form, '[name="customerNationalityCode"]'),
       reservationMenu: menuValues,
       accommodationName: getValue(form, '[name="accommodationName"]'),
       reservationNote: getValue(form, '[name="reservationNote"]'),
@@ -170,6 +185,9 @@
         return null;
       }
     }
+    if (state.customerNationalityCode !== "" && !/^[A-Z]{2}$/.test(state.customerNationalityCode)) {
+      return null;
+    }
     if (state.accommodationName !== "" && !isBlank(state.accommodationName) && stringLength(state.accommodationName) > 100) {
       return null;
     }
@@ -198,6 +216,7 @@
     formData.append("customerKana", values.state.customerKana);
     formData.append("customerTel", values.state.customerTel);
     formData.append("customerEmail", values.state.customerEmail);
+    formData.append("customerNationalityCode", values.state.customerNationalityCode);
     if (values.menuSelectionType !== 0) {
       values.state.reservationMenu.forEach(menuId => {
         formData.append("reservationMenu[]", menuId);
@@ -218,6 +237,37 @@
   }
 
   /**
+   * 登録済み国籍を未設定へ戻す前に確認する
+   */
+  function confirmNationalityClear() {
+    const modal = document.querySelector("[data-nationality-clear-modal]");
+    if (!modal) return Promise.resolve(false);
+    const confirmButton = modal.querySelector("[data-nationality-clear-confirm]");
+    const cancelButtons = modal.querySelectorAll("[data-nationality-clear-cancel]");
+    const previousFocus = document.activeElement;
+    modal.classList.add("is-active");
+    confirmButton?.focus();
+    return new Promise(resolve => {
+      function finish(confirmed) {
+        modal.classList.remove("is-active");
+        confirmButton?.removeEventListener("click", onConfirm);
+        cancelButtons.forEach(button => button.removeEventListener("click", onCancel));
+        document.removeEventListener("keydown", onKeyDown);
+        previousFocus?.focus();
+        resolve(confirmed);
+      }
+      function onConfirm() { finish(true); }
+      function onCancel() { finish(false); }
+      function onKeyDown(event) {
+        if (event.key === "Escape") finish(false);
+      }
+      confirmButton?.addEventListener("click", onConfirm);
+      cancelButtons.forEach(button => button.addEventListener("click", onCancel));
+      document.addEventListener("keydown", onKeyDown);
+    });
+  }
+
+  /**
    * Detail Edit保存を一度だけ実行する
    */
   async function saveReservationDetail(form, statusControl) {
@@ -226,6 +276,11 @@
     if (!values) {
       window.alert("入力内容を確認してください。");
       return;
+    }
+
+    const initialNationalityCode = form.dataset.initialNationalityCode ?? "";
+    if (initialNationalityCode !== "" && values.state.customerNationalityCode === "") {
+      if (await confirmNationalityClear() !== true) return;
     }
 
     isReservationDetailSaving = true;
@@ -270,6 +325,7 @@
 
     updateMenuSlotVisibility(form);
     const initialState = JSON.stringify(getEditableState(form));
+    form.dataset.initialNationalityCode = getValue(form, '[name="customerNationalityCode"]');
 
     /**
      * dirty状態を再計算しstatus操作可否へ反映する
@@ -300,5 +356,9 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", initializeReservationDetailEdit);
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("reservationDetailEditForm");
+    if (form) sortOtherNationalityOptions(form);
+    initializeReservationDetailEdit();
+  });
 })();

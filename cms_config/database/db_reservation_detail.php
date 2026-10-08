@@ -77,6 +77,7 @@ function getReservationDetail($shopId = null, $reservationId = null)
 				r.party_size,
 				r.customer_name,
 				r.customer_kana,
+				r.customer_nationality_code,
 				r.customer_tel,
 				r.customer_email,
 				r.accommodation_name,
@@ -111,7 +112,7 @@ function getReservationDetail($shopId = null, $reservationId = null)
 		$reservationRoute = normalizeReservationDetailReadInteger($reservation['reservation_route'] ?? null, 1, 3);
 		$status = normalizeReservationDetailReadInteger($reservation['status'] ?? null, 1, 4);
 		$requiredStringColumns = ['reservation_date', 'customer_name', 'customer_kana', 'customer_tel', 'created_at', 'updated_at'];
-		$nullableStringColumns = ['customer_email', 'accommodation_name', 'customer_note', 'shop_memo', 'cancelled_at'];
+		$nullableStringColumns = ['customer_nationality_code', 'customer_email', 'accommodation_name', 'customer_note', 'shop_memo', 'cancelled_at'];
 		if (
 			$normalizedReservationId !== $reservationId ||
 			$normalizedShopId !== $shopId ||

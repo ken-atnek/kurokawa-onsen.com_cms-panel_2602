@@ -230,6 +230,10 @@ function insertReservation($shopId = null, $reservationData = [])
 
 		$customerName = (string)$reservationData['customer_name'];
 		$customerKana = (string)$reservationData['customer_kana'];
+		$customerNationalityCode = $reservationData['customer_nationality_code'] ?? null;
+		if ($customerNationalityCode !== null && (is_string($customerNationalityCode) === false || preg_match('/\A[A-Z]{2}\z/D', $customerNationalityCode) !== 1)) {
+			return false;
+		}
 		$customerTel = (string)$reservationData['customer_tel'];
 		$customerEmail = array_key_exists('customer_email', $reservationData) ? $reservationData['customer_email'] : null;
 		$accommodationName = array_key_exists('accommodation_name', $reservationData) ? $reservationData['accommodation_name'] : null;
@@ -251,6 +255,7 @@ function insertReservation($shopId = null, $reservationData = [])
 					party_size,
 					customer_name,
 					customer_kana,
+					customer_nationality_code,
 					customer_tel,
 					customer_email,
 					accommodation_name,
@@ -266,6 +271,7 @@ function insertReservation($shopId = null, $reservationData = [])
 				:party_size,
 				:customer_name,
 				:customer_kana,
+				:customer_nationality_code,
 				:customer_tel,
 				:customer_email,
 				:accommodation_name,
@@ -283,6 +289,7 @@ function insertReservation($shopId = null, $reservationData = [])
 		$newStmt->bindValue(':party_size', (int)$partySize, PDO::PARAM_INT);
 		$newStmt->bindValue(':customer_name', $customerName, PDO::PARAM_STR);
 		$newStmt->bindValue(':customer_kana', $customerKana, PDO::PARAM_STR);
+		$newStmt->bindValue(':customer_nationality_code', $customerNationalityCode, $customerNationalityCode === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$newStmt->bindValue(':customer_tel', $customerTel, PDO::PARAM_STR);
 		$newStmt->bindValue(':customer_email', $customerEmail, $customerEmail === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$newStmt->bindValue(':accommodation_name', $accommodationName, $accommodationName === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
@@ -952,6 +959,7 @@ function getReservationDetailEditForWrite($shopId = null, $reservationId = null)
 				party_size,
 				customer_name,
 				customer_kana,
+				customer_nationality_code,
 				customer_tel,
 				customer_email,
 				accommodation_name,
@@ -982,7 +990,7 @@ function getReservationDetailEditForWrite($shopId = null, $reservationId = null)
 		$reservation['party_size'] = normalizeReservationDbIntegerForReservations($reservation['party_size'] ?? null, 1, 4);
 		$reservation['status'] = normalizeReservationDbIntegerForReservations($reservation['status'] ?? null, 1, 4);
 		$requiredStrings = ['customer_name', 'customer_kana', 'customer_tel'];
-		$nullableStrings = ['customer_email', 'accommodation_name', 'customer_note', 'shop_memo'];
+		$nullableStrings = ['customer_nationality_code', 'customer_email', 'accommodation_name', 'customer_note', 'shop_memo'];
 		if ($reservation['id'] !== $reservationId || $reservation['shop_id'] !== $shopId || $reservation['reservation_route'] === null || isReservationDbDateStringForReservations($reservation['reservation_date'] ?? null) === false || $reservation['party_size'] === null || $reservation['status'] === null) {
 			return false;
 		}
@@ -1114,6 +1122,7 @@ function updateReservationDetailFields($shopId = null, $reservationId = null, $c
 			'party_size' => 'int',
 			'customer_name' => 'string',
 			'customer_kana' => 'string',
+			'customer_nationality_code' => 'nullable_string',
 			'customer_tel' => 'string',
 			'customer_email' => 'nullable_string',
 			'accommodation_name' => 'nullable_string',
@@ -1135,6 +1144,9 @@ function updateReservationDetailFields($shopId = null, $reservationId = null, $c
 				return false;
 			}
 			if ($columnTypes[$column] === 'nullable_string' && $value !== null && is_string($value) === false) {
+				return false;
+			}
+			if ($column === 'customer_nationality_code' && $value !== null && preg_match('/\A[A-Z]{2}\z/D', $value) !== 1) {
 				return false;
 			}
 			$setClauses[] = $column . ' = :' . $column;

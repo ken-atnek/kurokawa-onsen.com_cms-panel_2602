@@ -140,6 +140,7 @@ function buildReservationReadReservationIndex($reservationSeatRows, $menuRows = 
 		}
 
 		$customerName = (string)($row['customer_name'] ?? '');
+		$customerNationalityCode = $row['customer_nationality_code'] ?? null;
 		$customerTel = (string)($row['customer_tel'] ?? '');
 		if (isset($reservationDatesById[$reservationId]) === false) {
 			$reservationDatesById[$reservationId] = $reservationDate;
@@ -147,6 +148,7 @@ function buildReservationReadReservationIndex($reservationSeatRows, $menuRows = 
 				'reservation_id' => $reservationId,
 				'party_size' => $partySize,
 				'customer_name' => $customerName,
+				'customer_nationality_code' => $customerNationalityCode,
 				'customer_tel' => $customerTel,
 				'reservation_route' => $reservationRoute,
 				'status' => $status,
@@ -169,6 +171,7 @@ function buildReservationReadReservationIndex($reservationSeatRows, $menuRows = 
 				$reservationDatesById[$reservationId] !== $reservationDate ||
 				$baseReservation['party_size'] !== $partySize ||
 				$baseReservation['customer_name'] !== $customerName ||
+				$baseReservation['customer_nationality_code'] !== $customerNationalityCode ||
 				$baseReservation['customer_tel'] !== $customerTel ||
 				$baseReservation['reservation_route'] !== $reservationRoute ||
 				$baseReservation['status'] !== $status

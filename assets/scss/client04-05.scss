@@ -169,8 +169,8 @@
         margin: 1.5em 1.4em 3.25em;
         .search-list {
             @include layout-table-list(
-                auto 1fr auto auto auto auto auto auto,
-                8
+                auto 1fr auto auto auto auto auto auto auto,
+                9
             );
             border-left: 1px solid $border-gray;
             border-right: 1px solid $border-gray;
@@ -349,6 +349,12 @@
                         font-size: inherit;
                         input[type="text"] {
                             max-width: 30rem;
+                        }
+                        select[name="customerNationalityCode"] {
+                            max-width: 30rem;
+                            height: 4rem;
+                            appearance: auto;
+                            cursor: pointer;
                         }
                         span {
                             font-size: fz(14);

@@ -13,6 +13,22 @@ function clientReservationReadEscape($value)
 }
 
 /**
+ * 予約者の国籍コードを日本語国名に変換
+ *  NULLは空表示、マスタ外コードは参照エラーとして区別する
+ */
+function clientReservationReadNationalityLabel($code)
+{
+  global $reservationNationalityList;
+  if ($code === null) {
+    return '';
+  }
+  if (is_string($code) === false || is_array($reservationNationalityList ?? null) === false || array_key_exists($code, $reservationNationalityList) === false) {
+    return null;
+  }
+  return $reservationNationalityList[$code];
+}
+
+/**
  * availability表示名取得
  *  日単位statusと休日理由を管理画面表示へ変換する
  */
@@ -304,6 +320,7 @@ function clientReservationReadRenderListTag($reservations)
   $lines[] = '<ul class="list-customer">';
   $lines[] = '  <li>';
   $lines[] = '    <div style="align-items: flex-start">お客様名</div>';
+  $lines[] = '    <div class="item-nationality">国籍</div>';
   $lines[] = '    <div></div>';
   $lines[] = '    <div>人数</div>';
   $lines[] = '    <div>メニュー</div>';
@@ -316,6 +333,7 @@ function clientReservationReadRenderListTag($reservations)
   if (empty($reservations) === true) {
     $lines[] = '  <li>';
     $lines[] = '    <div class="item-name"><span>予約はありません。</span></div>';
+    $lines[] = '    <div class="item-nationality"></div>';
     $lines[] = '    <div></div>';
     $lines[] = '    <div></div>';
     $lines[] = '    <div></div>';
@@ -351,6 +369,10 @@ function clientReservationReadRenderListTag($reservations)
 		return null;
 	}
     $customerName = (string)($reservation['customer_name'] ?? '');
+	$nationalityLabel = clientReservationReadNationalityLabel($reservation['customer_nationality_code'] ?? null);
+	if ($nationalityLabel === null) {
+		return null;
+	}
 	$reservationId = (int)($reservation['reservation_id'] ?? 0);
 	$status = (int)($reservation['status'] ?? 0);
 	$seatDataError = ($reservation['seat_data_error'] ?? false) === true;
@@ -425,6 +447,7 @@ function clientReservationReadRenderListTag($reservations)
 
     $lines[] = '  <li>';
     $lines[] = '    <div class="item-name"><span>' . clientReservationReadEscape($customerName) . '</span></div>';
+	$lines[] = '    <div class="item-nationality"><span>' . clientReservationReadEscape($nationalityLabel) . '</span></div>';
 	$lines[] = '    <form class="form-seat"' . $seatFormAttributes . '>';
 	$lines[] = '      <div class="select-seat-type is-selected" data-selectbox>';
 	$lines[] = '        <button type="button" class="selectbox__head" aria-expanded="false"' . $seatControlDisabled . '>';

@@ -6,7 +6,7 @@ require_once __DIR__ . '/set_food_menu_function.php';
 
 /**
  * 予約者の氏名・ふりがなを保存形式へ正規化
- *  Unicode空白を半角スペース1文字へ揃え、姓名区切りを必須とする
+ *  Unicode空白を半角スペース1文字へ揃え、空白なしの値も許可する
  */
 function normalizeReservationCustomerIdentityValue($value)
 {
@@ -26,9 +26,8 @@ function normalizeReservationCustomerIdentityValue($value)
 		? mb_strlen($normalizedValue, 'UTF-8')
 		: strlen($normalizedValue);
 	if (
-		$length < 3 ||
-		$length > 101 ||
-		preg_match('/\A[^ ]+ [^ ]+(?: [^ ]+)*\z/uD', $normalizedValue) !== 1
+		$length < 1 ||
+		$length > 101
 	) {
 		return null;
 	}
@@ -980,6 +979,17 @@ function executeReservationRegistration($shopId = null, $reservationData = [], $
 	}
 	$reservationData['customer_name'] = $customerName;
 	$reservationData['customer_kana'] = $customerKana;
+	$nationalityCode = $reservationData['customer_nationality_code'] ?? null;
+	if ($nationalityCode !== null) {
+		global $reservationNationalityList;
+		if (is_string($nationalityCode) === false || preg_match('/\A[A-Z]{2}\z/D', $nationalityCode) !== 1 || isset($reservationNationalityList[$nationalityCode]) === false) {
+			return makeReservationRegistrationResult(false, null, 'invalid_input');
+		}
+	}
+	if ($reservationRoute === 1 && $nationalityCode === null) {
+		return makeReservationRegistrationResult(false, null, 'invalid_input');
+	}
+	$reservationData['customer_nationality_code'] = $nationalityCode;
 	foreach (['getShopReservationSettings', 'checkAndAssignSeat', 'replaceReservationSeats', 'insertReservation', 'insertReservationSeats', 'insertReservationMenus'] as $requiredFunction) {
 		if (function_exists($requiredFunction) === false) {
 			return makeReservationRegistrationResult(false, null, 'invalid_input');

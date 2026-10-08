@@ -102,7 +102,7 @@ function isReservationDetailEditPostSyntaxValid($post)
 	$allowedKeys = [
 		'noUpDateKey', 'csrfToken', 'reservationId', 'detailEditVersion',
 		'reservationRoute', 'reservationPerson', 'customerName', 'customerKana',
-		'customerTel', 'customerEmail',
+		'customerTel', 'customerEmail', 'customerNationalityCode',
 		'reservationMenu', 'accommodationName', 'reservationNote', 'shopMemo',
 	];
 	$requiredScalarKeys = array_values(array_diff($allowedKeys, ['reservationMenu']));
@@ -174,6 +174,14 @@ function isReservationDetailEditPostSyntaxValid($post)
 	if ($email !== null && (reservationDetailEditStringLength($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false)) {
 		return false;
 	}
+	global $reservationNationalityList;
+	$nationalityCode = $post['customerNationalityCode'];
+	if ($nationalityCode !== '' && (
+		preg_match('/\A[A-Z]{2}\z/D', $nationalityCode) !== 1 ||
+		isset($reservationNationalityList[$nationalityCode]) === false
+	)) {
+		return false;
+	}
 	if ($accommodationName !== null && reservationDetailEditStringLength($accommodationName) > 100) {
 		return false;
 	}
@@ -225,6 +233,7 @@ function normalizeReservationDetailEditPost($post)
 			'customer_kana' => $customerKana,
 			'customer_tel' => $post['customerTel'],
 			'customer_email' => $email,
+			'customer_nationality_code' => $post['customerNationalityCode'] === '' ? null : $post['customerNationalityCode'],
 			'accommodation_name' => $accommodationName,
 			'customer_note' => $customerNote,
 			'shop_memo' => $shopMemo,
@@ -381,6 +390,17 @@ function buildReservationDetailEditCanonicalState($reservation, $menuRows, $menu
 			return false;
 		}
 	}
+	global $reservationNationalityList;
+	$nationalityCode = $reservation['customer_nationality_code'] ?? null;
+	if (array_key_exists('customer_nationality_code', $reservation) === false || (
+		$nationalityCode !== null && (
+			is_string($nationalityCode) === false ||
+			preg_match('/\A[A-Z]{2}\z/D', $nationalityCode) !== 1 ||
+			isset($reservationNationalityList[$nationalityCode]) === false
+		)
+	)) {
+		return false;
+	}
 	$cancelledAt = $reservation['cancelled_at'] ?? null;
 	if (
 		(in_array($status, [1, 2], true) === true && $cancelledAt !== null) ||
@@ -414,6 +434,7 @@ function buildReservationDetailEditCanonicalState($reservation, $menuRows, $menu
 			'customer_kana' => $reservation['customer_kana'],
 			'customer_tel' => $reservation['customer_tel'],
 			'customer_email' => $reservation['customer_email'],
+			'customer_nationality_code' => $nationalityCode,
 			'accommodation_name' => $reservation['accommodation_name'],
 			'customer_note' => $reservation['customer_note'],
 			'shop_memo' => $reservation['shop_memo'],
@@ -449,7 +470,7 @@ function buildReservationDetailEditReservationChanges($freshReservation, $reques
 {
 	$allowedColumns = [
 		'reservation_route', 'party_size', 'customer_name', 'customer_kana',
-		'customer_tel', 'customer_email',
+		'customer_tel', 'customer_email', 'customer_nationality_code',
 		'accommodation_name', 'customer_note', 'shop_memo',
 	];
 	if (is_array($freshReservation) === false || is_array($requestedReservationData) === false || array_keys($requestedReservationData) !== $allowedColumns) {

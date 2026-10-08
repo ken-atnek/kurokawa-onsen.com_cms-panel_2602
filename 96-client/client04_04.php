@@ -371,7 +371,7 @@ $reservationAddMessageBlockHtml = '';
 if ($reservationAddEnabled === false && $reservationAddMessageHtml !== '') {
   $reservationAddMessageBlockHtml = '<p class="reservation-add-message" data-reservation-local-message="1">' . $reservationAddMessageHtml;
   if ($reservationAddGuidancePathHtml !== '' && $reservationAddGuidanceLabelHtml !== '') {
-    $reservationAddMessageBlockHtml .= ' <a href="' . $reservationAddGuidancePathHtml . '">' . $reservationAddGuidanceLabelHtml . '</a>';
+    $reservationAddMessageBlockHtml .= ' <a href="' . $reservationAddGuidancePathHtml . '" style="font-size:inherit;">' . $reservationAddGuidanceLabelHtml . '</a>';
   }
   $reservationAddMessageBlockHtml .= '</p>';
 }
@@ -492,7 +492,7 @@ print <<<HTML
   <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon/apple-touch-icon.png">
   <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
-  <link rel="stylesheet" href="../assets/css/client04-04.css">
+  <link rel="stylesheet" href="../assets/css/client04-04.css?55221308102026">
 </head>
 <body data-reservation-temp-move-active="{$reservationTempMoveGuardActiveValue}" data-reservation-temp-move-invalid="{$reservationTempMoveInvalidValue}">
 
