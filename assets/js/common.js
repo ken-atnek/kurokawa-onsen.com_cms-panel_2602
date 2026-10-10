@@ -1,3 +1,63 @@
+if (window.location.pathname.includes('/96-client/')) {
+  const clientLogoutKey = 'KKY_CLIENT_FORCE_LOGOUT';
+  let clientLogoutMarker = null;
+  try {
+    clientLogoutMarker = localStorage.getItem(clientLogoutKey);
+  } catch (error) {
+    // 保存領域が無効な環境ではサーバー側のセッション判定を使用する。
+  }
+
+  /**
+   * 強制ログアウト後に残ったタブをログイン画面へ戻す
+   *  復帰したタブの操作を開始前に止める
+   */
+  function redirectAfterClientLogout() {
+    try {
+      if (localStorage.getItem(clientLogoutKey) !== clientLogoutMarker) {
+        window.location.replace(new URL('./index.php', window.location.href).href);
+        return true;
+      }
+    } catch (error) {
+      // 保存領域が無効な環境ではサーバー側のセッション判定を使用する。
+    }
+    return false;
+  }
+
+  window.addEventListener('storage', event => {
+    if (event.key === clientLogoutKey) redirectAfterClientLogout();
+  });
+  window.addEventListener('pageshow', redirectAfterClientLogout);
+  document.addEventListener('click', event => {
+    if (redirectAfterClientLogout()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+  document.addEventListener('submit', event => {
+    if (redirectAfterClientLogout()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
+  const clientOriginalFetch = window.fetch.bind(window);
+  /**
+   * クライアント側Ajaxのセッション失効を検出する
+   *  更新処理の応答を描画する前にログイン画面へ戻す
+   */
+  window.fetch = async (...args) => {
+    if (redirectAfterClientLogout()) {
+      throw new Error('Client session ended');
+    }
+    const response = await clientOriginalFetch(...args);
+    if (response.headers.get('X-Client-Session-Expired') === '1') {
+      window.location.replace(new URL('./index.php', window.location.href).href);
+      throw new Error('Client session ended');
+    }
+    return response;
+  };
+}
+
 // ----------------------------
 // 共通：パネルの開閉（is-active）をトグル
 // ----------------------------
