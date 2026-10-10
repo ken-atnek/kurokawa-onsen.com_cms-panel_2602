@@ -229,11 +229,63 @@
   }
 
   /**
-   * 安全なmessageを表示して最新状態へfull reloadする
+   * 保存結果をモーダルで表示して最新状態へfull reloadする
+   *  閉じる操作まで結果を表示し、DBの最新状態は再読込で取得する
    */
-  function showMessageAndReload(message) {
-    window.alert(message);
-    window.location.reload();
+  function showMessageAndReload(title, message) {
+    const modal = document.querySelector("[data-reservation-detail-result-modal]");
+    const titleElement = modal?.querySelector("#reservationDetailResultTitle");
+    const messageElement = modal?.querySelector("#reservationDetailResultMessage");
+    const closeButtons = modal?.querySelectorAll("[data-reservation-detail-result-close]");
+    if (!modal || !titleElement || !messageElement || !closeButtons?.length) {
+      window.alert(message);
+      window.location.reload();
+      return;
+    }
+
+    titleElement.textContent = title;
+    messageElement.textContent = message;
+    modal.setAttribute("aria-hidden", "false");
+    modal.classList.add("is-active");
+    closeButtons[0].focus();
+
+    /**
+     * モーダルを閉じて保存後の最新状態を読み込む
+     */
+    function closeAndReload() {
+      document.removeEventListener("keydown", onKeyDown);
+      modal.classList.remove("is-active");
+      modal.setAttribute("aria-hidden", "true");
+      window.location.reload();
+    }
+
+    /**
+     * Escapeで閉じ、Tab移動を結果モーダル内に留める
+     */
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeAndReload();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const firstButton = closeButtons[0];
+      const lastButton = closeButtons[closeButtons.length - 1];
+      if (!modal.contains(document.activeElement)) {
+        event.preventDefault();
+        firstButton.focus();
+      } else if (event.shiftKey && document.activeElement === firstButton) {
+        event.preventDefault();
+        lastButton.focus();
+      } else if (!event.shiftKey && document.activeElement === lastButton) {
+        event.preventDefault();
+        firstButton.focus();
+      }
+    }
+
+    closeButtons.forEach(button => button.addEventListener("click", closeAndReload, { once: true }));
+    document.addEventListener("keydown", onKeyDown);
   }
 
   /**
@@ -297,19 +349,25 @@
         throw new Error("Invalid response");
       }
       if (result.status === "success") {
+        const title = typeof result.title === "string" && result.title !== ""
+          ? result.title
+          : "予約詳細保存";
         const message = typeof result.msg === "string" && result.msg !== ""
           ? result.msg
           : "予約情報を保存しました。";
-        showMessageAndReload(message);
+        showMessageAndReload(title, message);
         return;
       }
+      const title = typeof result.title === "string" && result.title !== ""
+        ? result.title
+        : "保存エラー";
       const message = typeof result.msg === "string" && result.msg !== ""
         ? result.msg
         : "予約情報を保存できませんでした。ページを再読み込みして状態をご確認ください。";
-      showMessageAndReload(message);
+      showMessageAndReload(title, message);
     } catch (error) {
       console.error("予約詳細保存エラー:", error);
-      showMessageAndReload("保存結果を確認できませんでした。ページを再読み込みして最新の状態をご確認ください。");
+      showMessageAndReload("保存結果を確認できません", "保存結果を確認できませんでした。ページを再読み込みして最新の状態をご確認ください。");
     }
   }
 

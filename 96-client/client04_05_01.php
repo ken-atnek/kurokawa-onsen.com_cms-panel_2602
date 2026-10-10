@@ -608,8 +608,19 @@ print <<<HTML
       </div>
     </div>
   </article>
+  <article class="modal-alert" data-reservation-detail-result-modal role="alertdialog" aria-modal="true" aria-labelledby="reservationDetailResultTitle" aria-describedby="reservationDetailResultMessage" aria-hidden="true">
+    <div class="inner-modal">
+      <div class="box-title"><p id="reservationDetailResultTitle"></p><button type="button" class="btn-top-close" data-reservation-detail-result-close aria-label="閉じる"></button></div>
+      <div class="box-details">
+        <p id="reservationDetailResultMessage"></p>
+        <div class="box-btn">
+          <button type="button" class="btn-cancel" data-reservation-detail-result-close>閉じる</button>
+        </div>
+      </div>
+    </div>
+  </article>
   <script src="../assets/js/common.js?v=20260919-1" defer></script>
-  <script src="./assets/js/client04_05_01.js?v=20260919-1" defer></script>
+  <script src="./assets/js/client04_05_01.js?38181610102026" defer></script>
   <script src="./assets/js/client04_05_01_status.js" defer></script>
 </body>
 </html>
