@@ -489,6 +489,12 @@
                                 input[type="email"] {
                                     max-width: 30rem;
                                 }
+                                select[name="customerNationalityCode"] {
+                                    max-width: 30rem;
+                                    height: 4rem;
+                                    appearance: auto;
+                                    cursor: pointer;
+                                }
                                 &.input-pair {
                                     flex-wrap: wrap;
                                     gap: 1rem;

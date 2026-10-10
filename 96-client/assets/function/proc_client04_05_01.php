@@ -119,6 +119,7 @@ function clientReservationDate($value)
  */
 function clientReservationNormalizePost($post, $today)
 {
+  global $reservationNationalityList;
   $allowedKeys = [
     'noUpDateKey',
     'csrfToken',
@@ -127,6 +128,7 @@ function clientReservationNormalizePost($post, $today)
     'reservationRoute',
     'customerName',
     'customerKana',
+    'customerNationalityCode',
     'customerTel',
     'customerEmail',
     'reservationMenu',
@@ -173,6 +175,18 @@ function clientReservationNormalizePost($post, $today)
   if ($email !== null && (clientReservationLength($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false)) {
     return [false, 'メールアドレスを正しく入力してください。'];
   }
+  $nationalityCode = null;
+  if (array_key_exists('customerNationalityCode', $post)) {
+    $nationalityCode = $post['customerNationalityCode'];
+    if (is_string($nationalityCode) === false) {
+      return [false, '国籍を正しく選択してください。'];
+    }
+    if ($nationalityCode === '') {
+      $nationalityCode = null;
+    } elseif (preg_match('/\A[A-Z]{2}\z/D', $nationalityCode) !== 1 || isset($reservationNationalityList[$nationalityCode]) === false) {
+      return [false, '国籍を正しく選択してください。'];
+    }
+  }
   if ($accommodationName !== null && clientReservationLength($accommodationName) > 100) {
     return [false, '宿泊施設名は100文字以内で入力してください。'];
   }
@@ -204,7 +218,7 @@ function clientReservationNormalizePost($post, $today)
     'reservation_route' => $routeMap[$route],
     'customer_name' => $customerName,
     'customer_kana' => $customerKana,
-    'customer_nationality_code' => null,
+    'customer_nationality_code' => $nationalityCode,
     'customer_tel' => $customerTel,
     'customer_email' => $email,
     'accommodation_name' => $accommodationName,

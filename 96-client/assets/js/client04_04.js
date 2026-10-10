@@ -1115,12 +1115,28 @@ function setReservationAddView(form, showForm) {
     updateReservationButtonState(form);
 }
 /**
+ * 新規予約の国籍選択肢を予約詳細と同じ日本語名順にする
+ *  その他の国・地域だけを並べ替え、現在の選択値を保持する
+ */
+function sortReservationAddNationalityOptions(form) {
+    const select = form.querySelector('select[name="customerNationalityCode"]');
+    const group = select?.querySelector("[data-nationality-other-options]");
+    if (!group) return;
+    const selectedCode = select.value;
+    Array.from(group.querySelectorAll("option"))
+        .sort((a, b) => a.textContent.localeCompare(b.textContent, "ja"))
+        .forEach((option) => group.appendChild(option));
+    select.value = selectedCode;
+}
+/**
  * 予約追加formを初期状態へ戻す
  *  入力・custom select・menu slotを戻して選択日を再同期する
  */
 function resetReservationAddForm(form) {
     invalidateReservationSeatPreview(form);
     form.reset();
+    const nationalitySelect = form.querySelector('select[name="customerNationalityCode"]');
+    if (nationalitySelect) nationalitySelect.value = "JP";
     const guestMinValue = form.dataset.guestMin || "";
     const personInput = form.querySelector('input[name="reservationPerson"][data-selectbox-hidden]');
     const personSelectBox = personInput ? personInput.closest("[data-selectbox]") : null;
@@ -1228,9 +1244,10 @@ function validateReservationAddForm(form) {
     const noUpDateKeyInput = form.querySelector('input[name="noUpDateKey"]');
     const csrfTokenInput = form.querySelector('input[name="csrfToken"]');
     const routeInput = form.querySelector('input[name="reservationRoute"]:checked');
+    const nationalitySelect = form.querySelector('select[name="customerNationalityCode"]');
     const person = getReservationPersonValue(form);
     const menuSelectionTypeValue = form.dataset.menuSelectionType || "";
-    if (!noUpDateKeyInput || isReservationBlankValue(noUpDateKeyInput.value) || !csrfTokenInput || isReservationBlankValue(csrfTokenInput.value) || !reservationDate || person === null || !routeInput || !/^(tel|other)$/.test(routeInput.value) || !/^(0|1|2)$/.test(menuSelectionTypeValue)) {
+    if (!noUpDateKeyInput || isReservationBlankValue(noUpDateKeyInput.value) || !csrfTokenInput || isReservationBlankValue(csrfTokenInput.value) || !reservationDate || person === null || !routeInput || !/^(tel|other)$/.test(routeInput.value) || !nationalitySelect || !/^(?:|[A-Z]{2})$/.test(nationalitySelect.value) || !/^(0|1|2)$/.test(menuSelectionTypeValue)) {
         showReservationResultModal("送信できません", "画面情報を確認できません。ページを再読み込みしてください。");
         return null;
     }
@@ -1280,6 +1297,7 @@ function validateReservationAddForm(form) {
         reservationDate,
         reservationPerson: String(person),
         reservationRoute: routeInput.value,
+        customerNationalityCode: nationalitySelect.value,
         menuSelectionType,
         menuValues,
     };
@@ -1299,6 +1317,7 @@ function buildReservationRegistrationFormData(form, validatedData) {
         const input = form.querySelector(`[name="${fieldName}"]`);
         formData.append(fieldName, input ? input.value : "");
     });
+    formData.append("customerNationalityCode", validatedData.customerNationalityCode);
     if (validatedData.menuSelectionType !== 0) {
         validatedData.menuValues.forEach((menuValue) => {
             formData.append("reservationMenu[]", menuValue);
@@ -1628,6 +1647,7 @@ function initializeReservationAddForm() {
     if (!form || !reservationAddCard || !addButton || !cancelButton || !submitButton || !calendarContainer || !contentsDetails || !actionContainer) {
         return;
     }
+    sortReservationAddNationalityOptions(form);
     const initialReservationReadReady = initializeReservationReadState(calendarContainer);
     syncReservationTempMoveGuardState();
     showReservationTempMoveRedirectNotice();

@@ -315,6 +315,24 @@ $initialReservationTargetMonthLabelHtml = htmlspecialchars($initialReservationTa
 $reservationAddMessageHtml = htmlspecialchars($reservationAddMessage, ENT_QUOTES, 'UTF-8');
 $reservationAddGuidancePathHtml = htmlspecialchars($reservationAddGuidancePath, ENT_QUOTES, 'UTF-8');
 $reservationAddGuidanceLabelHtml = htmlspecialchars($reservationAddGuidanceLabel, ENT_QUOTES, 'UTF-8');
+$reservationNationalityOptionsHtml = '<option value="">未設定</option>';
+$priorityNationalityCodes = ['JP', 'KR', 'TW', 'CN', 'HK', 'US', 'AU', 'SG', 'TH'];
+$priorityNationalityList = [];
+foreach ($priorityNationalityCodes as $nationalityCode) {
+  $priorityNationalityList[$nationalityCode] = $reservationNationalityList[$nationalityCode];
+}
+$otherNationalityList = array_diff_key($reservationNationalityList, $priorityNationalityList);
+foreach (['主な国・地域' => $priorityNationalityList, 'その他の国・地域' => $otherNationalityList] as $groupLabel => $nationalityList) {
+  $otherGroupAttribute = $groupLabel === 'その他の国・地域' ? ' data-nationality-other-options' : '';
+  $reservationNationalityOptionsHtml .= '<optgroup label="' . htmlspecialchars($groupLabel, ENT_QUOTES, 'UTF-8') . '"' . $otherGroupAttribute . '>';
+  foreach ($nationalityList as $nationalityCode => $nationalityName) {
+    $nationalityCodeHtml = htmlspecialchars($nationalityCode, ENT_QUOTES, 'UTF-8');
+    $nationalityNameHtml = htmlspecialchars($nationalityName, ENT_QUOTES, 'UTF-8');
+    $nationalitySelected = $nationalityCode === 'JP' ? ' selected' : '';
+    $reservationNationalityOptionsHtml .= '<option value="' . $nationalityCodeHtml . '"' . $nationalitySelected . '>' . $nationalityNameHtml . '</option>';
+  }
+  $reservationNationalityOptionsHtml .= '</optgroup>';
+}
 $reservationAddEnabledValue = $reservationAddEnabled ? '1' : '0';
 $reservationAddButtonDisabled = ' disabled aria-disabled="true"';
 $reservationFormControlDisabled = $reservationAddEnabled ? '' : ' disabled';
@@ -494,7 +512,7 @@ print <<<HTML
   <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon/apple-touch-icon.png">
   <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
-  <link rel="stylesheet" href="../assets/css/client04-04.css?55221308102026">
+  <link rel="stylesheet" href="../assets/css/client04-04.css?55221310102026">
 </head>
 <body data-reservation-temp-move-active="{$reservationTempMoveGuardActiveValue}" data-reservation-temp-move-invalid="{$reservationTempMoveInvalidValue}">
 
@@ -612,6 +630,10 @@ print <<<HTML
                     </dd>
                   </div>
                   <div>
+                    <dt>国籍</dt>
+                    <dd><select name="customerNationalityCode" aria-label="国籍"{$reservationFormControlDisabled}>{$reservationNationalityOptionsHtml}</select></dd>
+                  </div>
+                  <div>
                     <dt>宿泊宿名</dt>
                     <dd>
                       <input type="text" name="accommodationName" maxlength="100"{$reservationFormControlDisabled}>
@@ -660,7 +682,7 @@ print <<<HTML
   </article>
   <script src="../assets/js/common.js?v=20260919-1" defer></script>
   <script src="../assets/js/modal.js" defer></script>
-  <script src="./assets/js/client04_04.js?v=20260919-4" defer></script>
+  <script src="./assets/js/client04_04.js?v=20261010-1" defer></script>
 </body>
 </html>
 
