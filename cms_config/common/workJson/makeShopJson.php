@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../database/db_photos.php';
 require_once __DIR__ . '/../../database/db_shop_articles.php';
 require_once __DIR__ . '/../../database/db_reservation_settings.php';
 require_once __DIR__ . '/makeShopIndexJson.php';
+require_once __DIR__ . '/makeFoodShopsSortJson.php';
 
 /*
  * [店舗JSON] 時刻をHH:MM形式に整形
@@ -272,11 +273,13 @@ function syncFrontendShopJson(&$makeTag, $shopId)
 {
 	$okShop = generateShopJson($shopId);
 	$okIndex = generateShopIndexJson();
-	if ($okShop !== true || $okIndex !== true) {
+	$okFoodSort = generateFoodShopsSortJson();
+	if ($okShop !== true || $okIndex !== true || $okFoodSort !== true) {
 		appendFrontendJsonWarningMessage($makeTag);
 		logFrontendJsonError('shop_json_export_failed', $shopId, null, [
 			'shop_json' => $okShop,
 			'index_json' => $okIndex,
+			'food_sort_json' => $okFoodSort,
 		]);
 		return false;
 	}

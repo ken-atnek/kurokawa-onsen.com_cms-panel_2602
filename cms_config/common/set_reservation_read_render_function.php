@@ -70,12 +70,29 @@ function clientReservationReadAvailabilityClass($status, $statusSummary = false)
 }
 
 /**
+ * 予約カレンダー表示に使う有効な通常席の有無を判定
+ *  仮移動席と無効席は予約受付用の席として数えない
+ */
+function clientReservationReadHasActiveNormalSeat($seatRows)
+{
+  if (is_array($seatRows) === false) {
+    return false;
+  }
+  foreach ($seatRows as $seat) {
+    if ((int)($seat['is_active'] ?? 0) === 1 && (int)($seat['is_temp_move'] ?? 0) === 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * 月間カレンダーHTML生成
  *  既存contents-calender構造で35・42日gridを生成し、店舗受付可否と選択状態を表示へ反映する
  */
-function clientReservationReadRenderCalendarTag($range, $days, $selectedDate = null, $shopEligible = true)
+function clientReservationReadRenderCalendarTag($range, $days, $selectedDate = null, $shopEligible = true, $hasActiveNormalSeat = true)
 {
-  if (is_array($range) === false || is_array($days) === false || is_bool($shopEligible) === false) {
+  if (is_array($range) === false || is_array($days) === false || is_bool($shopEligible) === false || is_bool($hasActiveNormalSeat) === false) {
     return null;
   }
   if ($selectedDate !== null) {
@@ -129,7 +146,8 @@ function clientReservationReadRenderCalendarTag($range, $days, $selectedDate = n
       $classes[] = 'is-outside';
     }
     $availabilityClass = clientReservationReadAvailabilityClass($day['availability_status'] ?? '');
-    if ($shopEligible && $availabilityClass !== '') {
+    $noActiveSeat = $shopEligible && $hasActiveNormalSeat === false && ($day['availability_status'] ?? '') === 'full';
+    if ($shopEligible && $noActiveSeat === false && $availabilityClass !== '') {
       $classes[] = $availabilityClass;
     }
     if ($selectedDate === $date) {
@@ -141,8 +159,8 @@ function clientReservationReadRenderCalendarTag($range, $days, $selectedDate = n
     if ($availabilityLabel === '') {
       return null;
     }
-    $statusLabel = $shopEligible ? $availabilityLabel : '予約不可';
-    $statusStyleAttribute = $shopEligible ? '' : ' style="background-color:#555; color:#fff;"';
+    $statusLabel = $shopEligible && $noActiveSeat === false ? $availabilityLabel : '予約不可';
+    $statusStyleAttribute = $shopEligible && $noActiveSeat === false ? '' : ' style="background-color:#555; color:#fff;"';
     if ($isOutside === false && $shopEligible && ($day['availability_status'] ?? '') === 'normal' && $date < $today) {
       $statusLabel = '営業終了';
       $statusStyleAttribute = ' style="background-color:#f2f3f5; color:#6f7478;"';
@@ -168,9 +186,9 @@ function clientReservationReadRenderCalendarTag($range, $days, $selectedDate = n
  * 選択日status HTML生成
  *  店舗受付可否・受付状態・status 1/2の予約件数・人数を既存list-status構造で返す
  */
-function clientReservationReadRenderStatusTag($day, $shopEligible = true)
+function clientReservationReadRenderStatusTag($day, $shopEligible = true, $hasActiveNormalSeat = true)
 {
-  if (is_array($day) === false || is_bool($shopEligible) === false) {
+  if (is_array($day) === false || is_bool($shopEligible) === false || is_bool($hasActiveNormalSeat) === false) {
     return null;
   }
   $date = normalizeReservationReadSelectedDate($day['date'] ?? null);
@@ -178,12 +196,13 @@ function clientReservationReadRenderStatusTag($day, $shopEligible = true)
   $weekdays = ['日', '月', '火', '水', '木', '金', '土'];
   $status = $day['availability_status'] ?? '';
   $availabilityLabel = clientReservationReadAvailabilityLabel($status, $day['availability_reason'] ?? null);
-  $statusLabel = $shopEligible ? $availabilityLabel : '予約不可';
-  $statusClass = $shopEligible ? clientReservationReadAvailabilityClass($status, true) : '';
+  $noActiveSeat = $shopEligible && $hasActiveNormalSeat === false && $status === 'full';
+  $statusLabel = $shopEligible && $noActiveSeat === false ? $availabilityLabel : '予約不可';
+  $statusClass = $shopEligible && $noActiveSeat === false ? clientReservationReadAvailabilityClass($status, true) : '';
   if (
     $dateTime instanceof DateTimeImmutable === false ||
     $availabilityLabel === '' ||
-    ($shopEligible && $statusClass === '')
+    ($shopEligible && $noActiveSeat === false && $statusClass === '')
   ) {
     return null;
   }

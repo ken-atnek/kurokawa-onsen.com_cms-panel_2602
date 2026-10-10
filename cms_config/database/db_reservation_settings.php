@@ -22,6 +22,135 @@ function getReservationJsonMaintenanceShopIds()
 	}
 }
 /**
+ * 表示順管理の対象店舗を取得
+ *  保存時は対象行をロックし、画面表示時と同じ条件・順序で再取得する。
+ */
+function getReservationFoodShopOrderRows($forUpdate = false)
+{
+	global $DB_CONNECT;
+	try {
+		if ($forUpdate && !$DB_CONNECT->inTransaction()) {
+			return false;
+		}
+		$sql = "
+			SELECT s.shop_id, s.shop_name, d.main_image_path, r.sort_order
+			FROM shops s
+			INNER JOIN shop_reservation_settings r ON r.shop_id = s.shop_id
+			LEFT JOIN shops_details d ON d.shop_id = s.shop_id
+			WHERE s.shop_type = :shop_type
+			  AND s.is_active = 1
+			  AND s.is_public = 1
+			  AND r.reservation_enabled = 1
+			ORDER BY CASE WHEN r.sort_order > 0 THEN 0 ELSE 1 END,
+			         r.sort_order ASC, s.shop_id ASC
+		" . ($forUpdate ? ' FOR UPDATE' : '');
+		$stmt = $DB_CONNECT->prepare($sql);
+		$stmt->bindValue(':shop_type', 'food', PDO::PARAM_STR);
+		if ($stmt->execute() !== true) {
+			return false;
+		}
+		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!is_array($rows)) {
+			return false;
+		}
+		foreach ($rows as &$row) {
+			$id = filter_var($row['shop_id'] ?? null, FILTER_VALIDATE_INT);
+			$order = filter_var($row['sort_order'] ?? null, FILTER_VALIDATE_INT);
+			if ($id === false || $id < 1 || $order === false || $order < 0) {
+				return false;
+			}
+			$row['shop_id'] = $id;
+			$row['sort_order'] = $order;
+		}
+		unset($row);
+		return $rows;
+	} catch (Throwable $e) {
+		return false;
+	}
+}
+/**
+ * 予約基本設定の全表示順を取得
+ *  保存時は対象外店舗の番号も保持し、新規番号の採番範囲を決める。
+ */
+function getReservationShopOrderSlots($forUpdate = false)
+{
+	global $DB_CONNECT;
+	try {
+		if ($forUpdate && !$DB_CONNECT->inTransaction()) {
+			return false;
+		}
+		$stmt = $DB_CONNECT->prepare('SELECT shop_id, sort_order FROM shop_reservation_settings ORDER BY shop_id ASC' . ($forUpdate ? ' FOR UPDATE' : ''));
+		if ($stmt->execute() !== true) {
+			return false;
+		}
+		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!is_array($rows)) {
+			return false;
+		}
+		$orders = [];
+		foreach ($rows as $row) {
+			$id = filter_var($row['shop_id'] ?? null, FILTER_VALIDATE_INT);
+			$order = filter_var($row['sort_order'] ?? null, FILTER_VALIDATE_INT);
+			if ($id === false || $id < 1 || $order === false || $order < 0) {
+				return false;
+			}
+			$orders[$id] = $order;
+		}
+		return $orders;
+	} catch (Throwable $e) {
+		return false;
+	}
+}
+/**
+ * 並べ替え画面の版を生成
+ *  店名や画像の変更を競合とせず、対象IDと番号の変更だけを検出する。
+ */
+function buildReservationFoodShopOrderVersion($rows)
+{
+	if (!is_array($rows)) {
+		return false;
+	}
+	$versionData = [];
+	foreach ($rows as $row) {
+		if (!is_array($row) || !is_int($row['shop_id'] ?? null) || !is_int($row['sort_order'] ?? null)) {
+			return false;
+		}
+		$versionData[] = [$row['shop_id'], $row['sort_order']];
+	}
+	$encoded = json_encode($versionData);
+	return $encoded === false ? false : hash('sha256', $encoded);
+}
+/**
+ * 飲食店予約の店舗表示順を更新
+ *  同一transactionのPDO接続で旧番号を照合し、接続し直したautocommitを避ける。
+ */
+function updateReservationFoodShopSortOrder($shopId, $oldOrder, $newOrder)
+{
+	global $DB_CONNECT;
+	try {
+		if (!$DB_CONNECT->inTransaction() || !is_int($shopId) || $shopId < 1 ||
+			!is_int($oldOrder) || $oldOrder < 0 || !is_int($newOrder) || $newOrder < 1) {
+			return false;
+		}
+		$stmt = $DB_CONNECT->prepare('
+			UPDATE shop_reservation_settings
+			SET sort_order = :new_order
+			WHERE shop_id = :shop_id AND sort_order = :old_order
+		');
+		$stmt->bindValue(':new_order', $newOrder, PDO::PARAM_INT);
+		$stmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
+		$stmt->bindValue(':old_order', $oldOrder, PDO::PARAM_INT);
+		$ok = $stmt->execute();
+		$count = $stmt->rowCount();
+		$stmt->closeCursor();
+		return $ok === true && $count === 1;
+	} catch (Throwable $e) {
+		return false;
+	}
+}
+/**
  * 店舗予約基本設定取得
  *  設定行なしはnull、DBエラーはfalseを返す
  */

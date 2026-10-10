@@ -347,7 +347,8 @@ if ($action === 'readMonth') {
       $range,
       $readData['days'],
       null,
-      $readData['shop_eligibility']['eligible']
+      $readData['shop_eligibility']['eligible'],
+      clientReservationReadHasActiveNormalSeat($baseData['seats'])
     );
   if ($readData === false || $tag === null) {
 		clientReservationReadExit('取得エラー', '予約カレンダーを生成できませんでした。', $noUpDateKey);
@@ -388,7 +389,11 @@ $selectedDay = $readData === false ? null : ($readData['days'][$selectedDate] ??
 $tag = $selectedDay === null ? null : clientReservationReadRenderListTag($selectedDay['reservations']);
 $statusTag = $selectedDay === null
   ? null
-  : clientReservationReadRenderStatusTag($selectedDay, $readData['shop_eligibility']['eligible']);
+  : clientReservationReadRenderStatusTag(
+    $selectedDay,
+    $readData['shop_eligibility']['eligible'],
+    clientReservationReadHasActiveNormalSeat($baseData['seats'])
+  );
 if ($readData === false || $selectedDay === null || $tag === null || $statusTag === null) {
 	clientReservationReadExit('取得エラー', '選択日の予約情報を生成できませんでした。', $noUpDateKey);
 }

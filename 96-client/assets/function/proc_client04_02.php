@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
  * [96-client/assets/function/proc_client04_02.php]
  *  予約基本設定保存
@@ -379,6 +379,14 @@ try {
 
 if ($committed) {
 	syncFrontendReservationBaseJson($response, $shopId);
+	try {
+		if (generateFoodShopsSortJson() !== true) {
+			appendFrontendJsonWarningMessage($response);
+			logFrontendJsonError('food_sort_json_export_failed', $shopId);
+		}
+	} catch (Throwable $e) {
+		appendFrontendJsonWarningMessage($response);
+	}
 	syncFrontendReservationAvailabilityMonthsJson($response, $shopId, $wasEnabled, $closedWeekdaysChanged);
 	if ($averageBudgetChanged === true) {
 		try {

@@ -238,16 +238,18 @@ if ($initialReservationRange !== null && $reservationSettings !== false) {
     $initialShopUnavailableReason = is_array($initialReservationEligibility)
       ? ($initialReservationEligibility['reason'] ?? null)
       : null;
+    $initialHasActiveNormalSeat = clientReservationReadHasActiveNormalSeat($initialReservationSeats);
     $initialReservationCalendar = is_array($initialReservationReadData) && is_bool($initialShopEligible)
       ? clientReservationReadRenderCalendarTag(
         $initialReservationRange,
         $initialReservationReadData['days'] ?? [],
         $initialReservationDateValue,
-        $initialShopEligible
+        $initialShopEligible,
+        $initialHasActiveNormalSeat
       )
       : null;
     $initialReservationStatus = is_array($initialReservationToday) && is_bool($initialShopEligible)
-      ? clientReservationReadRenderStatusTag($initialReservationToday, $initialShopEligible)
+      ? clientReservationReadRenderStatusTag($initialReservationToday, $initialShopEligible, $initialHasActiveNormalSeat)
       : null;
     $initialReservationList = is_array($initialReservationToday)
       ? clientReservationReadRenderListTag($initialReservationToday['reservations'] ?? null)
