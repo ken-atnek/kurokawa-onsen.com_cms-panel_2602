@@ -15,22 +15,62 @@ document.addEventListener("DOMContentLoaded", () => {
     const endpoint = "./assets/function/proc_client04_03.php";
     let busy = false;
     let draggedRow = null;
-    let highlightedRow = null;
-    /** ドロップ候補のinline強調を操作終了時に取り除く。 */
-    const clearDropHighlight = () => {
-        if (!highlightedRow) return;
-        highlightedRow.style.removeProperty("outline");
-        highlightedRow.style.removeProperty("outline-offset");
-        if (highlightedRow.style.length === 0) highlightedRow.removeAttribute("style");
-        highlightedRow = null;
+    let dropArea = null;
+    let dropMessage = null;
+    /**
+     * 移動先エリアと吹き出しを取り除く
+     *  ドロップ後とドラッグ中止時に一時表示を消す。
+     */
+    const clearDropPreview = () => {
+        if (dropArea) dropArea.remove();
+        dropArea = null;
+        dropMessage = null;
     };
-    /** 既存modal内でserver文字列をテキストとして表示する。 */
-    const showModal = (message) =>
+    /**
+     * 移動先エリアと吹き出しを作成する
+     *  メニュー一覧の全列にまたがる候補位置をinlineで表示する。
+     */
+    const createDropPreview = () => {
+        dropArea = document.createElement("li");
+        dropArea.className = "food-menu-drop-area";
+        dropArea.setAttribute("aria-hidden", "true");
+        dropArea.style.cssText = "grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; min-height: 6rem; box-sizing: border-box; border: 2px dashed #e47900; background-color: #edf1f8; cursor: default; transition: none;";
+
+        const bubble = document.createElement("span");
+        bubble.style.cssText = "position: relative; display: inline-block; max-width: calc(100% - 2rem); padding: 0.5rem 1rem; border-radius: 0.5rem; background-color: #e47900; color: #fff; font-size: 1.2rem; line-height: 1.4; text-align: center; pointer-events: none;";
+        dropMessage = document.createElement("span");
+        bubble.appendChild(dropMessage);
+
+        const tail = document.createElement("span");
+        tail.style.cssText = "position: absolute; left: calc(50% - 0.8rem); bottom: -0.6rem; width: 0; height: 0; border-left: 0.8rem solid transparent; border-right: 0.8rem solid transparent; border-top: 0.8rem solid #e47900; pointer-events: none;";
+        bubble.appendChild(tail);
+        dropArea.appendChild(bubble);
+    };
+    /**
+     * 候補行の上下へ移動先エリアを置く
+     *  表示中の位置と吹き出し文言を同期する。
+     */
+    const updateDropPreview = (target, upper) => {
+        if (!dropArea) createDropPreview();
+        const reference = upper ? target : target.nextSibling;
+        if (!dropArea.isConnected || (reference !== dropArea && dropArea.nextSibling !== reference)) {
+            list.insertBefore(dropArea, reference);
+        }
+        const menuName = target.querySelector(".item-name span")?.textContent?.trim() || "このメニュー";
+        dropMessage.textContent = `${menuName}の${upper ? "上" : "下"}に移動`;
+    };
+    /**
+     * 既存modal内でserver文字列を表示する
+     *  並び替え成功時だけ2秒後に自動終了する。
+     */
+    const showModal = (message, autoClose = false) =>
         new Promise((resolve) => {
             modalMessage.textContent = message;
             modal.classList.add("is-active");
             modal.setAttribute("aria-hidden", "false");
+            let timer = null;
             const finish = () => {
+                if (timer !== null) window.clearTimeout(timer);
                 modal.classList.remove("is-active");
                 if (modal.contains(document.activeElement)) document.activeElement.blur();
                 modal.setAttribute("aria-hidden", "true");
@@ -41,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
             modalClose.addEventListener("click", finish);
             modalOk.addEventListener("click", finish);
             modalOk.focus();
+            if (autoClose) timer = window.setTimeout(finish, 2000);
         });
     /** action共通のsession・CSRFだけをmanual FormDataへ載せる。 */
     const makeRequest = (action) => {
@@ -75,7 +116,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else if (messages.length === 0 && data.get("action") === "sort") {
                     messages.push("食事メニューの並び順を変更しました。");
                 }
-                if (messages.length > 0) await showModal(messages.join(" "));
+                if (messages.length > 0) {
+                    await showModal(messages.join(" "), result.status === "success" && !warning && data.get("action") === "sort");
+                }
                 window.location.reload();
                 return;
             }
@@ -108,30 +151,33 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
             return;
         }
+        clearDropPreview();
         draggedRow = handle.closest(".food-menu-row");
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("text/plain", draggedRow.dataset.menuId);
     });
     list.addEventListener("dragover", (event) => {
-        if (!draggedRow) return;
+        if (!draggedRow || busy) return;
         const target = event.target.closest(".food-menu-row");
-        if (target) event.preventDefault();
-        if (target === highlightedRow) return;
-        clearDropHighlight();
-        if (target && target !== draggedRow) {
-            target.style.outline = "2px solid #335d95";
-            target.style.outlineOffset = "-2px";
-            highlightedRow = target;
+        if (event.target.closest(".food-menu-drop-area")) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            return;
         }
+        if (!target || target === draggedRow) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        const upper = event.clientY < target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2;
+        updateDropPreview(target, upper);
     });
     list.addEventListener("drop", (event) => {
-        clearDropHighlight();
         const target = event.target.closest(".food-menu-row");
-        if (!draggedRow || !target || busy) return;
+        const onDropArea = event.target.closest(".food-menu-drop-area");
+        if (!draggedRow || !dropArea || (!target && !onDropArea) || busy) return;
         event.preventDefault();
         const before = Array.from(list.querySelectorAll(".food-menu-row"), (row) => row.dataset.menuId);
-        const upper = event.clientY < target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2;
-        list.insertBefore(draggedRow, upper ? target : target.nextSibling);
+        list.insertBefore(draggedRow, dropArea);
+        clearDropPreview();
         draggedRow = null;
         const rows = Array.from(list.querySelectorAll(".food-menu-row"));
         if (rows.every((row, index) => row.dataset.menuId === before[index])) return;
@@ -141,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         submit(data);
     });
     list.addEventListener("dragend", () => {
-        clearDropHighlight();
+        clearDropPreview();
         draggedRow = null;
     });
 });

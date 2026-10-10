@@ -149,7 +149,7 @@ print <<<HTML
     </div>
   </article>
   <script src="../assets/js/common.js" defer></script>
-  <script src="./assets/js/master04_01.js" defer></script>
+  <script src="./assets/js/master04_01.js?18231910102026" defer></script>
 </body>
 
 </html>
