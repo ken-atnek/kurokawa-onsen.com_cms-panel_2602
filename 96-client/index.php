@@ -67,6 +67,12 @@ if ((isset($_SESSION['login_err']) && $_SESSION['login_err'] != "") && $loginErr
           <div class="text-caution" style="display: block;">{$_SESSION['login_err']}</div>
 
 HTML;
+  if ($_SESSION['login_err'] === '既にログイン中のアカウントがあります。ログアウト後に再度お試しください') {
+    print <<<HTML
+          <button type="button" class="btn-force-logout" onclick="forceClientLogout()" style="width: auto; min-width: 0; height: 2.8rem; padding: 0 0.8em; margin: 0.5em 0 1em; font-size: 0.8em; background-color: #A1887F;">強制ログアウト</button>
+
+HTML;
+  }
 }
 print <<<HTML
           <button type="submit">ログイン</button>
@@ -96,15 +102,37 @@ print <<<HTML
           submitButton.click();
         }
       });
-      //IDとPWにフォーカスがあればエラーメッセージ削除
+      //IDかPWにフォーカスしたらエラーメッセージと強制ログアウトボタンを非表示
+      /**
+       * ログインエラーの表示を解除する
+       *  アカウント競合時は強制ログアウトボタンも非表示にする
+       */
       function clearErrorMessage() {
         const errorMessageElement = document.querySelector('.text-caution');
         if (errorMessageElement) {
           errorMessageElement.style.display = 'none';
         }
+        const forceLogoutButton = document.querySelector('.btn-force-logout');
+        if (forceLogoutButton) {
+          forceLogoutButton.style.display = 'none';
+        }
+      }
+      /**
+       * 既存セッションを終了してログイン画面へ戻る
+       *  同一ブラウザの他タブへ終了を通知する
+       */
+      function forceClientLogout() {
+        try {
+          localStorage.setItem('KKY_CLIENT_FORCE_LOGOUT', String(Date.now()) + ':' + Math.random());
+        } catch (error) {
+          // 保存領域が使えない場合もサーバー側のログアウトは実行する。
+        }
+        window.location.href = './logout.php';
       }
       userIdInput.addEventListener('input', clearErrorMessage);
       userPasswordInput.addEventListener('input', clearErrorMessage);
+      userIdInput.addEventListener('focus', clearErrorMessage);
+      userPasswordInput.addEventListener('focus', clearErrorMessage);
     </script>
   </body>
 </html>

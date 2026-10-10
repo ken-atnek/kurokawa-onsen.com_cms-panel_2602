@@ -35,6 +35,14 @@ session_set_cookie_params([
 ]);
 session_start();
 
+$clientRootPath = realpath(__DIR__ . '/../../96-client');
+$requestedScriptPath = realpath($_SERVER['SCRIPT_FILENAME'] ?? '');
+$isClientPageRequest = is_string($clientRootPath) && is_string($requestedScriptPath) &&
+	dirname($requestedScriptPath) === $clientRootPath;
+$isClientProcRequest = is_string($clientRootPath) && is_string($requestedScriptPath) &&
+	dirname($requestedScriptPath) === $clientRootPath . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'function';
+$isClientLogoutRequest = $isClientPageRequest && basename($requestedScriptPath) === 'logout.php';
+
 /*
  * [セッション情報取得]
  *
@@ -43,12 +51,24 @@ $loginCheck = 0;
 if (isset($_SESSION['client_login']['status'])) {
 	$loginCheck = $_SESSION['client_login']['status'];
 }
+if ($loginCheck != 1 && ($isClientProcRequest ||
+	($isClientPageRequest && !in_array(basename($requestedScriptPath), ['index.php', 'logout.php'], true)))) {
+	if ($isClientProcRequest) {
+		http_response_code(401);
+		header('Content-Type: application/json; charset=UTF-8');
+		header('X-Client-Session-Expired: 1');
+		echo json_encode(['status' => 'error', 'msg' => 'ログインセッションが切れました。再度ログインしてください。']);
+	} else {
+		header('Location: ./index.php');
+	}
+	exit;
+}
 
 /*
  * [ログインチェック]
  *
  */
-if ($loginCheck == 1) {
+if ($loginCheck == 1 && !$isClientLogoutRequest) {
 	#保存済みセッションIDから改めてアカウントが有効かチェック
 	$accountId = $_SESSION['client_login']['account_id'] ?? null;
 	$currentAccount = null;
