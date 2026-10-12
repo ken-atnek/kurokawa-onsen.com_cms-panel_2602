@@ -339,8 +339,8 @@ print <<<HTML
 HTML;
 #表示可能リストあればループで差し込む
 if (!empty($shopProductList)) {
-  #inline JS用エスケープ宣言
-  $jsonHex = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+  #サイト確認URLの参照先
+  $websiteUrlBase = 'https://kurokawa-onsen.com/shops/product-detail/';
   foreach ($shopProductList as $product) {
     #店舗ID：ゼロ埋め3桁
     $productShopId = str_pad($product['shop_id'], 3, '0', STR_PAD_LEFT);
@@ -399,10 +399,10 @@ if (!empty($shopProductList)) {
     if ($createdAtYMD === $updatedAtYMD) {
       $updatedAtHtml = '-';
     }
-    #inline JS用エスケープ（属性崩壊・注入対策）
-    $productIdJs = json_encode($productId, $jsonHex);
+    #サイト確認URL用の商品ID
+    $websiteProductId = 'ec-' . $productShopId . (int)$product['product_id'];
     #サイト確認URL
-    $websiteUrl = 'https://kurokawa-onsen.com/shops/' . $productShopId . '/products/' . $productIdJs;
+    $websiteUrl = $websiteUrlBase . '?id=' . rawurlencode($productShopId) . '&productId=' . rawurlencode($websiteProductId);
     $websiteUrl = htmlspecialchars($websiteUrl, ENT_QUOTES, 'UTF-8');
     print <<<HTML
             <li>
