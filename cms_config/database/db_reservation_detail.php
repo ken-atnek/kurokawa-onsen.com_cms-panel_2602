@@ -82,8 +82,11 @@ function getReservationDetail($shopId = null, $reservationId = null)
 				r.customer_email,
 				r.accommodation_name,
 				r.customer_note,
+				r.customer_children_note,
+				r.customer_request_note,
 				r.shop_memo,
 				r.reservation_route,
+				r.reservation_site_language,
 				r.status,
 				r.cancelled_at,
 				r.created_at,
@@ -112,12 +115,13 @@ function getReservationDetail($shopId = null, $reservationId = null)
 		$reservationRoute = normalizeReservationDetailReadInteger($reservation['reservation_route'] ?? null, 1, 3);
 		$status = normalizeReservationDetailReadInteger($reservation['status'] ?? null, 1, 4);
 		$requiredStringColumns = ['reservation_date', 'customer_name', 'customer_kana', 'customer_tel', 'created_at', 'updated_at'];
-		$nullableStringColumns = ['customer_nationality_code', 'customer_email', 'accommodation_name', 'customer_note', 'shop_memo', 'cancelled_at'];
+		$nullableStringColumns = ['customer_nationality_code', 'customer_email', 'accommodation_name', 'customer_note', 'customer_children_note', 'customer_request_note', 'shop_memo', 'cancelled_at'];
 		if (
 			$normalizedReservationId !== $reservationId ||
 			$normalizedShopId !== $shopId ||
 			$partySize === null ||
 			$reservationRoute === null ||
+			!in_array($reservation['reservation_site_language'] ?? null, ['ja', 'en'], true) ||
 			$status === null ||
 			isReservationDetailReadDateString($reservation['reservation_date'] ?? null) === false ||
 			isReservationDetailReadDateTimeString($reservation['created_at'] ?? null) === false ||
@@ -244,6 +248,7 @@ function getReservationDetailMenuRows($shopId = null, $reservationId = null)
 				rm.guest_no,
 				rm.menu_id,
 				rm.menu_name_snapshot,
+				rm.menu_name_snapshot_ja,
 				rm.menu_price_snapshot,
 				rm.tax_included_snapshot
 			FROM
@@ -293,6 +298,8 @@ function getReservationDetailMenuRows($shopId = null, $reservationId = null)
 				(($row['menu_id'] ?? null) !== null && $menuId === null) ||
 				array_key_exists('menu_name_snapshot', $row) === false ||
 				is_string($row['menu_name_snapshot']) === false ||
+				!array_key_exists('menu_name_snapshot_ja', $row) ||
+				($row['menu_name_snapshot_ja'] !== null && !is_string($row['menu_name_snapshot_ja'])) ||
 				$menuPrice === null ||
 				$taxIncluded === null ||
 				isset($reservationMenuIds[$reservationMenuId]) === true ||
@@ -308,6 +315,7 @@ function getReservationDetailMenuRows($shopId = null, $reservationId = null)
 				'guest_no' => $guestNo,
 				'menu_id' => $menuId,
 				'menu_name_snapshot' => $row['menu_name_snapshot'],
+				'menu_name_snapshot_ja' => $row['menu_name_snapshot_ja'],
 				'menu_price_snapshot' => $menuPrice,
 				'tax_included_snapshot' => $taxIncluded,
 			];

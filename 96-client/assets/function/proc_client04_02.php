@@ -170,10 +170,12 @@ function normalizeClientReservationSettingsRequest($postData)
 		'noUpDateKey',
 		'csrfToken',
 		'reservationEnabled',
+		'reservationEnabledEn',
 		'menuSelectionType',
 		'acceptStartDaysBefore',
 		'acceptEndDaysBefore',
 		'averageBudgetText',
+		'averageBudgetTextEn',
 		'guestMin',
 		'guestMax',
 		'closedWeekdays',
@@ -184,27 +186,33 @@ function normalizeClientReservationSettingsRequest($postData)
 			return false;
 		}
 	}
-	foreach (['noUpDateKey', 'csrfToken', 'reservationEnabled', 'menuSelectionType', 'acceptStartDaysBefore', 'acceptEndDaysBefore', 'averageBudgetText', 'guestMin', 'guestMax'] as $requiredKey) {
+	foreach (['noUpDateKey', 'csrfToken', 'reservationEnabled', 'reservationEnabledEn', 'menuSelectionType', 'acceptStartDaysBefore', 'acceptEndDaysBefore', 'averageBudgetText', 'averageBudgetTextEn', 'guestMin', 'guestMax'] as $requiredKey) {
 		if (array_key_exists($requiredKey, $postData) === false || is_string($postData[$requiredKey]) === false) {
 			return false;
 		}
 	}
 	$reservationEnabled = normalizeClientReservationSettingsEnum($postData['reservationEnabled'], [0, 1]);
+	$reservationEnabledEn = normalizeClientReservationSettingsEnum($postData['reservationEnabledEn'], [0, 1]);
 	$menuSelectionType = normalizeClientReservationSettingsEnum($postData['menuSelectionType'], [0, 1, 2]);
 	$acceptStartRaw = $postData['acceptStartDaysBefore'];
 	$acceptStartDaysBefore = $acceptStartRaw === 'unlimited' ? null : normalizeClientReservationSettingsEnum($acceptStartRaw, [90, 60, 30]);
 	$acceptEndDaysBefore = normalizeClientReservationSettingsEnum($postData['acceptEndDaysBefore'], [0, 1, 3, 7]);
 	$averageBudgetText = normalizeClientReservationAverageBudgetText($postData['averageBudgetText']);
+	$averageBudgetTextEnRaw = $postData['averageBudgetTextEn'];
+	$averageBudgetTextEn = trim($averageBudgetTextEnRaw) === '' ? null : str_replace(["\r\n", "\r"], "\n", $averageBudgetTextEnRaw);
 	$guestMin = normalizeClientReservationSettingsEnum($postData['guestMin'], [1, 2, 3, 4]);
 	$guestMax = normalizeClientReservationSettingsEnum($postData['guestMax'], [1, 2, 3, 4]);
 	$closedWeekdays = normalizeClientReservationSettingsClosedWeekdays($postData['closedWeekdays'] ?? null);
 	$confirmedWarnings = normalizeClientReservationSettingsConfirmedWarnings($postData['confirmedWarnings'] ?? null);
 	if (
 		$reservationEnabled === null ||
+		$reservationEnabledEn === null ||
 		$menuSelectionType === null ||
 		($acceptStartRaw !== 'unlimited' && $acceptStartDaysBefore === null) ||
 		$acceptEndDaysBefore === null ||
 		$averageBudgetText === false ||
+		mb_strlen($averageBudgetTextEnRaw, 'UTF-8') > 100 ||
+		preg_match('/\A[\x20-\x7E\x{00A5}\x{2013}\r\n]*\z/uD', $averageBudgetTextEnRaw) !== 1 ||
 		$guestMin === null ||
 		$guestMax === null ||
 		$guestMin > $guestMax ||
@@ -219,10 +227,12 @@ function normalizeClientReservationSettingsRequest($postData)
 		'csrf_token' => $postData['csrfToken'],
 		'settings' => [
 			'reservation_enabled' => $reservationEnabled,
+			'reservation_enabled_en' => $reservationEnabledEn,
 			'menu_selection_type' => $menuSelectionType,
 			'accept_start_days_before' => $acceptStartDaysBefore,
 			'accept_end_days_before' => $acceptEndDaysBefore,
 			'average_budget_text' => $averageBudgetText,
+			'average_budget_text_en' => $averageBudgetTextEn,
 			'guest_min' => $guestMin,
 			'guest_max' => $guestMax,
 		],
@@ -246,7 +256,8 @@ function getClientReservationSettingsPreSaveWarnings($currentSettings, $newSetti
 	if ($newSettings['guest_max'] > $currentSettings['guest_max']) {
 		$warnings[] = 'guest_max_increase';
 	}
-	if ($currentSettings['reservation_enabled'] === 1 && $newSettings['reservation_enabled'] === 0) {
+	if (($currentSettings['reservation_enabled'] === 1 || $currentSettings['reservation_enabled_en'] === 1) &&
+		$newSettings['reservation_enabled'] === 0 && $newSettings['reservation_enabled_en'] === 0) {
 		$warnings[] = 'reservation_disabled';
 	}
 	return $warnings;
@@ -286,7 +297,7 @@ try {
 	if (is_array($lockedShop) === false || (int)($lockedShop['shop_id'] ?? 0) !== $shopId) {
 		throw new RuntimeException('shop_lock_failed');
 	}
-	$wasEnabled = isReservationEnabledForShop($shopId);
+	$wasEnabled = isReservationEnabledForShopAnyLanguage($shopId);
 	$freshShop = getReservationShopForOccupancy($shopId);
 	if (is_array($freshShop) === false || (int)($freshShop['shop_id'] ?? 0) !== $shopId) {
 		throw new RuntimeException('shop_read_failed');
@@ -304,10 +315,13 @@ try {
 		throw new RuntimeException('settings_invalid');
 	}
 	$currentAverageBudgetText = $currentSettings === null ? null : $currentSettings['average_budget_text'];
-	$averageBudgetChanged = $currentAverageBudgetText !== $settingsData['average_budget_text'];
+	$currentAverageBudgetTextEn = $currentSettings === null ? null : $currentSettings['average_budget_text_en'];
+	$averageBudgetChanged = $currentAverageBudgetText !== $settingsData['average_budget_text'] ||
+		$currentAverageBudgetTextEn !== $settingsData['average_budget_text_en'];
 	$oversizedSeats = getNormalSeatsExceedingCapacity($shopId, $settingsData['guest_max']);
 	$activeMenuCount = getActiveFoodMenuCountForReservation($shopId);
-	if ($oversizedSeats === false || $activeMenuCount === false) {
+	$activeMenuCountEn = getActiveEnglishFoodMenuCountForReservation($shopId);
+	if ($oversizedSeats === false || $activeMenuCount === false || $activeMenuCountEn === false) {
 		throw new RuntimeException('master_read_failed');
 	}
 	$warnings = getClientReservationSettingsPreSaveWarnings($currentSettings, $settingsData, $oversizedSeats);
@@ -358,8 +372,11 @@ try {
 	$transactionStarted = false;
 	$committed = true;
 	$postCommitWarnings = [];
-	if ($settingsData['menu_selection_type'] === 2 && $activeMenuCount === 0) {
+	if ($settingsData['reservation_enabled'] === 1 && $settingsData['menu_selection_type'] === 2 && $activeMenuCount === 0) {
 		$postCommitWarnings[] = 'menu_required_no_active_menu';
+	}
+	if ($settingsData['reservation_enabled_en'] === 1 && $settingsData['menu_selection_type'] === 2 && $activeMenuCountEn === 0) {
+		$postCommitWarnings[] = 'menu_required_no_active_menu_en';
 	}
 	$response = clientReservationSettingsResponse('success', '予約基本設定', '予約基本設定を保存しました。', false, [], $postCommitWarnings);
 } catch (Throwable $e) {

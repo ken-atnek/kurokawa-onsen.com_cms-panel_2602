@@ -988,6 +988,16 @@ HTML;
 			if ($title === '') {
 				$title = null;
 			}
+			$titleEn = $_POST['photoName_en'] ?? '';
+			if (!is_string($titleEn) || mb_strlen($titleEn, 'UTF-8') > 255 || preg_match('/\A[\x20-\x7E\x{00A5}\x{2013}]*\z/uD', $titleEn) !== 1) {
+				$makeTag['status'] = 'error';
+				$makeTag['msg'] = '画像タイトル(英語)に使用できない文字が含まれています。';
+				break;
+			}
+			$titleEn = trim($titleEn);
+			if ($titleEn === '') {
+				$titleEn = null;
+			}
 			#アップロードドラフトから画像を取得（最新1件）
 			$draft = null;
 			if ($targetImageUploadSessionKey !== '' && isset($_SESSION[$targetImageUploadSessionKey]) && is_array($_SESSION[$targetImageUploadSessionKey])) {
@@ -1110,6 +1120,7 @@ HTML;
 					} else {
 						$dbFiledData['title'] = [':title', (string)$title, 0];
 					}
+					$dbFiledData['title_en'] = [':title_en', $titleEn, $titleEn === null ? 2 : 0];
 					$dbFiledData['mime_type'] = [':mime_type', $mimeType, 0];
 					$dbFiledData['file_size'] = [':file_size', $fileSize, $fileSize === null ? 2 : 1];
 					$dbFiledData['width'] = [':width', $width, $width === null ? 2 : 1];
@@ -1194,6 +1205,7 @@ HTML;
 					} else {
 						$upd['title'] = [':title', (string)$title, 0];
 					}
+					$upd['title_en'] = [':title_en', $titleEn, $titleEn === null ? 2 : 0];
 					if ($hasReplace) {
 						$upd['file_path'] = [':file_path', (string)$pendingPath, 0];
 						$upd['mime_type'] = [':mime_type', $mimeType, 0];
@@ -1526,6 +1538,17 @@ HTML;
 				$photoKey = isset($_POST['photoKey']) ? $_POST['photoKey'] : null;
 				#画像ファイル名
 				$photoName = isset($_POST['photoName']) ? $_POST['photoName'] : null;
+				$photoNameEn = $_POST['photoName_en'] ?? '';
+				$photoNameEn = is_string($photoNameEn) ? $photoNameEn : '';
+				if ($action === 'editPhotoDetail' && $photoKey !== null && !empty($photoData)) {
+					foreach ($photoData as $photo) {
+						if ((string)($photo['photo_id'] ?? '') === (string)$photoKey) {
+							$photoNameEn = (string)($photo['title_en'] ?? '');
+							break;
+						}
+					}
+				}
+				$photoNameEnEsc = htmlspecialchars($photoNameEn, ENT_QUOTES, 'UTF-8');
 				#checkPhoto（確認）では、file input が空でも upload draft があれば進める
 				#ただしドラフトもアップロードも無い場合はエラー
 				if ((string)$action === 'checkPhoto' && (string)$method === 'new') {
@@ -1851,6 +1874,10 @@ HTML;
                     <div class="wrap_03">
                       <h4>画像タイトル</h4>
                       <input type="text" name="photoName" value="{$photoName}">
+                    </div>
+                    <div class="wrap_03">
+                      <h4>画像タイトル(英語)</h4>
+                      <input type="text" name="photoName_en" value="{$photoNameEnEsc}" maxlength="255">
                     </div>
                     <div class="wrap_04">
                       <ul>

@@ -158,7 +158,7 @@ try {
 	if (!is_array($shop) || (int)($shop['shop_id'] ?? 0) !== $shopId) {
 		throw new RuntimeException('shop_lock_failed');
 	}
-	$wasEnabled = isReservationEnabledForShop($shopId);
+	$wasEnabled = isReservationEnabledForShopAnyLanguage($shopId);
 	$warnings = [];
 	if ($request['action'] === 'toggle') {
 		$current = getFoodMenuForManagement($shopId, $request['id']);

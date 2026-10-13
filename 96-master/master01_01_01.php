@@ -204,6 +204,10 @@ print <<<HTML
                       <h4>画像タイトル</h4>
                       <input type="text" name="photoName">
                     </div>
+                    <div class="wrap_03">
+                      <h4>画像タイトル(英語)</h4>
+                      <input type="text" name="photoName_en" maxlength="255">
+                    </div>
                     <div class="wrap_04">
                       <ul>
                         <li>
@@ -380,7 +384,7 @@ print <<<HTML
     <script src="../assets/js/common.js" defer></script>
     <script src="../assets/js/dropZone.js?2026092301" defer></script>
     <script src="../assets/js/modal.js" defer></script>
-    <script src="./assets/js/master01_01_01.js?2026092301" defer></script>
+    <script src="./assets/js/master01_01_01.js?2026101301-title-en" defer></script>
   </body>
 </html>
 

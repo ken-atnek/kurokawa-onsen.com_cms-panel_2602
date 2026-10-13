@@ -122,6 +122,7 @@ function generateReservationBasicJson($shopId)
 		$writeData = [
 			'shopId' => sprintf('%03d', $shopId),
 			'reservationEnabled' => isReservationEnabledForShop($shopId),
+			'reservationEnabled_en' => isReservationEnabledForShop($shopId, 'en'),
 			'menuSelectionType' => (int)$settings['menu_selection_type'],
 			'acceptancePeriod' => [
 				'startDaysBefore' => $settings['accept_start_days_before'] === null ? null : (int)$settings['accept_start_days_before'],
@@ -170,6 +171,7 @@ function generateReservationMenusJson($shopId)
 		}
 		$today = foodMenuTodayJst();
 		$menus = [];
+		$menusEn = [];
 		foreach ($rows as $row) {
 			if (isFoodMenuUsable($row, $shopId, $today) === false) {
 				continue;
@@ -183,6 +185,19 @@ function generateReservationMenusJson($shopId)
 				'description' => (string)$row['description'],
 				'enabled' => true,
 			];
+			$nameEn = $row['menu_name_en'] ?? null;
+			$priceEn = $row['price_en'] ?? null;
+			if (isFoodMenuEnglishReadyForReservation($row)) {
+				$menusEn[] = [
+					'id' => 'menu-' . str_pad((string)(int)$row['id'], 3, '0', STR_PAD_LEFT),
+					'name' => $nameEn,
+					'price' => (int)$priceEn,
+					'taxIncluded' => true,
+					'image' => (string)$row['image_path'],
+					'description' => (string)($row['description_en'] ?? ''),
+					'enabled' => true,
+				];
+			}
 		}
 		$menuSelectionType = is_array($settings) ? (int)$settings['menu_selection_type'] : 0;
 		$writeData = [
@@ -190,6 +205,7 @@ function generateReservationMenusJson($shopId)
 			'allowSeatOnly' => $menuSelectionType !== 2,
 			'updatedAt' => buildReservationJsonUpdatedAt(),
 			'menus' => $menus,
+			'menus_en' => $menusEn,
 		];
 		return writeReservationJsonFile($shopId, 'menus.json', $writeData);
 	} finally {
@@ -483,7 +499,7 @@ function syncFrontendReservationAvailabilityMonthsJson(&$response, $shopId, $was
 		$monthKeys = [];
 	}
 	try {
-		$nowEnabled = isReservationEnabledForShop($shopId) === true;
+		$nowEnabled = isReservationEnabledForShopAnyLanguage($shopId) === true;
 	} catch (Throwable $e) {
 		$nowEnabled = false;
 		$failed = true;

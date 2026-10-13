@@ -153,6 +153,13 @@
                                 }
                             }
                         }
+                        &.lang_en {
+                            dd {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: flex-start;
+                            }
+                        }
                     }
                     // 電話・FAX
                     .box_tel,
@@ -217,6 +224,26 @@
                                 }
                                 input[type="text"] {
                                     width: 50%;
+                                }
+                            }
+                            .wrap-note {
+                                display: grid;
+                                grid-template-columns: auto 1fr;
+                                align-items: center;
+                                gap: 0.4em 2em;
+                                font-size: inherit;
+                                &.note-top {
+                                    border-bottom: 1px solid #646464;
+                                    padding-bottom: 1em;
+                                    margin-bottom: 0.5em;
+                                    width: 100%;
+                                }
+                                & > div {
+                                    font-size: fz(16);
+                                    font-weight: 600;
+                                }
+                                input[type="text"] {
+                                    font-size: inherit;
                                 }
                             }
                         }

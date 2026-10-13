@@ -110,6 +110,7 @@ function generateShopJson($shopId): bool
 		$shopNameEng = 'shop-' . $sId;
 	}
 	$pickupItems = [];
+	$pickupItemsEn = [];
 	for ($i = 1; $i <= 3; $i++) {
 		$imagePath = $shop['image_path_' . $i] ?? '';
 		$title = $shop['image_title_' . $i] ?? '';
@@ -123,10 +124,16 @@ function generateShopJson($shopId): bool
 			'title' => $title,
 			'image' => $imagePath,
 		];
+		$pickupItemsEn[] = [
+			'id' => 'pick-' . sprintf('%03d', $i),
+			'title' => trim((string)($shop['image_title_' . $i . '_en'] ?? '')),
+			'image' => $imagePath,
+		];
 	}
 	$infoData = [];
 	$infoData['hours'] = [
 		[
+			'key' => 'businessHours',
 			'label' => '営業時間',
 			'timeRanges' => [
 				[
@@ -142,6 +149,7 @@ function generateShopJson($shopId): bool
 			]
 		],
 		[
+			'key' => 'closedDays',
 			'label' => '店休日',
 			'value' => $shop['regular_holiday_display'] ?? ''
 		]
@@ -149,8 +157,52 @@ function generateShopJson($shopId): bool
 	$averageBudgetText = is_array($reservationSettings) ? ($reservationSettings['average_budget_text'] ?? null) : null;
 	if ($averageBudgetText !== null) {
 		$infoData['hours'][] = [
+			'key' => 'averageBudget',
 			'label' => '平均予算',
 			'value' => str_replace(["\r\n", "\r"], "\n", (string)$averageBudgetText),
+		];
+	}
+	$infoData['hours_en'] = [];
+	$hasCommonHours = false;
+	foreach (['lunch', 'dinner'] as $period) {
+		if (normalizeShopJsonTimeHm($shop[$period . '_open_time'] ?? '') !== '' &&
+			normalizeShopJsonTimeHm($shop[$period . '_close_time'] ?? '') !== '') {
+			$hasCommonHours = true;
+			break;
+		}
+	}
+	if ($hasCommonHours) {
+		$infoData['hours_en'][] = [
+			'key' => 'businessHours',
+			'label' => 'Opening Hours',
+			'timeRanges' => [
+				[
+					'open' => normalizeShopJsonTimeHm($shop['lunch_open_time'] ?? ''),
+					'close' => normalizeShopJsonTimeHm($shop['lunch_close_time'] ?? ''),
+					'note' => $shop['lunch_note_en'] ?? ''
+				],
+				[
+					'open' => normalizeShopJsonTimeHm($shop['dinner_open_time'] ?? ''),
+					'close' => normalizeShopJsonTimeHm($shop['dinner_close_time'] ?? ''),
+					'note' => $shop['dinner_note_en'] ?? ''
+				]
+			]
+		];
+	}
+	$holidayEn = $shop['regular_holiday_display_en'] ?? null;
+	if (is_string($holidayEn) && trim($holidayEn) !== '') {
+		$infoData['hours_en'][] = [
+			'key' => 'closedDays',
+			'label' => 'Days Closed',
+			'value' => $holidayEn,
+		];
+	}
+	$averageBudgetEn = is_array($reservationSettings) ? ($reservationSettings['average_budget_text_en'] ?? null) : null;
+	if (is_string($averageBudgetEn) && trim($averageBudgetEn) !== '') {
+		$infoData['hours_en'][] = [
+			'key' => 'averageBudget',
+			'label' => 'Average Budget',
+			'value' => str_replace(["\r\n", "\r"], "\n", $averageBudgetEn),
 		];
 	}
 	$closedWeekdays = [];
@@ -168,11 +220,41 @@ function generateShopJson($shopId): bool
 		}
 	}
 	$infoData['closedWeekdays'] = $closedWeekdays;
+	$addressJaParts = array_values(array_filter(array_map('trim', [
+		(string)($shop['address1'] ?? ''),
+		(string)($shop['address2'] ?? ''),
+		(string)($shop['address3'] ?? ''),
+	]), 'strlen'));
+	$addressJa = implode(' ', $addressJaParts);
+	if (!str_starts_with($addressJa, '熊本県')) {
+		$addressJa = '熊本県' . $addressJa;
+	}
+	$addressEnParts = array_values(array_filter(array_map('trim', [
+		(string)($shop['address1_en'] ?? ''),
+		(string)($shop['address2_en'] ?? ''),
+		(string)($shop['address3_en'] ?? ''),
+	]), 'strlen'));
+	$addressEn = implode(', ', $addressEnParts);
+	if ($addressEn !== '' && preg_match('/(?:^|[,\s]+)Kumamoto\s*,?\s*Japan$/i', $addressEn) !== 1) {
+		if (preg_match('/(?:^|[,\s]+)Kumamoto$/i', $addressEn) === 1) {
+			$addressEn .= ', Japan';
+		} elseif (preg_match('/(?:^|[,\s]+)Japan$/i', $addressEn) === 1) {
+			$addressEn = preg_replace('/(?:^|[,\s]+)Japan$/i', ', Kumamoto, Japan', $addressEn);
+			$addressEn = ltrim($addressEn, ', ');
+		} else {
+			$addressEn .= ', Kumamoto, Japan';
+		}
+	}
 	$infoData['address'] = [
 		'postalCode' => $shop['postal_code'] ?? '',
-		'full' => trim(($shop['address1'] ?? '') . ' ' . ($shop['address2'] ?? '') . ' ' . ($shop['address3'] ?? ''))
+		'full' => $addressJa,
+	];
+	$infoData['address_en'] = [
+		'postalCode' => $shop['postal_code'] ?? '',
+		'full' => $addressEn,
 	];
 	$infoData['mapUrl'] = $shop['map_url'] ?? '';
+	$infoData['mapUrl_en'] = $shop['map_url_en'] ?? '';
 	$infoData['mapLinkUrl'] = $shop['map_link_url'] ?? '';
 	$infoData['tel'] = $shop['tel'] ?? '';
 	$infoData['fax'] = $shop['fax'] ?? '';
@@ -181,6 +263,7 @@ function generateShopJson($shopId): bool
 		$infoData['mail'] = $shop['email'] ?? '';
 	}
 	$recommendedProducts = [];
+	$recommendedProductsEn = [];
 	$recommendedSlots = $shopItemsData['recommended'] ?? [];
 	for ($j = 1; $j <= 3; $j++) {
 		$row = $recommendedSlots[$j] ?? null;
@@ -196,7 +279,19 @@ function generateShopJson($shopId): bool
 		$priceYen = $row['price_yen'] ?? null;
 		$price = '';
 		if ($priceYen !== null && $priceYen !== '') {
-			$price = '¥' . number_format((int)$priceYen);
+			$price = number_format((int)$priceYen) . '円';
+		}
+		$titleEn = $row['title_en'] ?? null;
+		$descriptionEn = $row['description_en'] ?? null;
+		if (is_string($titleEn) && trim($titleEn) !== '' && is_string($descriptionEn) && trim($descriptionEn) !== '') {
+			$priceYenEn = $row['price_yen_en'] ?? null;
+			$recommendedProductsEn[] = [
+				'id' => 'rec-' . sprintf('%03d', $j),
+				'name' => $titleEn,
+				'price' => $priceYenEn === null || $priceYenEn === '' ? '' : '¥' . number_format((int)$priceYenEn),
+				'image' => (string)($imagePath ?? ''),
+				'description' => $descriptionEn,
+			];
 		}
 		if (($imagePath === null || $imagePath === '') && ($title === null || $title === '') && ($description === null || $description === '') && $price === '') {
 			continue;
@@ -245,12 +340,16 @@ function generateShopJson($shopId): bool
 		'category' => $shop['shop_type'] ?? '',
 		'mealPeriods' => $mealPeriods,
 		'name' => formatTextareaForDB((string)($shop['shop_name'] ?? '')),
+		'name_en' => formatTextareaForDB((string)($shop['shop_name_en'] ?? '')),
 		'statusFallbackKey' => 'open',
 		'heroImage' => $shop['main_image_path'] ?? '',
 		'leadCopy' => formatTextareaForDB((string)($shop['intro_body'] ?? '')),
+		'leadCopy_en' => formatTextareaForDB((string)($shop['intro_body_en'] ?? '')),
 		'pickupItems' => $pickupItems,
+		'pickupItems_en' => $pickupItemsEn,
 		'info' => $infoData,
 		'recommendedProducts' => $recommendedProducts,
+		'recommendedProducts_en' => $recommendedProductsEn,
 		'onlineShopUrl' => null,
 		'onlineProductsCount' => $onlineProductsCount,
 		'articles' => $articles,

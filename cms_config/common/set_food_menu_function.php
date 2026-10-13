@@ -99,6 +99,19 @@ function isFoodMenuUsable($row, $shopId, $today)
 }
 
 /**
+ * 英語サイトへ出せるメニュー名・料金が揃っているか判定
+ *  掲載期間などの共通usable判定は呼出元で別途行う
+ */
+function isFoodMenuEnglishReadyForReservation($row)
+{
+	if (!is_array($row) || !is_string($row['menu_name_en'] ?? null) || trim($row['menu_name_en']) === '') {
+		return false;
+	}
+	$priceEn = normalizeFoodMenuContractInteger($row['price_en'] ?? null);
+	return $priceEn !== null && $priceEn >= 1 && $priceEn <= 2147483647;
+}
+
+/**
  * 予約判定に使用する日本時間の当日を返す
  *  DB sessionのtimezoneを日付authorityにしない
  */

@@ -78,6 +78,9 @@ if ($shopId !== null) {
     'address1' => '阿蘇郡南小国町大字満願寺黒川6603',
     'address2' => '',
     'address3' => '',
+    'address1_en' => '',
+    'address2_en' => '',
+    'address3_en' => '',
     'tel' => '',
     'fax' => '',
     'email' => '',
@@ -86,11 +89,14 @@ if ($shopId !== null) {
     'lunch_open_time' => '',
     'lunch_close_time' => '',
     'lunch_note' => '',
+    'lunch_note_en' => '',
     'dinner_open_time' => '',
     'dinner_close_time' => '',
     'dinner_note' => '',
+    'dinner_note_en' => '',
     'business_hours_types' => '',
     'regular_holiday_display' => '',
+    'regular_holiday_display_en' => '',
     'closed_weekdays' => array(),
     'sort_order' => '',
     'is_public' => 1
@@ -134,7 +140,7 @@ print <<<HTML
     <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon/apple-touch-icon.png">
     <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
-    <link rel="stylesheet" href="../assets/css/master01-02.css?59531824092026">
+    <link rel="stylesheet" href="../assets/css/master01-02.css?28281213102026">
   </head>
 
   <body>
@@ -206,13 +212,19 @@ $escPostalCode = htmlspecialchars($shopData['postal_code'], ENT_QUOTES, 'UTF-8')
 $escAddress1 = htmlspecialchars($shopData['address1'], ENT_QUOTES, 'UTF-8');
 $escAddress2 = htmlspecialchars($shopData['address2'], ENT_QUOTES, 'UTF-8');
 $escAddress3 = htmlspecialchars($shopData['address3'], ENT_QUOTES, 'UTF-8');
+$escAddress1En = htmlspecialchars((string)($shopData['address1_en'] ?? ''), ENT_QUOTES, 'UTF-8');
+$escAddress2En = htmlspecialchars((string)($shopData['address2_en'] ?? ''), ENT_QUOTES, 'UTF-8');
+$escAddress3En = htmlspecialchars((string)($shopData['address3_en'] ?? ''), ENT_QUOTES, 'UTF-8');
 $escTel = htmlspecialchars($shopData['tel'], ENT_QUOTES, 'UTF-8');
 $escFax = htmlspecialchars($shopData['fax'], ENT_QUOTES, 'UTF-8');
 $escEmail = htmlspecialchars($shopData['email'], ENT_QUOTES, 'UTF-8');
 $escWebsiteUrl = htmlspecialchars($shopData['website_url'], ENT_QUOTES, 'UTF-8');
 $escLunchNote = htmlspecialchars($shopData['lunch_note'], ENT_QUOTES, 'UTF-8');
+$escLunchNoteEn = htmlspecialchars((string)($shopData['lunch_note_en'] ?? ''), ENT_QUOTES, 'UTF-8');
 $escDinnerNote = htmlspecialchars($shopData['dinner_note'], ENT_QUOTES, 'UTF-8');
+$escDinnerNoteEn = htmlspecialchars((string)($shopData['dinner_note_en'] ?? ''), ENT_QUOTES, 'UTF-8');
 $escRegularHolidayDisplay = htmlspecialchars($shopData['regular_holiday_display'], ENT_QUOTES, 'UTF-8');
+$escRegularHolidayDisplayEn = htmlspecialchars((string)($shopData['regular_holiday_display_en'] ?? ''), ENT_QUOTES, 'UTF-8');
 $escLoginId = htmlspecialchars($accountData['login_id'], ENT_QUOTES, 'UTF-8');
 $escPassword = htmlspecialchars($accountData['password'], ENT_QUOTES, 'UTF-8');
 $businessHoursTypes = [];
@@ -279,6 +291,15 @@ print <<<HTML
                     <input type="text" name="form04_01" class="add_02" value="{$escAddress1}">
                     <input type="text" name="form04_02" class="add_03" value="{$escAddress2}">
                     <input type="text" name="form04_03" class="add_04" value="{$escAddress3}">
+                  </dd>
+                </div>
+                <div class="box_add lang_en">
+                  <dt class="required">住所(英語)</dt>
+                  <dd>
+                    <input type="text" id="form04_01_en" name="form04_01_en" class="add_02 required-item" value="{$escAddress1En}" maxlength="255" required aria-label="住所1 (英語)" placeholder="Street address, P.O. box">
+                    <input type="text" id="form04_02_en" name="form04_02_en" class="add_03" value="{$escAddress2En}" maxlength="255" aria-label="住所2 (英語)" placeholder="Apartment, suite, unit, etc. - optional">
+                    <input type="text" id="form04_03_en" name="form04_03_en" class="add_03" value="{$escAddress3En}" maxlength="255" aria-label="住所3 (英語)">
+                    <div>Kumamoto, Japan</div>
                   </dd>
                 </div>
                 <div class="box_tel">
@@ -493,7 +514,12 @@ print <<<HTML
                         </div>
                         <p>分</p>
                       </div>
+                    </div>
+                    <div class="wrap-note note-top">
+                      <div>備考</div>
                       <input type="text" name="form08_01_note" value="{$escLunchNote}" placeholder="備考（ラストオーダー等）">
+                      <div>備考(英語)</div>
+                      <input type="text" name="form08_01_note_en" value="{$escLunchNoteEn}" placeholder="Additional Information (Last Order, etc.)">
                     </div>
                     <div class="wrap-hour">
                       <div class="inner-hour">
@@ -660,13 +686,22 @@ print <<<HTML
                         </div>
                         <p>分</p>
                       </div>
+                    </div>
+                    <div class="wrap-note">
+                      <div>備考</div>
                       <input type="text" name="form08_02_note" value="{$escDinnerNote}" placeholder="備考（ラストオーダー等）">
+                      <div>備考(英語)</div>
+                      <input type="text" name="form08_02_note_en" value="{$escDinnerNoteEn}" placeholder="Additional Information (Last Order, etc.)">
                     </div>
                   </dd>
                 </div>
                 <div class="box_textarea">
                   <dt>店休日<span>(表示用)</span></dt>
                   <dd><textarea name="form09">{$escRegularHolidayDisplay}</textarea></dd>
+                </div>
+                <div class="box_textarea">
+                  <dt>店休日<span>(表示用・英語)</span></dt>
+                  <dd><textarea name="form09_en">{$escRegularHolidayDisplayEn}</textarea></dd>
                 </div>
                 <div class="box_close-week-day">
                   <dt>店休日<span>(システム用)</span></dt>
@@ -762,7 +797,7 @@ print <<<HTML
     <script src="../assets/js/common.js" defer></script>
     <script src="../assets/js/modal.js" defer></script>
     <script src="../assets/js/form.js" defer></script>
-    <script src="./assets/js/master01_02.js?59531824092026" defer></script>
+    <script src="./assets/js/master01_02.js?28281213102026-address-en" defer></script>
   </body>
 </html>
 

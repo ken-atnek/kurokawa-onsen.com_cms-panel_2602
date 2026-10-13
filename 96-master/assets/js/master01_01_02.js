@@ -50,6 +50,25 @@ async function sendInput() {
         errFlag = 1;
     }
     if (errFlag === 0) {
+        const mapUrlEn = validationForm.elements.namedItem("form02_en").value.trim();
+        try {
+            const parsedUrl = new URL(mapUrlEn);
+            if (!parsedUrl.host || /\s/u.test(mapUrlEn)) throw new Error("Invalid URL");
+        } catch (error) {
+            showImageSelectError({ title: "入力エラー", msg: "地図URL(英語)の形式が正しくありません。" });
+            return;
+        }
+    }
+    if (errFlag === 0) {
+        for (let i = 1; i <= 3; i++) {
+            const titleEn = validationForm.elements.namedItem(`image_title_${i}_en`)?.value ?? "";
+            if (/[^\x20-\x7E¥–]/u.test(titleEn) || Array.from(titleEn).length > 255) {
+                showImageSelectError({ title: "入力エラー", msg: "画像タイトル(英語)に使用できない文字が含まれています。" });
+                return;
+            }
+        }
+    }
+    if (errFlag === 0) {
         isSending = true;
         const submitButton = validationForm.querySelector(".btn-submit");
         if (submitButton) submitButton.disabled = true;
@@ -195,7 +214,7 @@ async function changeFolder(el, action, shopId, folderId, folderName, noUpDateKe
  * 画像セレクト
  *
  */
-function selectFile(el, action, type, target, shopId, photoFilePath, photoPreviewUrl, photoTitle, noUpDateKey) {
+function selectFile(el, action, type, target, shopId, photoFilePath, photoPreviewUrl, photoTitle, photoTitleEn, noUpDateKey) {
     //ターゲットタグのvalueを上書き
     let targetTag = document.querySelector("input[name=" + target + "]");
     if (targetTag) targetTag.value = photoFilePath;
@@ -204,16 +223,19 @@ function selectFile(el, action, type, target, shopId, photoFilePath, photoPrevie
         case "image_path_1":
             {
                 document.querySelector('input[name="image_title_1"]').value = photoTitle;
+                document.querySelector('input[name="image_title_1_en"]').value = photoTitleEn;
             }
             break;
         case "image_path_2":
             {
                 document.querySelector('input[name="image_title_2"]').value = photoTitle;
+                document.querySelector('input[name="image_title_2_en"]').value = photoTitleEn;
             }
             break;
         case "image_path_3":
             {
                 document.querySelector('input[name="image_title_3"]').value = photoTitle;
+                document.querySelector('input[name="image_title_3_en"]').value = photoTitleEn;
             }
             break;
     }
@@ -266,14 +288,20 @@ function deleteFile(el, mode, type, target, shopId, noUpDateKey) {
     if (target === "image_path_1") {
         const titleTag = document.querySelector('input[name="image_title_1"]');
         if (titleTag) titleTag.value = "";
+        const titleEnTag = document.querySelector('input[name="image_title_1_en"]');
+        if (titleEnTag) titleEnTag.value = "";
     }
     if (target === "image_path_2") {
         const titleTag = document.querySelector('input[name="image_title_2"]');
         if (titleTag) titleTag.value = "";
+        const titleEnTag = document.querySelector('input[name="image_title_2_en"]');
+        if (titleEnTag) titleEnTag.value = "";
     }
     if (target === "image_path_3") {
         const titleTag = document.querySelector('input[name="image_title_3"]');
         if (titleTag) titleTag.value = "";
+        const titleEnTag = document.querySelector('input[name="image_title_3_en"]');
+        if (titleEnTag) titleEnTag.value = "";
     }
     //プレビュー画像の表示
     const previewImage = "../assets/images/no-image.webp";

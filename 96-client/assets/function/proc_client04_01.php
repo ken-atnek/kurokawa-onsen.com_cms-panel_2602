@@ -275,7 +275,7 @@ try {
 	if (!is_array($shop) || (int)($shop['shop_id'] ?? 0) !== $shopId) {
 		throw new RuntimeException('shop_lock_failed');
 	}
-	$wasEnabled = isReservationEnabledForShop($shopId);
+	$wasEnabled = isReservationEnabledForShopAnyLanguage($shopId);
 	$action = $request['action'];
 	if (in_array($action, ['create', 'update', 'toggle'], true)) {
 		$guestMax = getSeatManagementFreshGuestMax($shopId);

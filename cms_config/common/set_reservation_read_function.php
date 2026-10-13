@@ -93,7 +93,8 @@ function buildReservationReadShopEligibility($shop, $settings)
 	}
 
 	$reservationEnabled = normalizeReservationRegistrationInteger($settings['reservation_enabled'] ?? null, 0, 1);
-	if ($reservationEnabled === null) {
+	$reservationEnabledEn = normalizeReservationRegistrationInteger($settings['reservation_enabled_en'] ?? null, 0, 1);
+	if ($reservationEnabled === null || $reservationEnabledEn === null) {
 		return ['eligible' => false, 'reason' => 'settings_invalid', 'guest_min' => null, 'guest_max' => null];
 	}
 	$guestMin = normalizeReservationRegistrationInteger($settings['guest_min'] ?? null, 1, 4);
@@ -101,7 +102,7 @@ function buildReservationReadShopEligibility($shop, $settings)
 	if ($guestMin === null || $guestMax === null || $guestMin > $guestMax) {
 		return ['eligible' => false, 'reason' => 'settings_invalid', 'guest_min' => null, 'guest_max' => null];
 	}
-	if ($reservationEnabled !== 1) {
+	if ($reservationEnabled !== 1 && $reservationEnabledEn !== 1) {
 		return ['eligible' => false, 'reason' => 'reservation_disabled', 'guest_min' => $guestMin, 'guest_max' => $guestMax];
 	}
 

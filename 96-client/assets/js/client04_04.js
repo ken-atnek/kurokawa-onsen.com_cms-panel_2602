@@ -1243,11 +1243,12 @@ function validateReservationAddForm(form) {
     const currentJstToday = getCurrentReservationJstDate();
     const noUpDateKeyInput = form.querySelector('input[name="noUpDateKey"]');
     const csrfTokenInput = form.querySelector('input[name="csrfToken"]');
+    const languageInput = form.querySelector('input[name="reservationSiteLanguage"]');
     const routeInput = form.querySelector('input[name="reservationRoute"]:checked');
     const nationalitySelect = form.querySelector('select[name="customerNationalityCode"]');
     const person = getReservationPersonValue(form);
     const menuSelectionTypeValue = form.dataset.menuSelectionType || "";
-    if (!noUpDateKeyInput || isReservationBlankValue(noUpDateKeyInput.value) || !csrfTokenInput || isReservationBlankValue(csrfTokenInput.value) || !reservationDate || person === null || !routeInput || !/^(tel|other)$/.test(routeInput.value) || !nationalitySelect || !/^(?:|[A-Z]{2})$/.test(nationalitySelect.value) || !/^(0|1|2)$/.test(menuSelectionTypeValue)) {
+    if (!noUpDateKeyInput || isReservationBlankValue(noUpDateKeyInput.value) || !csrfTokenInput || isReservationBlankValue(csrfTokenInput.value) || !languageInput || !/^(ja|en)$/.test(languageInput.value) || !reservationDate || person === null || !routeInput || !/^(tel|other)$/.test(routeInput.value) || !nationalitySelect || !/^(?:|[A-Z]{2})$/.test(nationalitySelect.value) || !/^(0|1|2)$/.test(menuSelectionTypeValue)) {
         showReservationResultModal("送信できません", "画面情報を確認できません。ページを再読み込みしてください。");
         return null;
     }
@@ -1296,6 +1297,7 @@ function validateReservationAddForm(form) {
         csrfToken: csrfTokenInput.value,
         reservationDate,
         reservationPerson: String(person),
+        reservationSiteLanguage: languageInput.value,
         reservationRoute: routeInput.value,
         customerNationalityCode: nationalitySelect.value,
         menuSelectionType,
@@ -1312,6 +1314,7 @@ function buildReservationRegistrationFormData(form, validatedData) {
     formData.append("csrfToken", validatedData.csrfToken);
     formData.append("reservationDate", validatedData.reservationDate);
     formData.append("reservationPerson", validatedData.reservationPerson);
+    formData.append("reservationSiteLanguage", validatedData.reservationSiteLanguage);
     formData.append("reservationRoute", validatedData.reservationRoute);
     ["customerName", "customerKana", "customerTel", "customerEmail"].forEach((fieldName) => {
         const input = form.querySelector(`[name="${fieldName}"]`);
@@ -1323,7 +1326,7 @@ function buildReservationRegistrationFormData(form, validatedData) {
             formData.append("reservationMenu[]", menuValue);
         });
     }
-    ["accommodationName", "reservationNote", "shopMemo"].forEach((fieldName) => {
+    ["accommodationName", "childrenNote", "reservationNote", "shopMemo"].forEach((fieldName) => {
         const input = form.querySelector(`[name="${fieldName}"]`);
         formData.append(fieldName, input ? input.value : "");
     });

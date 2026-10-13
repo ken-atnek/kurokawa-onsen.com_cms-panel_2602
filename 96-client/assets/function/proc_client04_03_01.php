@@ -85,6 +85,9 @@ function normalizeFoodMenuFormRequest($post, $files)
 		'menuName',
 		'menuPrice',
 		'menuDescription',
+		'menuNameEn',
+		'menuPriceEn',
+		'menuDescriptionEn',
 		'menuPublicationPeriod',
 		'menuPublicationStartDay',
 		'menuPublicationEndDay',
@@ -132,11 +135,19 @@ function normalizeFoodMenuFormRequest($post, $files)
 		return $result;
 	}
 	$price = foodMenuFormPositiveInteger($post['menuPrice']);
+	$nameEn = trim($post['menuNameEn']) === '' ? null : $post['menuNameEn'];
+	$descriptionEn = trim($post['menuDescriptionEn']) === '' ? null : str_replace(["\r\n", "\r"], "\n", $post['menuDescriptionEn']);
+	$priceEn = $post['menuPriceEn'] === '' ? null : foodMenuFormPositiveInteger($post['menuPriceEn']);
 	$period = $post['menuPublicationPeriod'];
 	$mode = $post['imageMode'];
 	if (
 		!foodMenuFormText($post['menuName'], 100) || !foodMenuFormText($post['menuDescription'], null, 65535) ||
 		$price === null || $price > 2147483647 ||
+		($nameEn !== null && (mb_strlen($nameEn, 'UTF-8') > 100 || preg_match('/\A[\x20-\x7E\x{00A5}\x{2013}]+\z/uD', $nameEn) !== 1)) ||
+		($descriptionEn !== null && (strlen($descriptionEn) > 65535 || preg_match('/\A[\x20-\x7E\x{00A5}\x{2013}\n]+\z/uD', $descriptionEn) !== 1)) ||
+		($nameEn === null) !== ($post['menuPriceEn'] === '') ||
+		($nameEn === null && $descriptionEn !== null) ||
+		($post['menuPriceEn'] !== '' && ($priceEn === null || $priceEn > 2147483647)) ||
 		!in_array($period, ['unlimited', 'custom'], true) ||
 		!in_array($post['menuIsActive'], ['0', '1'], true) ||
 		!in_array($mode, ['keep', 'replace', 'remove'], true) ||
@@ -155,6 +166,9 @@ function normalizeFoodMenuFormRequest($post, $files)
 		'menu_name' => $post['menuName'],
 		'price' => $price,
 		'description' => $post['menuDescription'],
+		'menu_name_en' => $nameEn,
+		'price_en' => $priceEn,
+		'description_en' => $descriptionEn,
 		'period_type' => $period === 'unlimited' ? 1 : 2,
 		'period_start' => $period === 'unlimited' ? null : $post['menuPublicationStartDay'],
 		'period_end' => $period === 'unlimited' ? null : $post['menuPublicationEndDay'],
@@ -275,6 +289,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 $request = normalizeFoodMenuFormRequest($_POST, $_FILES);
 if ($request === false) {
+	if (in_array($_POST['action'] ?? null, ['create', 'update'], true) && is_string($_POST['menuPriceEn'] ?? null)) {
+		$priceEnRaw = $_POST['menuPriceEn'];
+		$priceEnValue = $priceEnRaw === '' ? null : foodMenuFormPositiveInteger($priceEnRaw);
+		if ($priceEnRaw !== '' && ($priceEnValue === null || $priceEnValue > 2147483647)) {
+			foodMenuFormExit('入力エラー', '英語料金が不正です。料金設定が無い場合は表示しません。');
+		}
+		if (is_string($_POST['menuNameEn'] ?? null) && is_string($_POST['menuDescriptionEn'] ?? null)) {
+			$hasNameEn = trim($_POST['menuNameEn']) !== '';
+			$hasDescriptionEn = trim($_POST['menuDescriptionEn']) !== '';
+			if (($hasNameEn && $priceEnRaw === '') || (!$hasNameEn && ($priceEnRaw !== '' || $hasDescriptionEn))) {
+				foodMenuFormExit('入力エラー', '英語のタイトル、料金が未入力です。');
+			}
+		}
+	}
 	foodMenuFormExit('入力エラー', '送信された項目が正しくありません。');
 }
 $shopRaw = $_SESSION['client_login']['shop_id'] ?? null;
@@ -370,7 +398,7 @@ try {
 	if (!is_array($shop) || (int)($shop['shop_id'] ?? 0) !== $shopId) {
 		throw new RuntimeException('shop_lock_failed');
 	}
-	$wasEnabled = isReservationEnabledForShop($shopId);
+	$wasEnabled = isReservationEnabledForShopAnyLanguage($shopId);
 	$target = $request['target'];
 	$target['tax_included'] = 1;
 	if ($request['action'] === 'update') {

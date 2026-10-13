@@ -18,7 +18,7 @@ function getShopItemsData(int $shopId): array
 		$strSQL = "
 			SELECT
 				shop_id, item_type, slot,
-				title, description, price_yen, image_path, image_title, is_active
+				title, title_en, description, description_en, price_yen, price_yen_en, image_path, image_title, is_active
 			FROM shop_items
 			WHERE shop_id = :shop_id
 			ORDER BY item_type, slot
@@ -57,6 +57,7 @@ function getShopItemsData(int $shopId): array
 			$r['slot'] = $slot;
 			$r['is_active'] = (int)$r['is_active'];
 			$r['price_yen'] = ($r['price_yen'] === null) ? null : (int)$r['price_yen'];
+			$r['price_yen_en'] = ($r['price_yen_en'] === null) ? null : (int)$r['price_yen_en'];
 			$data[$type][$slot] = array_merge($data[$type][$slot], $r);
 		}
 		return $data;
@@ -75,8 +76,11 @@ function defaultShopItemRow(int $shopId, string $type, int $slot): array
 		'item_type'    => $type,
 		'slot'         => $slot,
 		'title'        => null,
+		'title_en'     => null,
 		'description'  => null,
+		'description_en' => null,
 		'price_yen'    => null,
+		'price_yen_en' => null,
 		'image_path'   => null,
 		'image_title'  => null,
 		'is_active'    => 1,

@@ -114,7 +114,7 @@ if ($action == 'changeStatus') {
 				throw new RuntimeException('shop_read_failed');
 			}
 			$publicChanged = (int)$previousShop['is_public'] !== (int)$changeStatus;
-			$reservationWasEnabled = isReservationEnabledForShop((int)$statusChangeShopId);
+			$reservationWasEnabled = isReservationEnabledForShopAnyLanguage((int)$statusChangeShopId);
 			#***** ステータス変更 *****#
 			#登録用配列：初期化
 			$dbFiledData = array();

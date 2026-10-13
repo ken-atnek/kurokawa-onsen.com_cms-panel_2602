@@ -24,14 +24,37 @@ function getActiveFoodMenuCountForReservation($shopId = null)
 }
 
 /**
+ * 英語名・英語料金が揃った利用可能メニューの件数を取得
+ *  日本語側と共通の有効状態・掲載期間も確認する
+ */
+function getActiveEnglishFoodMenuCountForReservation($shopId = null)
+{
+	if (!is_numeric($shopId) || (int)$shopId < 1) {
+		return false;
+	}
+	$rows = getFoodMenuRowsForReservationJson((int)$shopId);
+	if ($rows === false) {
+		return false;
+	}
+	$today = foodMenuTodayJst();
+	$count = 0;
+	foreach ($rows as $row) {
+		if (isFoodMenuUsable($row, (int)$shopId, $today) && isFoodMenuEnglishReadyForReservation($row)) {
+			$count++;
+		}
+	}
+	return $count;
+}
+
+/**
  * 予約追加画面用の有効メニュー一覧取得
  *  対象店舗のcurrent-validなusable menuだけを表示順で返す
  */
-function getActiveFoodMenusForReservationForm($shopId = null)
+function getActiveFoodMenusForReservationForm($shopId = null, $language = 'ja')
 {
 	global $DB_CONNECT;
 	try {
-		if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1) {
+		if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1 || !in_array($language, ['ja', 'en'], true)) {
 			return false;
 		}
 
@@ -41,7 +64,9 @@ function getActiveFoodMenusForReservationForm($shopId = null)
 				id,
 				shop_id,
 				menu_name,
+				menu_name_en,
 				price,
+				price_en,
 				tax_included,
 				image_path,
 				description,
@@ -73,8 +98,8 @@ function getActiveFoodMenusForReservationForm($shopId = null)
 		}
 		$menus = [];
 		foreach ($rows as $row) {
-			if (isFoodMenuUsable($row, (int)$shopId, $today)) {
-				$menus[] = ['id' => $row['id'], 'menu_name' => $row['menu_name']];
+			if (isFoodMenuUsable($row, (int)$shopId, $today) && ($language !== 'en' || isFoodMenuEnglishReadyForReservation($row))) {
+				$menus[] = ['id' => $row['id'], 'menu_name' => $language === 'en' ? $row['menu_name_en'] : $row['menu_name'], 'menu_name_ja' => $row['menu_name']];
 			}
 		}
 		return $menus;
@@ -94,7 +119,7 @@ function getFoodMenuRowsForReservationJson($shopId)
 		return false;
 	}
 	try {
-		$stmt = $DB_CONNECT->prepare('SELECT id, shop_id, menu_name, price, tax_included, image_path, description, period_type, period_start, period_end, is_active, is_deleted FROM food_menus WHERE shop_id = :shop_id AND is_deleted = 0 ORDER BY sort_order ASC, id ASC');
+		$stmt = $DB_CONNECT->prepare('SELECT id, shop_id, menu_name, menu_name_en, price, price_en, tax_included, image_path, description, description_en, period_type, period_start, period_end, is_active, is_deleted FROM food_menus WHERE shop_id = :shop_id AND is_deleted = 0 ORDER BY sort_order ASC, id ASC');
 		$stmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
 		if ($stmt->execute() !== true) {
 			return false;
@@ -148,7 +173,9 @@ function getFoodMenuRowsForReservation($shopId = null, $menuIds = [])
 				id,
 				shop_id,
 				menu_name,
+				menu_name_en,
 				price,
+				price_en,
 				tax_included,
 				image_path,
 				description,
@@ -223,17 +250,24 @@ function normalizeFoodMenuManagementRow($row)
 	}
 	$image = $row['image_path'] ?? null;
 	$description = $row['description'] ?? null;
+	$nameEn = $row['menu_name_en'] ?? null;
+	$descriptionEn = $row['description_en'] ?? null;
+	$priceEnRaw = $row['price_en'] ?? null;
+	$priceEn = $priceEnRaw === null ? null : normalizeFoodMenuStoredInteger($priceEnRaw);
 	$start = $row['period_start'] ?? null;
 	$end = $row['period_end'] ?? null;
-	if (($image !== null && (!is_string($image) || !mb_check_encoding($image, 'UTF-8'))) ||
+	if (($nameEn !== null && (!is_string($nameEn) || !mb_check_encoding($nameEn, 'UTF-8'))) ||
+		($descriptionEn !== null && (!is_string($descriptionEn) || !mb_check_encoding($descriptionEn, 'UTF-8'))) ||
+		($priceEnRaw !== null && $priceEn === null) ||
+		($image !== null && (!is_string($image) || !mb_check_encoding($image, 'UTF-8'))) ||
 		($description !== null && (!is_string($description) || !mb_check_encoding($description, 'UTF-8'))) ||
 		($start !== null && !is_string($start)) || ($end !== null && !is_string($end))) {
 		return false;
 	}
 	return [
-		'id' => $integers['id'], 'shop_id' => $integers['shop_id'], 'menu_name' => $row['menu_name'],
-		'price' => $integers['price'], 'tax_included' => $integers['tax_included'], 'image_path' => $image,
-		'description' => $description, 'period_type' => $integers['period_type'], 'period_start' => $start,
+		'id' => $integers['id'], 'shop_id' => $integers['shop_id'], 'menu_name' => $row['menu_name'], 'menu_name_en' => $nameEn,
+		'price' => $integers['price'], 'price_en' => $priceEn, 'tax_included' => $integers['tax_included'], 'image_path' => $image,
+		'description' => $description, 'description_en' => $descriptionEn, 'period_type' => $integers['period_type'], 'period_start' => $start,
 		'period_end' => $end, 'is_active' => $integers['is_active'], 'is_deleted' => 0,
 		'sort_order' => $integers['sort_order'],
 	];
@@ -250,7 +284,7 @@ function getFoodMenusForManagement($shopId)
 		return false;
 	}
 	try {
-		$stmt = $DB_CONNECT->prepare('SELECT id, shop_id, menu_name, price, tax_included, image_path, description, period_type, period_start, period_end, is_active, is_deleted, sort_order FROM food_menus WHERE shop_id = :shop_id AND is_deleted = 0 ORDER BY sort_order ASC, id ASC');
+		$stmt = $DB_CONNECT->prepare('SELECT id, shop_id, menu_name, menu_name_en, price, price_en, tax_included, image_path, description, description_en, period_type, period_start, period_end, is_active, is_deleted, sort_order FROM food_menus WHERE shop_id = :shop_id AND is_deleted = 0 ORDER BY sort_order ASC, id ASC');
 		$stmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
 		if ($stmt->execute() !== true) {
 			return false;
@@ -285,7 +319,7 @@ function getFoodMenuForManagement($shopId, $menuId)
 		return false;
 	}
 	try {
-		$stmt = $DB_CONNECT->prepare('SELECT id, shop_id, menu_name, price, tax_included, image_path, description, period_type, period_start, period_end, is_active, is_deleted, sort_order FROM food_menus WHERE id = :id AND shop_id = :shop_id AND is_deleted = 0 LIMIT 1');
+		$stmt = $DB_CONNECT->prepare('SELECT id, shop_id, menu_name, menu_name_en, price, price_en, tax_included, image_path, description, description_en, period_type, period_start, period_end, is_active, is_deleted, sort_order FROM food_menus WHERE id = :id AND shop_id = :shop_id AND is_deleted = 0 LIMIT 1');
 		$stmt->bindValue(':id', $menuId, PDO::PARAM_INT);
 		$stmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
 		if ($stmt->execute() !== true) {
@@ -374,9 +408,9 @@ function insertFoodMenuForManagement($shopId, $data)
 {
 	global $DB_CONNECT;
 	try {
-		$stmt = $DB_CONNECT->prepare('INSERT INTO food_menus (shop_id, menu_name, price, tax_included, image_path, description, period_type, period_start, period_end, is_active, is_deleted, sort_order) VALUES (:shop_id, :menu_name, :price, 1, :image_path, :description, :period_type, :period_start, :period_end, :is_active, 0, :sort_order)');
+		$stmt = $DB_CONNECT->prepare('INSERT INTO food_menus (shop_id, menu_name, menu_name_en, price, price_en, tax_included, image_path, description, description_en, period_type, period_start, period_end, is_active, is_deleted, sort_order) VALUES (:shop_id, :menu_name, :menu_name_en, :price, :price_en, 1, :image_path, :description, :description_en, :period_type, :period_start, :period_end, :is_active, 0, :sort_order)');
 		$stmt->bindValue(':shop_id', $shopId, PDO::PARAM_INT);
-		foreach (['menu_name' => PDO::PARAM_STR, 'price' => PDO::PARAM_INT, 'image_path' => PDO::PARAM_STR, 'description' => PDO::PARAM_STR, 'period_type' => PDO::PARAM_INT, 'period_start' => PDO::PARAM_STR, 'period_end' => PDO::PARAM_STR, 'is_active' => PDO::PARAM_INT, 'sort_order' => PDO::PARAM_INT] as $field => $type) {
+		foreach (['menu_name' => PDO::PARAM_STR, 'menu_name_en' => PDO::PARAM_STR, 'price' => PDO::PARAM_INT, 'price_en' => PDO::PARAM_INT, 'image_path' => PDO::PARAM_STR, 'description' => PDO::PARAM_STR, 'description_en' => PDO::PARAM_STR, 'period_type' => PDO::PARAM_INT, 'period_start' => PDO::PARAM_STR, 'period_end' => PDO::PARAM_STR, 'is_active' => PDO::PARAM_INT, 'sort_order' => PDO::PARAM_INT] as $field => $type) {
 			$stmt->bindValue(':' . $field, $data[$field], $data[$field] === null ? PDO::PARAM_NULL : $type);
 		}
 		$ok = $stmt->execute();
@@ -394,7 +428,7 @@ function insertFoodMenuForManagement($shopId, $data)
 function updateFoodMenuForManagement($shopId, $menuId, $changes)
 {
 	global $DB_CONNECT;
-	$allowed = ['menu_name' => PDO::PARAM_STR, 'price' => PDO::PARAM_INT, 'tax_included' => PDO::PARAM_INT, 'image_path' => PDO::PARAM_STR, 'description' => PDO::PARAM_STR, 'period_type' => PDO::PARAM_INT, 'period_start' => PDO::PARAM_STR, 'period_end' => PDO::PARAM_STR, 'is_active' => PDO::PARAM_INT];
+	$allowed = ['menu_name' => PDO::PARAM_STR, 'menu_name_en' => PDO::PARAM_STR, 'price' => PDO::PARAM_INT, 'price_en' => PDO::PARAM_INT, 'tax_included' => PDO::PARAM_INT, 'image_path' => PDO::PARAM_STR, 'description' => PDO::PARAM_STR, 'description_en' => PDO::PARAM_STR, 'period_type' => PDO::PARAM_INT, 'period_start' => PDO::PARAM_STR, 'period_end' => PDO::PARAM_STR, 'is_active' => PDO::PARAM_INT];
 	if (!is_array($changes) || $changes === [] || array_diff(array_keys($changes), array_keys($allowed)) !== []) {
 		return false;
 	}

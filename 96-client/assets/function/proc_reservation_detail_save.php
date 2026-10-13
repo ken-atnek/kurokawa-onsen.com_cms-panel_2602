@@ -137,7 +137,7 @@ function clientReservationDetailSaveExecute($shopId, $request)
 								if (empty($menuPlan['menu_ids']) === false) {
 									$menuRowsById = getFoodMenuRowsForReservation($shopId, $menuPlan['menu_ids']);
 									$snapshotResult = is_array($menuRowsById) === true
-										? buildReservationMenuSnapshotRowsForRegistration($shopId, $menuPlan['snapshot_slots'], $menuRowsById, foodMenuTodayJst())
+										? buildReservationMenuSnapshotRowsForRegistration($shopId, $menuPlan['snapshot_slots'], $menuRowsById, foodMenuTodayJst(), $freshReservation['reservation_site_language'])
 										: false;
 									if (is_array($snapshotResult) === false || ($snapshotResult['success'] ?? false) !== true) {
 										$menuPlan = false;
@@ -146,7 +146,27 @@ function clientReservationDetailSaveExecute($shopId, $request)
 									}
 								}
 								$menuPlan = $menuPlan === false ? false : completeReservationDetailEditMenuPlan($menuPlan, $snapshotRows);
-								$reservationChanges = buildReservationDetailEditReservationChanges($freshReservation, $request['reservation_data']);
+								$requestedReservationData = $request['reservation_data'];
+								$noteLanguage = $requestedReservationData['reservation_route'] === 1 ? $freshReservation['reservation_site_language'] : 'ja';
+								$notes = buildReservationCustomerNotes(
+									$requestedReservationData['customer_children_note'],
+									$requestedReservationData['customer_request_note'],
+									$noteLanguage
+								);
+								if ($notes !== false) {
+									$requestedReservationData['customer_children_note'] = $notes['customer_children_note'];
+									$requestedReservationData['customer_request_note'] = $notes['customer_request_note'];
+									$dedicatedNotesChanged = $freshReservation['customer_children_note'] !== $notes['customer_children_note'] ||
+										$freshReservation['customer_request_note'] !== $notes['customer_request_note'];
+									$legacyNoteOnly = $freshReservation['customer_children_note'] === null &&
+										$freshReservation['customer_request_note'] === null &&
+										$freshReservation['customer_note'] !== null;
+									$routeChanged = $freshReservation['reservation_route'] !== $requestedReservationData['reservation_route'];
+									$requestedReservationData['customer_note'] = $dedicatedNotesChanged || ($routeChanged && $legacyNoteOnly === false)
+										? $notes['customer_note']
+										: $freshReservation['customer_note'];
+								}
+								$reservationChanges = $notes === false ? false : buildReservationDetailEditReservationChanges($freshReservation, $requestedReservationData);
 								if ($menuPlan === false || $reservationChanges === false) {
 									$response = clientReservationDetailSaveResponse('error', '入力エラー', '入力内容を確認できませんでした。ページを再読み込みしてください。');
 								} else {

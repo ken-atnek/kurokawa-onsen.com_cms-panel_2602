@@ -4,10 +4,11 @@ const reservationSettingsRequestUrl = "./assets/function/proc_client04_02.php";
 const reservationSettingsWarningMessages = {
     guest_max_decrease_oversized_seat: "新しい最大予約人数を超える定員の席があります。\n席は自動変更されません。",
     guest_max_increase: "最大予約人数を引き上げます。\n必要に応じて席管理で定員を確認してください。",
-    reservation_disabled: "予約受付を停止すると、Web・電話・その他の\n新規予約を受け付けられなくなります。",
+    reservation_disabled: "日本語・英語とも予約受付を停止すると、Web・電話・その他の\n新規予約を受け付けられなくなります。",
 };
 const reservationSettingsPostCommitMessages = {
     menu_required_no_active_menu: "食事メニュー必須の設定ですが、現在利用可能なメニューがありません。\n食事メニュー管理を確認してください。",
+    menu_required_no_active_menu_en: "英語の食事メニューが必須の設定ですが、現在利用可能な英語メニューがありません。\n食事メニュー管理を確認してください。",
 };
 
 let reservationSettingsSubmitting = false;
@@ -90,10 +91,12 @@ function buildReservationSettingsFormData(form, confirmedWarnings = []) {
     formData.append("noUpDateKey", getValue("noUpDateKey"));
     formData.append("csrfToken", getValue("csrfToken"));
     formData.append("reservationEnabled", getCheckedValue("reservationEnabled"));
+    formData.append("reservationEnabledEn", getCheckedValue("reservationEnabledEn"));
     formData.append("menuSelectionType", getCheckedValue("menuSelectionType"));
     formData.append("acceptStartDaysBefore", getValue("acceptStartDaysBefore"));
     formData.append("acceptEndDaysBefore", getValue("acceptEndDaysBefore"));
     formData.append("averageBudgetText", getValue("averageBudgetText"));
+    formData.append("averageBudgetTextEn", getValue("averageBudgetTextEn"));
     formData.append("guestMin", getValue("guestMin"));
     formData.append("guestMax", getValue("guestMax"));
     form.querySelectorAll('input[name="closedWeekdays[]"]:checked').forEach((input) => {
@@ -110,7 +113,7 @@ function buildReservationSettingsFormData(form, confirmedWarnings = []) {
  */
 function captureReservationSettingsFormState(form) {
     const data = buildReservationSettingsFormData(form);
-    return JSON.stringify([data.get("reservationEnabled"), data.get("menuSelectionType"), data.get("acceptStartDaysBefore"), data.get("acceptEndDaysBefore"), data.get("averageBudgetText"), data.get("guestMin"), data.get("guestMax"), data.getAll("closedWeekdays[]").sort()]);
+    return JSON.stringify([data.get("reservationEnabled"), data.get("reservationEnabledEn"), data.get("menuSelectionType"), data.get("acceptStartDaysBefore"), data.get("acceptEndDaysBefore"), data.get("averageBudgetText"), data.get("averageBudgetTextEn"), data.get("guestMin"), data.get("guestMax"), data.getAll("closedWeekdays[]").sort()]);
 }
 /**
  * 予約基本設定のclient-side値域検証
@@ -118,17 +121,21 @@ function captureReservationSettingsFormState(form) {
  */
 function validateReservationSettingsFormData(formData) {
     const reservationEnabled = formData.get("reservationEnabled");
+    const reservationEnabledEn = formData.get("reservationEnabledEn");
     const menuSelectionType = formData.get("menuSelectionType");
     const acceptStart = formData.get("acceptStartDaysBefore");
     const acceptEnd = formData.get("acceptEndDaysBefore");
     const averageBudgetText = formData.get("averageBudgetText");
+    const averageBudgetTextEn = formData.get("averageBudgetTextEn");
     const guestMin = formData.get("guestMin");
     const guestMax = formData.get("guestMax");
     if (!["0", "1"].includes(reservationEnabled)) return false;
+    if (!["0", "1"].includes(reservationEnabledEn)) return false;
     if (!["0", "1", "2"].includes(menuSelectionType)) return false;
     if (!["unlimited", "90", "60", "30"].includes(acceptStart)) return false;
     if (!["0", "1", "3", "7"].includes(acceptEnd)) return false;
     if (typeof averageBudgetText !== "string" || Array.from(averageBudgetText).length > 100 || /[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f-\u009f]/u.test(averageBudgetText)) return false;
+    if (typeof averageBudgetTextEn !== "string" || Array.from(averageBudgetTextEn).length > 100 || /[^\x20-\x7E¥–\r\n]/u.test(averageBudgetTextEn)) return false;
     if (!["1", "2", "3", "4"].includes(guestMin)) return false;
     if (!["1", "2", "3", "4"].includes(guestMax)) return false;
     if (Number(guestMin) > Number(guestMax)) return false;

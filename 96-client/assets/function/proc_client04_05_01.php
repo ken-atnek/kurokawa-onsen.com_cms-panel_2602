@@ -125,6 +125,7 @@ function clientReservationNormalizePost($post, $today)
     'csrfToken',
     'reservationDate',
     'reservationPerson',
+    'reservationSiteLanguage',
     'reservationRoute',
     'customerName',
     'customerKana',
@@ -133,6 +134,7 @@ function clientReservationNormalizePost($post, $today)
     'customerEmail',
     'reservationMenu',
     'accommodationName',
+    'childrenNote',
     'reservationNote',
     'shopMemo',
   ];
@@ -148,6 +150,10 @@ function clientReservationNormalizePost($post, $today)
   $partySize = clientReservationPositiveInt($post['reservationPerson'] ?? null);
   if ($partySize === null || $partySize > 4) {
     return [false, '予約人数は1名から4名で入力してください。'];
+  }
+  $requestedLanguage = $post['reservationSiteLanguage'] ?? null;
+  if (!in_array($requestedLanguage, ['ja', 'en'], true)) {
+    return [false, '予約設定の言語を確認できません。画面を再読み込みしてください。'];
   }
   $routeMap = ['tel' => 2, 'other' => 3];
   $route = $post['reservationRoute'] ?? null;
@@ -167,10 +173,15 @@ function clientReservationNormalizePost($post, $today)
   }
   $email = clientReservationOptional($post['customerEmail'] ?? null);
   $accommodationName = clientReservationOptional($post['accommodationName'] ?? null);
-  $customerNote = clientReservationOptional($post['reservationNote'] ?? null);
+  $childrenNote = clientReservationOptional($post['childrenNote'] ?? null);
+  $requestNote = clientReservationOptional($post['reservationNote'] ?? null);
   $shopMemo = clientReservationOptional($post['shopMemo'] ?? null);
-  if ($email === false || $accommodationName === false || $customerNote === false || $shopMemo === false) {
+  if ($email === false || $accommodationName === false || $childrenNote === false || $requestNote === false || $shopMemo === false) {
     return [false, '任意項目の形式が正しくありません。'];
+  }
+  $notes = buildReservationCustomerNotes($childrenNote, $requestNote, 'ja');
+  if ($notes === false) {
+    return [false, '備考が上限を超えています。'];
   }
   if ($email !== null && (clientReservationLength($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false)) {
     return [false, 'メールアドレスを正しく入力してください。'];
@@ -190,7 +201,7 @@ function clientReservationNormalizePost($post, $today)
   if ($accommodationName !== null && clientReservationLength($accommodationName) > 100) {
     return [false, '宿泊施設名は100文字以内で入力してください。'];
   }
-  if (($customerNote !== null && strlen($customerNote) > 65535) || ($shopMemo !== null && strlen($shopMemo) > 65535)) {
+  if ($shopMemo !== null && strlen($shopMemo) > 65535) {
     return [false, '備考が上限を超えています。'];
   }
   $rawMenus = $post['reservationMenu'] ?? [];
@@ -222,10 +233,12 @@ function clientReservationNormalizePost($post, $today)
     'customer_tel' => $customerTel,
     'customer_email' => $email,
     'accommodation_name' => $accommodationName,
-    'customer_note' => $customerNote,
+    'customer_note' => $notes['customer_note'],
+    'customer_children_note' => $notes['customer_children_note'],
+    'customer_request_note' => $notes['customer_request_note'],
     'shop_memo' => $shopMemo,
   ];
-  return [true, null, 'party' => $partySize, 'menus' => $menuSlots, 'data' => $reservationData];
+  return [true, null, 'party' => $partySize, 'menus' => $menuSlots, 'requested_language' => $requestedLanguage, 'data' => $reservationData];
 }
 /**
  * menu type別slot正規化
@@ -316,13 +329,16 @@ try {
         $response = clientReservationResponse('error', '登録エラー', '予約設定を確認できませんでした。');
       } elseif ($shop === null || ($shop['shop_type'] ?? null) !== 'food' || (int)($shop['is_active'] ?? 0) !== 1) {
         $response = clientReservationResponse('error', '予約受付不可', 'この店舗では予約を登録できません。');
-      } elseif ($settings === null || (int)($settings['reservation_enabled'] ?? 0) !== 1) {
+      } elseif ($settings === null || resolveManagementReservationLanguage($settings) === null) {
         $response = clientReservationResponse('error', '予約受付不可', '現在、予約受付は利用できません。');
       } else {
+        $reservationLanguage = resolveManagementReservationLanguage($settings);
         $guestMin = normalizeReservationRegistrationInteger($settings['guest_min'] ?? null, 1, 4);
         $guestMax = normalizeReservationRegistrationInteger($settings['guest_max'] ?? null, 1, 4);
         $menuSelectionType = normalizeReservationRegistrationInteger($settings['menu_selection_type'] ?? null, 0, 2);
-        if ($guestMin === null || $guestMax === null || $guestMin > $guestMax || $menuSelectionType === null) {
+        if ($normalizedPost['requested_language'] !== $reservationLanguage) {
+          $response = clientReservationResponse('error', '予約設定の変更', '予約受付の設定が変更されました。画面を再読み込みしてください。');
+        } elseif ($guestMin === null || $guestMax === null || $guestMin > $guestMax || $menuSelectionType === null) {
           $response = clientReservationResponse('error', '登録エラー', '予約設定を確認できませんでした。');
         } elseif ($normalizedPost['party'] < $guestMin || $normalizedPost['party'] > $guestMax) {
           $response = clientReservationResponse('error', '予約受付不可', '予約可能な人数の範囲を確認してください。');
@@ -331,6 +347,7 @@ try {
           if ($menuSelections === null) {
             $response = clientReservationResponse('error', 'メニューエラー', '人数分のメニュー選択を確認してください。');
           } else {
+            $normalizedPost['data']['reservation_site_language'] = $reservationLanguage;
             $result = executeReservationRegistration($shopId, $normalizedPost['data'], $menuSelections);
             $response = clientReservationMap($result);
           }

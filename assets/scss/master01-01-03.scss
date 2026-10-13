@@ -66,6 +66,10 @@
                             }
                             span {
                                 margin-left: 0.5em;
+                                &.lang_en {
+                                    margin-left: unset;
+                                    margin-right: 0.5em;
+                                }
                             }
                         }
                     }

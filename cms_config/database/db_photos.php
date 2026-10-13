@@ -12,7 +12,7 @@ function getPhotoList($shopId = null)
 			#SQL定義
 			$strSQL = "
 				SELECT 
-					photo_id, shop_id, folder_id, file_path, title, 
+					photo_id, shop_id, folder_id, file_path, title, title_en,
 					mime_type, file_size, width, height, is_active, created_at 
 				FROM 
 					shops_photos 
@@ -55,7 +55,7 @@ function getDeletePhoto($shopId = null, $photoId = null)
 			#SQL定義
 			$strSQL = "
 				SELECT 
-					photo_id, shop_id, folder_id, file_path, title, 
+					photo_id, shop_id, folder_id, file_path, title,
 					mime_type, file_size, width, height, is_active, created_at 
 				FROM 
 					shops_photos 

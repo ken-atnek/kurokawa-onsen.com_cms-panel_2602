@@ -98,6 +98,7 @@ if ($settingsRaw === false) {
 } elseif ($settingsRaw === null) {
   $settings = [
     'reservation_enabled' => 0,
+    'reservation_enabled_en' => 0,
     'menu_selection_type' => 0,
     'accept_start_days_before' => null,
     'accept_end_days_before' => 0,
@@ -130,6 +131,7 @@ if ($csrfToken === false) {
 
 $displaySettings = $settings ?: [
   'reservation_enabled' => 0,
+  'reservation_enabled_en' => 0,
   'menu_selection_type' => 0,
   'accept_start_days_before' => null,
   'accept_end_days_before' => 0,
@@ -142,6 +144,7 @@ $acceptStartValue = $displaySettings['accept_start_days_before'] === null ? 'unl
 $acceptStartSelect = renderClientReservationSettingsSelect('acceptStartDaysBefore', ['unlimited' => '無期限', 90 => '90日', 60 => '60日', 30 => '30日'], $acceptStartValue, 'acceptStart', $saveEnabled === false);
 $acceptEndSelect = renderClientReservationSettingsSelect('acceptEndDaysBefore', [0 => '当日', 1 => '1日前', 3 => '3日前', 7 => '1週間前'], $displaySettings['accept_end_days_before'], 'acceptEnd', $saveEnabled === false);
 $averageBudgetText = htmlspecialchars((string)($displaySettings['average_budget_text'] ?? ''), ENT_QUOTES, 'UTF-8');
+$averageBudgetTextEn = htmlspecialchars((string)($displaySettings['average_budget_text_en'] ?? ''), ENT_QUOTES, 'UTF-8');
 $guestMinSelect = renderClientReservationSettingsSelect('guestMin', [1 => '1名', 2 => '2名', 3 => '3名', 4 => '4名'], $displaySettings['guest_min'], 'guestMin', $saveEnabled === false);
 $guestMaxSelect = renderClientReservationSettingsSelect('guestMax', [1 => '1名', 2 => '2名', 3 => '3名', 4 => '4名'], $displaySettings['guest_max'], 'guestMax', $saveEnabled === false);
 $disabled = $saveEnabled ? '' : ' disabled';
@@ -150,6 +153,8 @@ $csrfTokenHtml = htmlspecialchars((string)$csrfToken, ENT_QUOTES, 'UTF-8');
 $noUpDateKeyHtml = htmlspecialchars($noUpDateKey, ENT_QUOTES, 'UTF-8');
 $reservationEnabled0Checked = $displaySettings['reservation_enabled'] === 0 ? ' checked' : '';
 $reservationEnabled1Checked = $displaySettings['reservation_enabled'] === 1 ? ' checked' : '';
+$reservationEnabledEn0Checked = $displaySettings['reservation_enabled_en'] === 0 ? ' checked' : '';
+$reservationEnabledEn1Checked = $displaySettings['reservation_enabled_en'] === 1 ? ' checked' : '';
 $menuSelectionType0Checked = $displaySettings['menu_selection_type'] === 0 ? ' checked' : '';
 $menuSelectionType1Checked = $displaySettings['menu_selection_type'] === 1 ? ' checked' : '';
 $menuSelectionType2Checked = $displaySettings['menu_selection_type'] === 2 ? ' checked' : '';
@@ -199,10 +204,17 @@ print <<<HTML
               <dd><span>{$headerShopName}</span></dd>
             </div>
             <div class="box-check">
-              <dt>予約受付</dt>
+              <dt>【日本語サイト】予約受付</dt>
               <dd>
                 <div><input type="radio" name="reservationEnabled" id="reservationEnabled0" value="0"{$disabled}{$reservationEnabled0Checked}><label for="reservationEnabled0">使用しない</label></div>
                 <div><input type="radio" name="reservationEnabled" id="reservationEnabled1" value="1"{$disabled}{$reservationEnabled1Checked}><label for="reservationEnabled1">使用する</label></div>
+              </dd>
+            </div>
+            <div class="box-check">
+              <dt>【英語サイト】予約受付</dt>
+              <dd>
+                <div><input type="radio" name="reservationEnabledEn" id="reservationEnabledEn0" value="0"{$disabled}{$reservationEnabledEn0Checked}><label for="reservationEnabledEn0">使用しない</label></div>
+                <div><input type="radio" name="reservationEnabledEn" id="reservationEnabledEn1" value="1"{$disabled}{$reservationEnabledEn1Checked}><label for="reservationEnabledEn1">使用する</label></div>
               </dd>
             </div>
             <div class="box-check">
@@ -229,6 +241,12 @@ print <<<HTML
               <dt>平均予算</dt>
               <dd>
                 <textarea name="averageBudgetText" id="averageBudgetText" maxlength="100" style="min-height:3lh;"{$disabled}>{$averageBudgetText}</textarea>
+              </dd>
+            </div>
+            <div>
+              <dt>平均予算(英語)</dt>
+              <dd>
+                <textarea name="averageBudgetTextEn" id="averageBudgetTextEn" maxlength="100" style="min-height:3lh;"{$disabled}>{$averageBudgetTextEn}</textarea>
               </dd>
             </div>
             <div class="box-person"><dt>最小予約人数</dt><dd>{$guestMinSelect}</dd></div>
@@ -269,7 +287,7 @@ print <<<HTML
     </div>
   </article>
   <script src="../assets/js/common.js" defer></script>
-  <script src="./assets/js/client04_02.js?06422030092026" defer></script>
+  <script src="./assets/js/client04_02.js?20261013-en-reservation" defer></script>
 </body>
 </html>
 

@@ -174,6 +174,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const name = form.elements.menuName.value;
         const price = form.elements.menuPrice.value;
         const description = form.elements.menuDescription.value;
+        const nameEn = form.elements.menuNameEn.value;
+        const priceEn = form.elements.menuPriceEn.value;
+        const descriptionEn = form.elements.menuDescriptionEn.value;
+        const hasNameEn = nameEn.trim() !== "";
+        const hasDescriptionEn = descriptionEn.trim() !== "";
         const period = form.querySelector('[name="menuPublicationPeriod"]:checked')?.value;
         const start = form.elements.menuPublicationStartDay.value;
         const end = form.elements.menuPublicationEndDay.value;
@@ -188,6 +193,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (!description || /^[\s\p{Z}\uFEFF]*$/u.test(description) || new TextEncoder().encode(description).length > 65535) {
             showModal("説明文を確認してください。");
+            return false;
+        }
+        if (hasNameEn && (/[^\x20-\x7E¥–]/u.test(nameEn) || Array.from(nameEn).length > 100)) {
+            showModal("英語のメニュー名を確認してください。全角英数字は入力できません。");
+            return false;
+        }
+        if (hasDescriptionEn && (/[^\x20-\x7E¥–\r\n]/u.test(descriptionEn) || new TextEncoder().encode(descriptionEn).length > 65535)) {
+            showModal("英語の説明文を確認してください。全角英数字は入力できません。");
+            return false;
+        }
+        if (priceEn && (!/^[1-9][0-9]*$/.test(priceEn) || Number(priceEn) > 2147483647)) {
+            showModal("英語料金が不正です。料金設定が無い場合は表示しません。");
+            return false;
+        }
+        if ((hasNameEn && !priceEn) || (!hasNameEn && priceEn) || (!hasNameEn && hasDescriptionEn)) {
+            showModal("英語のタイトル、料金が未入力です。");
             return false;
         }
         if (period !== "unlimited" && period !== "custom") {
@@ -215,6 +236,9 @@ document.addEventListener("DOMContentLoaded", () => {
         data.append("menuName", form.elements.menuName.value);
         data.append("menuPrice", form.elements.menuPrice.value);
         data.append("menuDescription", form.elements.menuDescription.value);
+        data.append("menuNameEn", form.elements.menuNameEn.value);
+        data.append("menuPriceEn", form.elements.menuPriceEn.value);
+        data.append("menuDescriptionEn", form.elements.menuDescriptionEn.value);
         const period = form.querySelector('[name="menuPublicationPeriod"]:checked').value;
         data.append("menuPublicationPeriod", period);
         data.append("menuPublicationStartDay", period === "custom" ? form.elements.menuPublicationStartDay.value : "");

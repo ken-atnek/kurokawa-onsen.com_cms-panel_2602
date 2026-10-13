@@ -77,19 +77,21 @@ try {
 		$disabled = ($shop['shop_type'] ?? null) !== 'food' ||
 			(int)($shop['is_active'] ?? 0) !== 1 ||
 			(int)($shop['is_public'] ?? 0) !== 1 ||
-			(int)$settingsData['reservation_enabled'] !== 1;
+			((int)$settingsData['reservation_enabled'] !== 1 && (int)$settingsData['reservation_enabled_en'] !== 1);
 		if (!$disabled) {
 			$hasSeats = hasReservationAvailabilityNormalSeats($shopId);
-			$menuCount = (int)$settingsData['menu_selection_type'] === 2 ? getActiveFoodMenuCountForReservation($shopId) : 1;
-			if ($hasSeats === null || $menuCount === false) {
+			$menuRequired = (int)$settingsData['menu_selection_type'] === 2;
+			$menuCountJa = $menuRequired && (int)$settingsData['reservation_enabled'] === 1 ? getActiveFoodMenuCountForReservation($shopId) : 0;
+			$menuCountEn = $menuRequired && (int)$settingsData['reservation_enabled_en'] === 1 ? getActiveEnglishFoodMenuCountForReservation($shopId) : 0;
+			if ($hasSeats === null || $menuCountJa === false || $menuCountEn === false) {
 				$summary['failed_shops']++;
 				$exitCode = 1;
 				fwrite(STDERR, 'Availability preflight failed: shop_id=' . $shopId . PHP_EOL);
 				continue;
 			}
-			$disabled = $hasSeats === false || $menuCount === 0;
+			$disabled = $hasSeats === false || ($menuRequired && $menuCountJa === 0 && $menuCountEn === 0);
 		}
-		if (!$disabled && isReservationEnabledForShop($shopId) !== true) {
+		if (!$disabled && isReservationEnabledForShopAnyLanguage($shopId) !== true) {
 			$summary['failed_shops']++;
 			$exitCode = 1;
 			fwrite(STDERR, 'Eligibility preflight failed: shop_id=' . $shopId . PHP_EOL);

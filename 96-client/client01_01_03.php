@@ -105,7 +105,7 @@ print <<<HTML
     <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon/apple-touch-icon.png">
     <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
-    <link rel="stylesheet" href="../assets/css/master01-01-03.css">
+    <link rel="stylesheet" href="../assets/css/master01-01-03.css?42192013102026">
   </head>
 
   <body>
@@ -137,8 +137,11 @@ for ($slot = 1; $slot <= $recommendedItemMax; $slot++) {
   $itemImagePathRaw = (string)($item['image_path'] ?? '');
   $itemImagePathEsc = htmlspecialchars($itemImagePathRaw, ENT_QUOTES, 'UTF-8');
   $itemTitleEsc = htmlspecialchars((string)($item['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+  $itemTitleEnEsc = htmlspecialchars((string)($item['title_en'] ?? ''), ENT_QUOTES, 'UTF-8');
   $itemDescriptionEsc = htmlspecialchars((string)($item['description'] ?? ''), ENT_QUOTES, 'UTF-8');
+  $itemDescriptionEnEsc = htmlspecialchars((string)($item['description_en'] ?? ''), ENT_QUOTES, 'UTF-8');
   $itemPriceEsc = htmlspecialchars((string)($item['price_yen'] ?? ''), ENT_QUOTES, 'UTF-8');
+  $itemPriceEnEsc = htmlspecialchars((string)($item['price_yen_en'] ?? ''), ENT_QUOTES, 'UTF-8');
   print <<<HTML
             <article>
               <input type="hidden" name="image_path{$slot}" value="{$itemImagePathEsc}">
@@ -150,17 +153,36 @@ for ($slot = 1; $slot <= $recommendedItemMax; $slot++) {
                     <input type="text" name="item[recommended][$slot][title]" value="{$itemTitleEsc}">
                   </dd>
                 </div>
+                <div>
+                  <dt>商品タイトル(英語)</dt>
+                  <dd>
+                    <input type="text" name="item[recommended][$slot][title_en]" value="{$itemTitleEnEsc}">
+                  </dd>
+                </div>
                 <div class="box_price">
-                  <dt>価格(税込)</dt>
+                  <dt>価格[税込]</dt>
                   <dd>
                     <input type="number" name="item[recommended][$slot][price]" value="{$itemPriceEsc}" inputmode="numeric" min="0" step="10">
                     <span>円</span>
+                  </dd>
+                </div>
+                <div class="box_price">
+                  <dt>価格[税込](英語)</dt>
+                  <dd>
+                    <span class="lang_en">¥</span>
+                    <input type="number" name="item[recommended][$slot][price_en]" value="{$itemPriceEnEsc}" inputmode="numeric" min="0" step="10">
                   </dd>
                 </div>
                 <div class="box_comment">
                   <dt class="required">商品説明</dt>
                   <dd>
                     <textarea name="item[recommended][$slot][description]">{$itemDescriptionEsc}</textarea>
+                  </dd>
+                </div>
+                <div class="box_comment">
+                  <dt>商品説明(英語)</dt>
+                  <dd>
+                    <textarea name="item[recommended][$slot][description_en]">{$itemDescriptionEnEsc}</textarea>
                   </dd>
                 </div>
                 <div class="box_image">
@@ -270,7 +292,7 @@ print <<<HTML
     <script src="../assets/js/common.js" defer></script>
     <script src="../assets/js/modal.js" defer></script>
     <script src="../assets/js/form.js" defer></script>
-    <script src="./assets/js/client01_01_03.js" defer></script>
+    <script src="./assets/js/client01_01_03.js?28281213102026" defer></script>
   </body>
 </html>
 

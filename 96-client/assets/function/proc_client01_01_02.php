@@ -97,6 +97,8 @@ $form01 = isset($_POST['form01']) ? $_POST['form01'] : null;
 $form01_01 = isset($_POST['form01_01']) ? $_POST['form01_01'] : null;
 #地図URL
 $form02 = isset($_POST['form02']) ? $_POST['form02'] : null;
+#地図URL（英語）
+$form02_en = isset($_POST['form02_en']) ? $_POST['form02_en'] : null;
 #地図URL（リンク用）
 $form03 = isset($_POST['form03']) ? $_POST['form03'] : null;
 #メイン画像
@@ -104,12 +106,15 @@ $mainImagePath = isset($_POST['main_image_path']) ? $_POST['main_image_path'] : 
 #画像1
 $image1Path = isset($_POST['image_path_1']) ? $_POST['image_path_1'] : null;
 $image1Title = isset($_POST['image_title_1']) ? $_POST['image_title_1'] : null;
+$image1TitleEn = $_POST['image_title_1_en'] ?? '';
 #画像2
 $image2Path = isset($_POST['image_path_2']) ? $_POST['image_path_2'] : null;
 $image2Title = isset($_POST['image_title_2']) ? $_POST['image_title_2'] : null;
+$image2TitleEn = $_POST['image_title_2_en'] ?? '';
 #画像3
 $image3Path = isset($_POST['image_path_3']) ? $_POST['image_path_3'] : null;
 $image3Title = isset($_POST['image_title_3']) ? $_POST['image_title_3'] : null;
+$image3TitleEn = $_POST['image_title_3_en'] ?? '';
 #-------------#
 #inline JS用エスケープ宣言
 $jsonHex = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -254,6 +259,7 @@ HTML;
             $jsPhotoFilePath = json_encode($photoFilePathRaw, $jsonHex);
             $jsPhotoPreviewPath = json_encode((string)($previewPath ?? ''), $jsonHex);
             $jsPhotoTitle = json_encode((string)($photo['title'] ?? ''), $jsonHex);
+            $jsPhotoTitleEn = json_encode((string)($photo['title_en'] ?? ''), $jsonHex);
             $jsActionDeletePhoto = json_encode('deletePhoto', $jsonHex);
             $makeTag['tag'] .= <<<HTML
                 <li>
@@ -265,7 +271,7 @@ HTML;
                       </picture>
                     </div>
                     <div class="title">{$photoTitle}</div>
-                    <button type="button" class="btn-confirm" onclick='selectFile(this,{$jsActionSelect},{$jsSelectType},{$jsTarget},{$jsShopId},{$jsPhotoFilePath},{$jsPhotoPreviewPath},{$jsPhotoTitle},{$jsNoUpDateKey})'>選択</button>
+                    <button type="button" class="btn-confirm" onclick='selectFile(this,{$jsActionSelect},{$jsSelectType},{$jsTarget},{$jsShopId},{$jsPhotoFilePath},{$jsPhotoPreviewPath},{$jsPhotoTitle},{$jsPhotoTitleEn},{$jsNoUpDateKey})'>選択</button>
                   </form>
                 </li>
 
@@ -288,6 +294,24 @@ HTML;
     break;
   #***** 登録 *****#
   case 'sendInput': {
+      #選択済み写真の英語タイトルは、紹介情報の空更新でも写真整理の最新値を反映する
+      $photoTitlesEnByPath = [];
+      foreach (getPhotoList($shopId) ?? [] as $photo) {
+        $photoPath = (string)($photo['file_path'] ?? '');
+        if ($photoPath !== '') {
+          $photoTitlesEnByPath[$photoPath] = (string)($photo['title_en'] ?? '');
+        }
+      }
+      $selectedImagePaths = [$image1Path, $image2Path, $image3Path];
+      $selectedImageTitlesEn = [$image1TitleEn, $image2TitleEn, $image3TitleEn];
+      foreach ($selectedImagePaths as $index => $imagePath) {
+        if (!is_string($imagePath) || $imagePath === '') {
+          $selectedImageTitlesEn[$index] = '';
+        } elseif (array_key_exists($imagePath, $photoTitlesEnByPath)) {
+          $selectedImageTitlesEn[$index] = $photoTitlesEnByPath[$imagePath];
+        }
+      }
+      [$image1TitleEn, $image2TitleEn, $image3TitleEn] = $selectedImageTitlesEn;
       #----------------------------
       # サーバーサイドバリデーション
       #----------------------------
@@ -307,6 +331,17 @@ HTML;
         $value = isset($_POST[$fieldName]) ? trim($_POST[$fieldName]) : '';
         if ($value === '') {
           $validationErrors[] = $fieldLabel . 'は必須です。';
+        }
+      }
+      if (!is_string($form02_en) || trim($form02_en) === '') {
+        $validationErrors[] = '地図URL(英語)は必須です。';
+      } elseif (!filter_var(trim($form02_en), FILTER_VALIDATE_URL)) {
+        $validationErrors[] = '地図URL(英語)の形式が正しくありません。';
+      }
+      foreach ([$image1TitleEn, $image2TitleEn, $image3TitleEn] as $imageTitleEn) {
+        if (!is_string($imageTitleEn) || mb_strlen($imageTitleEn, 'UTF-8') > 255 || preg_match('/\A[\x20-\x7E\x{00A5}\x{2013}]*\z/uD', $imageTitleEn) !== 1) {
+          $validationErrors[] = '画像タイトル(英語)に使用できない文字が含まれています。';
+          break;
         }
       }
       #地図URL形式チェック（空でない場合のみ）
@@ -348,9 +383,11 @@ HTML;
           $dbCompleteFlg = true;
           #DB登録情報準備
           $mapURLRaw = (!empty($form02)) ? trim($form02) : '';
+          $mapURLEnRaw = trim($form02_en);
           $mapLinkURLRaw = (!empty($form03)) ? trim($form03) : '';
           #URL用：スペース等（半角/全角含むホワイトスペース）を全て削除
           $mapURL = preg_replace('/[\s　]+/u', '', $mapURLRaw);
+          $mapURLEn = preg_replace('/[\s　]+/u', '', $mapURLEnRaw);
           $mapLinkURL = preg_replace('/[\s　]+/u', '', $mapLinkURLRaw);
           switch ($method) {
             #***** 新規登録 *****#
@@ -375,11 +412,15 @@ HTML;
                 $dbFiledData['main_image_path'] = array(':main_image_path', $mainImagePath, 0);
                 $dbFiledData['image_path_1'] = array(':image_path_1', $image1Path, 0);
                 $dbFiledData['image_title_1'] = array(':image_title_1', $image1Title, 0);
+                $dbFiledData['image_title_1_en'] = array(':image_title_1_en', $image1TitleEn, 0);
                 $dbFiledData['image_path_2'] = array(':image_path_2', $image2Path, 0);
                 $dbFiledData['image_title_2'] = array(':image_title_2', $image2Title, 0);
+                $dbFiledData['image_title_2_en'] = array(':image_title_2_en', $image2TitleEn, 0);
                 $dbFiledData['image_path_3'] = array(':image_path_3', $image3Path, 0);
                 $dbFiledData['image_title_3'] = array(':image_title_3', $image3Title, 0);
+                $dbFiledData['image_title_3_en'] = array(':image_title_3_en', $image3TitleEn, 0);
                 $dbFiledData['map_url'] = array(':map_url', $mapURL, 0);
+                $dbFiledData['map_url_en'] = array(':map_url_en', $mapURLEn, 0);
                 $dbFiledData['map_link_url'] = array(':map_link_url', $mapLinkURL, 0);
                 $dbFiledData['created_at'] = array(':created_at', date("Y-m-d H:i:s"), 0);
                 #更新用キー：初期化
@@ -424,11 +465,15 @@ HTML;
                 $dbFiledData['main_image_path'] = array(':main_image_path', $mainImagePath, 0);
                 $dbFiledData['image_path_1'] = array(':image_path_1', $image1Path, 0);
                 $dbFiledData['image_title_1'] = array(':image_title_1', $image1Title, 0);
+                $dbFiledData['image_title_1_en'] = array(':image_title_1_en', $image1TitleEn, 0);
                 $dbFiledData['image_path_2'] = array(':image_path_2', $image2Path, 0);
                 $dbFiledData['image_title_2'] = array(':image_title_2', $image2Title, 0);
+                $dbFiledData['image_title_2_en'] = array(':image_title_2_en', $image2TitleEn, 0);
                 $dbFiledData['image_path_3'] = array(':image_path_3', $image3Path, 0);
                 $dbFiledData['image_title_3'] = array(':image_title_3', $image3Title, 0);
+                $dbFiledData['image_title_3_en'] = array(':image_title_3_en', $image3TitleEn, 0);
                 $dbFiledData['map_url'] = array(':map_url', $mapURL, 0);
+                $dbFiledData['map_url_en'] = array(':map_url_en', $mapURLEn, 0);
                 $dbFiledData['map_link_url'] = array(':map_link_url', $mapLinkURL, 0);
                 $dbFiledData['updated_at'] = array(':updated_at', date("Y-m-d H:i:s"), 0);
                 #更新用キー：初期化

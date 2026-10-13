@@ -74,13 +74,17 @@ try {
 			fwrite(STDERR, 'Preflight failed: shop_id=' . $shopId . PHP_EOL);
 			continue;
 		}
-		if (is_array($settings) && (int)$settings['menu_selection_type'] === 2 && getActiveFoodMenuCountForReservation($shopId) === false) {
-			$summary['failed_shops']++;
-			$exitCode = 1;
-			fwrite(STDERR, 'Menu preflight failed: shop_id=' . $shopId . PHP_EOL);
-			continue;
+		if (is_array($settings) && (int)$settings['menu_selection_type'] === 2) {
+			$menuCountJa = (int)($settings['reservation_enabled'] ?? 0) === 1 ? getActiveFoodMenuCountForReservation($shopId) : 0;
+			$menuCountEn = (int)($settings['reservation_enabled_en'] ?? 0) === 1 ? getActiveEnglishFoodMenuCountForReservation($shopId) : 0;
+			if ($menuCountJa === false || $menuCountEn === false) {
+				$summary['failed_shops']++;
+				$exitCode = 1;
+				fwrite(STDERR, 'Menu preflight failed: shop_id=' . $shopId . PHP_EOL);
+				continue;
+			}
 		}
-		if (isReservationEnabledForShop($shopId) !== true) {
+		if (isReservationEnabledForShopAnyLanguage($shopId) !== true) {
 			$summary['skipped_shops']++;
 			continue;
 		}

@@ -86,6 +86,10 @@ $form04_01 = isset($_POST['form04_01']) ? $_POST['form04_01'] : null;
 $form04_02 = isset($_POST['form04_02']) ? $_POST['form04_02'] : null;
 #住所3
 $form04_03 = isset($_POST['form04_03']) ? $_POST['form04_03'] : null;
+#住所1～3（英語）
+$form04_01_en = $_POST['form04_01_en'] ?? null;
+$form04_02_en = $_POST['form04_02_en'] ?? null;
+$form04_03_en = $_POST['form04_03_en'] ?? null;
 #電話番号
 $form05 = isset($_POST['form05']) ? $_POST['form05'] : null;
 #FAX番号
@@ -105,6 +109,7 @@ $form08_01_close_hour = isset($_POST['form08_01_close_hour']) ? $_POST['form08_0
 $form08_01_close_minute = isset($_POST['form08_01_close_minute']) ? $_POST['form08_01_close_minute'] : null;
 #ランチ備考
 $form08_01_note = isset($_POST['form08_01_note']) ? $_POST['form08_01_note'] : null;
+$form08_01_note_en = $_POST['form08_01_note_en'] ?? null;
 #ディナー営業開始
 $form08_02_open_hour = isset($_POST['form08_02_open_hour']) ? $_POST['form08_02_open_hour'] : null;
 $form08_02_open_minute = isset($_POST['form08_02_open_minute']) ? $_POST['form08_02_open_minute'] : null;
@@ -113,9 +118,11 @@ $form08_02_close_hour = isset($_POST['form08_02_close_hour']) ? $_POST['form08_0
 $form08_02_close_minute = isset($_POST['form08_02_close_minute']) ? $_POST['form08_02_close_minute'] : null;
 #ディナー備考
 $form08_02_note = isset($_POST['form08_02_note']) ? $_POST['form08_02_note'] : null;
+$form08_02_note_en = $_POST['form08_02_note_en'] ?? null;
 #店休日
 #表示用
 $form09 = isset($_POST['form09']) ? $_POST['form09'] : null;
+$form09_en = $_POST['form09_en'] ?? null;
 #システム用
 $form10 = isset($_POST['form10']) ? $_POST['form10'] : array();
 #-------------#
@@ -170,6 +177,21 @@ switch ($action) {
           $validationErrors[] = $fieldLabel . 'は必須です。';
         }
       }
+      foreach (['form04_01_en' => '住所1 (英語)', 'form04_02_en' => '住所2 (英語)', 'form04_03_en' => '住所3 (英語)'] as $field => $label) {
+        $value = $_POST[$field] ?? null;
+        if (!is_string($value)) {
+          $validationErrors[] = $label . 'の値が不正です。';
+          continue;
+        }
+        if ($field === 'form04_01_en' && trim($value) === '') {
+          $validationErrors[] = $label . 'は必須です。';
+        }
+        if (mb_strlen($value, 'UTF-8') > 255) {
+          $validationErrors[] = $label . 'は255文字以内で入力してください。';
+        } elseif (preg_match('/\A[\x20-\x7E\x{00A5}\x{2013}]*\z/uD', $value) !== 1) {
+          $validationErrors[] = $label . 'に使用できない文字が含まれています。';
+        }
+      }
       #メールアドレス形式チェック
       if (!empty($form06) && !filter_var($form06, FILTER_VALIDATE_EMAIL)) {
         $validationErrors[] = 'メールアドレスの形式が正しくありません。';
@@ -177,6 +199,38 @@ switch ($action) {
       #オフィシャルサイトURL形式チェック（空でない場合のみ）
       if (!empty($form07) && !filter_var($form07, FILTER_VALIDATE_URL)) {
         $validationErrors[] = 'オフィシャルサイトURLの形式が正しくありません。';
+      }
+      foreach (['form08_01_note_en' => 'ランチ英語備考', 'form08_02_note_en' => 'ディナー英語備考', 'form09_en' => '英語の店休日'] as $field => $label) {
+        $value = $_POST[$field] ?? null;
+        $pattern = $field === 'form09_en'
+          ? '/\A[\x20-\x7E\x{00A5}\x{2013}\r\n]*\z/uD'
+          : '/\A[\x20-\x7E\x{00A5}\x{2013}]*\z/uD';
+        if (!is_string($value) || strlen($value) > 65535 || preg_match($pattern, $value) !== 1) {
+          $validationErrors[] = $label . 'に使用できない文字が含まれています。';
+        }
+      }
+      foreach (['form08_01' => $form08_01_note_en, 'form08_02' => $form08_02_note_en] as $prefix => $noteEn) {
+        $openHour = $_POST[$prefix . '_open_hour'] ?? null;
+        $openMinute = $_POST[$prefix . '_open_minute'] ?? null;
+        $closeHour = $_POST[$prefix . '_close_hour'] ?? null;
+        $closeMinute = $_POST[$prefix . '_close_minute'] ?? null;
+        foreach ([[$openHour, $shopOpenHourList], [$openMinute, $shopMinuteList], [$closeHour, $shopCloseHourList], [$closeMinute, $shopMinuteList]] as [$part, $allowed]) {
+          if (!is_string($part) || ($part !== '' && !isset($allowed[$part]))) {
+            $validationErrors[] = '営業時間の値が不正です。';
+            break;
+          }
+        }
+        $openAny = ($openHour !== null && $openHour !== '') || ($openMinute !== null && $openMinute !== '');
+        $closeAny = ($closeHour !== null && $closeHour !== '') || ($closeMinute !== null && $closeMinute !== '');
+        $openComplete = ($openHour !== null && $openHour !== '') && ($openMinute !== null && $openMinute !== '');
+        $closeComplete = ($closeHour !== null && $closeHour !== '') && ($closeMinute !== null && $closeMinute !== '');
+        if (($openAny && !$openComplete) || ($closeComplete && !$openComplete)) {
+          $validationErrors[] = 'OPEN時間が入力されていません。';
+        } elseif (($closeAny && !$closeComplete) || ($openComplete && !$closeComplete)) {
+          $validationErrors[] = 'CLOSE時間が入力されていません。';
+        } elseif (is_string($noteEn) && trim($noteEn) !== '' && !$openComplete) {
+          $validationErrors[] = '英語の営業時間が未入力です。';
+        }
       }
       #店休日（システム用）の正規化（0-6の数値配列にする）
       $normalizedClosedWeekdays = [];
@@ -295,6 +349,9 @@ switch ($action) {
                 $dbFiledData['address1'] = array(':address1', $form04_01, 0);
                 $dbFiledData['address2'] = array(':address2', $form04_02, 0);
                 $dbFiledData['address3'] = array(':address3', $form04_03, 0);
+                $dbFiledData['address1_en'] = array(':address1_en', trim($form04_01_en), 0);
+                $dbFiledData['address2_en'] = array(':address2_en', trim($form04_02_en) === '' ? null : trim($form04_02_en), trim($form04_02_en) === '' ? 2 : 0);
+                $dbFiledData['address3_en'] = array(':address3_en', trim($form04_03_en) === '' ? null : trim($form04_03_en), trim($form04_03_en) === '' ? 2 : 0);
                 $dbFiledData['tel'] = array(':tel', $phone, 0);
                 $dbFiledData['fax'] = array(':fax', $fax, 0);
                 $dbFiledData['email'] = array(':email', $form06, 0);
@@ -303,11 +360,14 @@ switch ($action) {
                 $dbFiledData['lunch_open_time'] = array(':lunch_open_time', $lunchOpenTime, 1);
                 $dbFiledData['lunch_close_time'] = array(':lunch_close_time', $lunchCloseTime, 1);
                 $dbFiledData['lunch_note'] = array(':lunch_note', $form08_01_note, 1);
+                $dbFiledData['lunch_note_en'] = array(':lunch_note_en', trim($form08_01_note_en) === '' ? null : $form08_01_note_en, trim($form08_01_note_en) === '' ? 2 : 0);
                 $dbFiledData['dinner_open_time'] = array(':dinner_open_time', $dinnerOpenTime, 1);
                 $dbFiledData['dinner_close_time'] = array(':dinner_close_time', $dinnerCloseTime, 1);
                 $dbFiledData['dinner_note'] = array(':dinner_note', $form08_02_note, 1);
+                $dbFiledData['dinner_note_en'] = array(':dinner_note_en', trim($form08_02_note_en) === '' ? null : $form08_02_note_en, trim($form08_02_note_en) === '' ? 2 : 0);
                 $dbFiledData['business_hours_types'] = array(':business_hours_types', $businessHoursTypes, $businessHoursTypesBindType);
                 $dbFiledData['regular_holiday_display'] = array(':regular_holiday_display', $form09, 0);
+                $dbFiledData['regular_holiday_display_en'] = array(':regular_holiday_display_en', trim($form09_en) === '' ? null : $form09_en, trim($form09_en) === '' ? 2 : 0);
                 $dbFiledData['closed_weekdays'] = array(':closed_weekdays', $closedWeekdays, 0);
                 $dbFiledData['created_at'] = array(':created_at', date("Y-m-d H:i:s"), 0);
                 #更新用キー：初期化
@@ -406,7 +466,7 @@ switch ($action) {
                   break;
                 }
                 $previousClosedWeekdays = normalizeRegularHolidays($previousReservationShop['closed_weekdays'] ?? null);
-                $reservationWasEnabled = isReservationEnabledForShop($shopId);
+                $reservationWasEnabled = isReservationEnabledForShopAnyLanguage($shopId);
                 #登録用配列：初期化
                 $dbFiledData = array();
                 #登録情報セット
@@ -419,6 +479,9 @@ switch ($action) {
                 $dbFiledData['address1'] = array(':address1', $form04_01, 0);
                 $dbFiledData['address2'] = array(':address2', $form04_02, 0);
                 $dbFiledData['address3'] = array(':address3', $form04_03, 0);
+                $dbFiledData['address1_en'] = array(':address1_en', trim($form04_01_en), 0);
+                $dbFiledData['address2_en'] = array(':address2_en', trim($form04_02_en) === '' ? null : trim($form04_02_en), trim($form04_02_en) === '' ? 2 : 0);
+                $dbFiledData['address3_en'] = array(':address3_en', trim($form04_03_en) === '' ? null : trim($form04_03_en), trim($form04_03_en) === '' ? 2 : 0);
                 $dbFiledData['tel'] = array(':tel', $phone, 0);
                 $dbFiledData['fax'] = array(':fax', $fax, 0);
                 $dbFiledData['email'] = array(':email', $form06, 0);
@@ -427,11 +490,14 @@ switch ($action) {
                 $dbFiledData['lunch_open_time'] = array(':lunch_open_time', $lunchOpenTime, 1);
                 $dbFiledData['lunch_close_time'] = array(':lunch_close_time', $lunchCloseTime, 1);
                 $dbFiledData['lunch_note'] = array(':lunch_note', $form08_01_note, 1);
+                $dbFiledData['lunch_note_en'] = array(':lunch_note_en', trim($form08_01_note_en) === '' ? null : $form08_01_note_en, trim($form08_01_note_en) === '' ? 2 : 0);
                 $dbFiledData['dinner_open_time'] = array(':dinner_open_time', $dinnerOpenTime, 1);
                 $dbFiledData['dinner_close_time'] = array(':dinner_close_time', $dinnerCloseTime, 1);
                 $dbFiledData['dinner_note'] = array(':dinner_note', $form08_02_note, 1);
+                $dbFiledData['dinner_note_en'] = array(':dinner_note_en', trim($form08_02_note_en) === '' ? null : $form08_02_note_en, trim($form08_02_note_en) === '' ? 2 : 0);
                 $dbFiledData['business_hours_types'] = array(':business_hours_types', $businessHoursTypes, $businessHoursTypesBindType);
                 $dbFiledData['regular_holiday_display'] = array(':regular_holiday_display', $form09, 0);
+                $dbFiledData['regular_holiday_display_en'] = array(':regular_holiday_display_en', trim($form09_en) === '' ? null : $form09_en, trim($form09_en) === '' ? 2 : 0);
                 $dbFiledData['closed_weekdays'] = array(':closed_weekdays', $closedWeekdays, 0);
                 $dbFiledData['updated_at'] = array(':updated_at', date("Y-m-d H:i:s"), 0);
                 #更新用キー：初期化

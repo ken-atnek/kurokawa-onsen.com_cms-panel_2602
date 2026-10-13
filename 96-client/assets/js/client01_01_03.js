@@ -31,6 +31,34 @@ function showImageSelectError(list) {
 }
 
 /**
+ * おすすめ商品3枠の英語タイトル・説明・価格の相関を検証する
+ *  不正値は既存モーダルで通知して送信を止める
+ */
+function validateRecommendedEnglish(form) {
+    for (let slot = 1; slot <= 3; slot++) {
+        const field = (key) => form.querySelector(`[name="item[recommended][${slot}][${key}]"]`)?.value ?? "";
+        const title = field("title_en");
+        const description = field("description_en");
+        const price = field("price_en");
+        let message = "";
+        if (/[^\x20-\x7E¥–]/u.test(title) || /[^\x20-\x7E¥–\r\n]/u.test(description) || Array.from(title).length > 255 || new TextEncoder().encode(description).length > 65535) {
+            message = "英語のタイトル・説明に使用できない文字が含まれています。";
+        } else if (price !== "" && (!/^(?:0|[1-9][0-9]*)$/.test(price) || Number(price) > 4294967295)) {
+            message = "英語価格は半角数字の整数で入力してください。";
+        } else if (!title.trim() && (description.trim() || price !== "")) {
+            message = "英語のタイトルは必須です。";
+        } else if (title.trim() && !description.trim()) {
+            message = "英語の商品説明は必須です。";
+        }
+        if (message) {
+            showImageSelectError({ title: "入力エラー", msg: `おすすめ商品${slot}：${message}` });
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
  * 送信
  *
  */
@@ -50,6 +78,7 @@ async function sendInput() {
         errFlag = 1;
     }
     if (errFlag === 0) {
+        if (!validateRecommendedEnglish(validationForm)) return;
         isSending = true;
         const submitButton = validationForm.querySelector(".btn-submit");
         if (submitButton) submitButton.disabled = true;

@@ -118,7 +118,7 @@ if ($reservationDetailEditAvailable === true) {
   if ($reservationDetailMenuSelectionType === null) {
     $reservationDetailEditAvailable = false;
   } elseif ($reservationDetailMenuSelectionType !== 0) {
-    $reservationDetailActiveMenuRows = getActiveFoodMenusForReservationForm($shopId);
+    $reservationDetailActiveMenuRows = getActiveFoodMenusForReservationForm($shopId, $reservationDetail['reservation_site_language']);
     if (is_array($reservationDetailActiveMenuRows) === false) {
       $reservationDetailActiveMenuRows = [];
       $reservationDetailEditAvailable = false;
@@ -131,10 +131,13 @@ if ($reservationDetailEditAvailable === true) {
   foreach ($reservationDetailActiveMenuRows as $activeMenuRow) {
     $activeMenuId = normalizeReservationDetailEditInteger($activeMenuRow['id'] ?? null, 1, null);
     $activeMenuName = $activeMenuRow['menu_name'] ?? null;
+    $activeMenuNameJa = $activeMenuRow['menu_name_ja'] ?? null;
     if (
       $activeMenuId === null ||
       is_string($activeMenuName) === false ||
       reservationDetailEditBlankResult($activeMenuName) !== false ||
+      is_string($activeMenuNameJa) === false ||
+      reservationDetailEditBlankResult($activeMenuNameJa) !== false ||
       isset($activeMenuIds[$activeMenuId]) === true
     ) {
       $reservationDetailEditAvailable = false;
@@ -144,6 +147,7 @@ if ($reservationDetailEditAvailable === true) {
     $normalizedActiveMenuRows[] = [
       'id' => $activeMenuId,
       'menu_name' => $activeMenuName,
+      'menu_name_ja' => $activeMenuNameJa,
     ];
   }
   $reservationDetailActiveMenuRows = $normalizedActiveMenuRows;
@@ -182,6 +186,7 @@ if ($reservationDetailHasError === true) {
   $updatedAtLabel = clientReservationDetailReadDateTimeLabel($reservationDetail['updated_at']);
   $cancelledAtLabel = clientReservationDetailReadDateTimeLabel($reservationDetail['cancelled_at'], true);
   $reservationRouteLabel = clientReservationReadRouteLabel($reservationDetail['reservation_route']);
+  $reservationSiteLabel = ['ja' => '日本語', 'en' => '英語'][$reservationDetail['reservation_site_language'] ?? ''] ?? '不明';
   $reservationStatusLabel = clientReservationReadStatusLabel($reservationDetail['status']);
   if (
     $reservationDateLabel === null ||
@@ -236,8 +241,10 @@ if ($reservationDetailHasError === true) {
     $partySizeHtml = (int)$reservationDetail['party_size'];
     $menuLabelHtml = clientReservationReadEscape($menuLabel);
     $accommodationNameHtml = clientReservationReadEscape($reservationDetail['accommodation_name'] ?? '');
-    $customerNoteHtml = clientReservationReadEscape($reservationDetail['customer_note'] ?? '');
+    $customerChildrenNoteHtml = clientReservationReadEscape($reservationDetail['customer_children_note'] ?? '');
+    $customerRequestNoteHtml = clientReservationReadEscape($reservationDetail['customer_request_note'] ?? '');
     $reservationStatusHtml = clientReservationReadEscape($reservationStatusLabel);
+    $reservationSiteHtml = clientReservationReadEscape($reservationSiteLabel);
     $shopMemoHtml = clientReservationReadEscape($reservationDetail['shop_memo'] ?? '');
     $noUpDateKeyHtml = clientReservationReadEscape($noUpDateKey);
     $csrfTokenHtml = clientReservationReadEscape($csrfToken);
@@ -245,8 +252,16 @@ if ($reservationDetailHasError === true) {
       ? clientReservationReadEscape($reservationDetailEditVersion)
       : '';
     $reservationDetailEditControlDisabled = $reservationDetailEditAvailable === true ? '' : ' disabled';
+    $customerKanaControlHtml = ($reservationDetail['reservation_site_language'] ?? 'ja') === 'en'
+      ? '<div hidden><input type="hidden" name="customerKana" value="' . $customerKanaHtml . '"></div>'
+      : <<<HTML
+              <div>
+                <dt>ふりがな</dt>
+                <dd><input type="text" name="customerKana" value="{$customerKanaHtml}" maxlength="101" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
+              </div>
+HTML;
     $reservationDetailEditFormAttributes = $reservationDetailEditAvailable === true
-      ? ' data-reservation-detail-edit-form data-menu-selection-type="' . $reservationDetailMenuSelectionType . '"'
+      ? ' data-reservation-detail-edit-form data-menu-selection-type="' . $reservationDetailMenuSelectionType . '" data-reservation-site-language="' . (($reservationDetail['reservation_site_language'] ?? 'ja') === 'en' ? 'en' : 'ja') . '"'
       : '';
     $reservationDetailEditMetadataHtml = $reservationDetailEditAvailable === true
       ? <<<HTML
@@ -495,13 +510,14 @@ HTML;
             <h3>お客様情報</h3>
             <dl>
               <div>
+                <dt>予約サイト</dt>
+                <dd><span>{$reservationSiteHtml}</span></dd>
+              </div>
+              <div>
                 <dt>お客様名</dt>
                 <dd><input type="text" name="customerName" value="{$customerNameHtml}" maxlength="101" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
               </div>
-              <div>
-                <dt>ふりがな</dt>
-                <dd><input type="text" name="customerKana" value="{$customerKanaHtml}" maxlength="101" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
-              </div>
+              {$customerKanaControlHtml}
               <div>
                 <dt>電話番号</dt>
                 <dd><input type="text" name="customerTel" value="{$customerTelHtml}" maxlength="20" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
@@ -528,8 +544,12 @@ HTML;
                 <dd><input type="text" name="accommodationName" value="{$accommodationNameHtml}" maxlength="100" data-reservation-detail-field{$reservationDetailEditControlDisabled}></dd>
               </div>
               <div>
-                <dt class="position-top">備考 / ご要望</dt>
-                <dd><textarea name="reservationNote" data-reservation-detail-field{$reservationDetailEditControlDisabled}>{$customerNoteHtml}</textarea></dd>
+                <dt class="position-top">小学生以下のお子様</dt>
+                <dd><textarea name="childrenNote" data-reservation-detail-field{$reservationDetailEditControlDisabled}>{$customerChildrenNoteHtml}</textarea></dd>
+              </div>
+              <div>
+                <dt class="position-top">ご要望・アレルギー等</dt>
+                <dd><textarea name="reservationNote" data-reservation-detail-field{$reservationDetailEditControlDisabled}>{$customerRequestNoteHtml}</textarea></dd>
               </div>
             </dl>
           </article>
@@ -620,7 +640,7 @@ print <<<HTML
     </div>
   </article>
   <script src="../assets/js/common.js?v=20260919-1" defer></script>
-  <script src="./assets/js/client04_05_01.js?38181610102026" defer></script>
+  <script src="./assets/js/client04_05_01.js?18142113102026" defer></script>
   <script src="./assets/js/client04_05_01_status.js" defer></script>
 </body>
 </html>

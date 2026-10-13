@@ -82,7 +82,7 @@ print <<<HTML
   <link rel="icon" type="image/svg+xml" href="../assets/images/favicon/favicon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon/apple-touch-icon.png">
   <link rel="shortcut icon" href="../assets/images/favicon/favicon.ico">
-  <link rel="stylesheet" href="../assets/css/client04-03.css">
+  <link rel="stylesheet" href="../assets/css/client04-03.css?52262013102026">
 </head>
 <body>
 
@@ -113,8 +113,11 @@ if (!$pageReady) {
   $idHtml = $edit ? foodMenuFormHtml($menu['id']) : '';
   $versionHtml = $edit ? foodMenuFormHtml($menuVersion) : '';
   $nameHtml = $edit ? foodMenuFormHtml($menu['menu_name']) : '';
+  $nameEnHtml = $edit ? foodMenuFormHtml($menu['menu_name_en'] ?? '') : '';
   $priceHtml = $edit ? foodMenuFormHtml($menu['price']) : '';
+  $priceEnHtml = $edit ? foodMenuFormHtml($menu['price_en'] ?? '') : '';
   $descriptionHtml = $edit ? foodMenuFormHtml($menu['description'] ?? '') : '';
+  $descriptionEnHtml = $edit ? foodMenuFormHtml($menu['description_en'] ?? '') : '';
   $unlimitedChecked = !$edit || $menu['period_type'] === 1 ? ' checked' : '';
   $customChecked = $edit && $menu['period_type'] === 2 ? ' checked' : '';
   $startHtml = $edit && $menu['period_type'] === 2 ? foodMenuFormHtml($menu['period_start'] ?? '') : '';
@@ -137,8 +140,22 @@ if (!$pageReady) {
         <input type="hidden" name="menuVersion" value="{$versionHtml}">
         <h3>メニュー情報</h3>
         <dl>
-          <div class="box-name"><dt class="is-required">メニュー名</dt><dd><input type="text" name="menuName" value="{$nameHtml}" maxlength="100" required></dd></div>
-          <div class="box-price"><dt class="is-required">料金</dt><dd><input type="text" name="menuPrice" value="{$priceHtml}" inputmode="numeric" required>円</dd></div>
+          <div class="box-name">
+            <dt class="is-required">メニュー名</dt>
+            <dd><input type="text" name="menuName" value="{$nameHtml}" maxlength="100" required></dd>
+          </div>
+          <div class="box-name">
+            <dt>メニュー名(英語)</dt>
+            <dd><input type="text" name="menuNameEn" value="{$nameEnHtml}" maxlength="100"></dd>
+          </div>
+          <div class="box-price">
+            <dt class="is-required">料金</dt>
+            <dd><input type="text" name="menuPrice" value="{$priceHtml}" inputmode="numeric" required>円</dd>
+          </div>
+          <div class="box-price lang_en">
+            <dt>料金(英語)</dt>
+            <dd>¥<input type="text" name="menuPriceEn" value="{$priceEnHtml}" inputmode="numeric"></dd>
+          </div>
           <div class="box-image"><dt class="position-top is-required">画像</dt><dd>
             <div class="select-image" id="foodMenuDropZone">
               <h4>画像をここにドラッグ＆ドロップ</h4><span>または</span>
@@ -149,7 +166,14 @@ if (!$pageReady) {
             </div>
             <ul id="foodMenuImagePreview">{$imageHtml}</ul>
           </dd></div>
-          <div><dt class="position-top is-required">説明文</dt><dd><textarea name="menuDescription" required>{$descriptionHtml}</textarea></dd></div>
+          <div>
+            <dt class="position-top is-required">説明文</dt>
+            <dd><textarea name="menuDescription" required>{$descriptionHtml}</textarea></dd>
+          </div>
+          <div>
+            <dt class="position-top">説明文(英語)</dt>
+            <dd><textarea name="menuDescriptionEn">{$descriptionEnHtml}</textarea></dd>
+          </div>
           <div class="box-periode"><dt class="position-top is-required">掲載期間</dt><dd>
             <div class="wrap-dd-top"><input type="radio" name="menuPublicationPeriod" id="menuPublicationPeriodUnlimited" value="unlimited"{$unlimitedChecked}><label for="menuPublicationPeriodUnlimited">無期限</label></div>
             <div class="wrap-dd-bottom"><div class="item-check-box"><input type="radio" name="menuPublicationPeriod" id="menuPublicationPeriodCustom" value="custom"{$customChecked}><label for="menuPublicationPeriodCustom">期間を指定する</label></div>
@@ -186,7 +210,7 @@ print <<<HTML
   </article>
   <script src="../assets/js/common.js" defer></script>
   <script src="../assets/js/dropZone.js" defer></script>
-  <script src="./assets/js/client04_03_01.js" defer></script>
+  <script src="./assets/js/client04_03_01.js?28281213102026" defer></script>
 </body>
 </html>
 

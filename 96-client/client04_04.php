@@ -74,6 +74,8 @@ $reservationAddMessage = '';
 $reservationAddGuidancePath = '';
 $reservationAddGuidanceLabel = '';
 $reservationEnabled = null;
+$reservationEnabledEn = null;
+$reservationLanguage = null;
 $menuSelectionType = null;
 $guestMin = null;
 $guestMax = null;
@@ -110,18 +112,29 @@ if ($reservationSettings === false) {
   }
 } else {
   $reservationEnabledRaw = $reservationSettings['reservation_enabled'] ?? null;
+  $reservationEnabledEnRaw = $reservationSettings['reservation_enabled_en'] ?? null;
   $menuSelectionTypeRaw = $reservationSettings['menu_selection_type'] ?? null;
   $guestMinRaw = $reservationSettings['guest_min'] ?? null;
   $guestMaxRaw = $reservationSettings['guest_max'] ?? null;
   $reservationEnabledValid = is_int($reservationEnabledRaw) || (is_string($reservationEnabledRaw) && ctype_digit($reservationEnabledRaw));
+  $reservationEnabledEnValid = is_int($reservationEnabledEnRaw) || (is_string($reservationEnabledEnRaw) && ctype_digit($reservationEnabledEnRaw));
   $menuSelectionTypeValid = is_int($menuSelectionTypeRaw) || (is_string($menuSelectionTypeRaw) && ctype_digit($menuSelectionTypeRaw));
   $guestMinValid = is_int($guestMinRaw) || (is_string($guestMinRaw) && ctype_digit($guestMinRaw));
   $guestMaxValid = is_int($guestMaxRaw) || (is_string($guestMaxRaw) && ctype_digit($guestMaxRaw));
   $reservationEnabled = $reservationEnabledValid ? (int)$reservationEnabledRaw : null;
+  $reservationEnabledEn = $reservationEnabledEnValid ? (int)$reservationEnabledEnRaw : null;
+  $reservationLanguage = resolveManagementReservationLanguage($reservationSettings);
   $menuSelectionType = $menuSelectionTypeValid ? (int)$menuSelectionTypeRaw : null;
   $guestMin = $guestMinValid ? (int)$guestMinRaw : null;
   $guestMax = $guestMaxValid ? (int)$guestMaxRaw : null;
-  if ($reservationEnabled !== 1) {
+  if ($reservationEnabled === null || $reservationEnabledEn === null || !in_array($reservationEnabled, [0, 1], true) || !in_array($reservationEnabledEn, [0, 1], true)) {
+    $reservationAddEnabled = false;
+    if ($reservationAddMessage === '') {
+      $reservationAddMessage = '予約受付の設定が正しくありません。予約基本設定を確認してください。';
+      $reservationAddGuidancePath = './client04_02.php';
+      $reservationAddGuidanceLabel = '予約基本設定を確認する';
+    }
+  } elseif ($reservationLanguage === null) {
     $reservationAddEnabled = false;
     if ($reservationAddMessage === '') {
       $reservationAddMessage = '現在、予約受付は停止中です。';
@@ -153,7 +166,7 @@ if ($reservationSettings === false) {
   }
 }
 if (
-  $reservationEnabled === 1 &&
+  $reservationLanguage !== null &&
   $guestMin !== null &&
   $guestMax !== null &&
   $guestMin >= 1 &&
@@ -163,7 +176,7 @@ if (
   $guestMin <= $guestMax &&
   in_array($menuSelectionType, [1, 2], true)
 ) {
-  $foodMenus = getActiveFoodMenusForReservationForm($shopId);
+  $foodMenus = getActiveFoodMenusForReservationForm($shopId, $reservationLanguage);
   if ($foodMenus === false) {
     $reservationAddEnabled = false;
     $foodMenus = [];
@@ -338,6 +351,7 @@ $reservationAddButtonDisabled = ' disabled aria-disabled="true"';
 $reservationFormControlDisabled = $reservationAddEnabled ? '' : ' disabled';
 $reservationAddFormDisabledClass = $reservationAddEnabled ? '' : ' is-disabled';
 $menuSelectionTypeValue = $menuSelectionType === null ? '' : (string)$menuSelectionType;
+$reservationLanguageValue = $reservationLanguage === null ? '' : $reservationLanguage;
 $guestMinValue = $guestMin === null ? '' : (string)$guestMin;
 $guestMaxValue = $guestMax === null ? '' : (string)$guestMax;
 $reservationPersonInitialLabel = $guestMin === null ? '選択してください' : $guestMin . '名';
@@ -486,9 +500,10 @@ HTML;
 }
 $reservationMenuBlockHtml = '';
 if (in_array($menuSelectionType, [1, 2], true)) {
+  $reservationMenuHeadingHtml = $reservationLanguage === 'en' ? 'ご注文メニュー（英語）' : 'ご注文メニュー';
   $reservationMenuBlockHtml = <<<HTML
                   <div class="item-menu">
-                    <dt>ご注文メニュー</dt>
+                    <dt>{$reservationMenuHeadingHtml}</dt>
                     <dd>
                       <div class="menu-slot-list">
 {$reservationMenuSlotsHtml}                      </div>
@@ -564,6 +579,7 @@ print <<<HTML
                 data-guest-max="{$guestMaxValue}">
                 <input type="hidden" name="noUpDateKey" value="{$noUpDateKeyHtml}">
                 <input type="hidden" name="csrfToken" id="csrfToken" value="{$csrfTokenHtml}">
+                <input type="hidden" name="reservationSiteLanguage" value="{$reservationLanguageValue}">
                 <input type="hidden" name="reservationDate" id="reservationDate" value="{$initialReservationSelectedDateHtml}">
                 <dl>
                   <div>
@@ -640,7 +656,13 @@ print <<<HTML
                     </dd>
                   </div>
                   <div>
-                    <dt class="position-top">備考 / ご要望</dt>
+                    <dt class="position-top">小学生以下のお子様</dt>
+                    <dd>
+                      <textarea name="childrenNote"{$reservationFormControlDisabled}></textarea>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="position-top">ご要望・アレルギー等</dt>
                     <dd>
                       <textarea name="reservationNote"{$reservationFormControlDisabled}></textarea>
                     </dd>
@@ -680,9 +702,9 @@ print <<<HTML
       </div>
     </div>
   </article>
-  <script src="../assets/js/common.js?v=20260919-1" defer></script>
+  <script src="../assets/js/common.js?18142113102026" defer></script>
   <script src="../assets/js/modal.js" defer></script>
-  <script src="./assets/js/client04_04.js?v=20261010-1" defer></script>
+  <script src="./assets/js/client04_04.js?18142113102026" defer></script>
 </body>
 </html>
 

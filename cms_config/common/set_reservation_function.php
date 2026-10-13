@@ -35,6 +35,45 @@ function normalizeReservationCustomerIdentityValue($value)
 }
 
 /**
+ * 予約者の子供情報とご要望から保存用3項目を生成
+ *  空白のみはNULLとし、Web・管理画面で同じ見出しと長さ制限を使用する
+ */
+function buildReservationCustomerNotes($childrenNote, $requestNote, $language = 'ja')
+{
+	if (in_array($language, ['ja', 'en'], true) === false) {
+		return false;
+	}
+	foreach ([$childrenNote, $requestNote] as $value) {
+		if ($value !== null && (is_string($value) === false || preg_match('//u', $value) !== 1 || strlen($value) > 65535)) {
+			return false;
+		}
+	}
+	$childrenBlank = $childrenNote === null ? 1 : preg_match('/\A[\s\p{Z}\x{FEFF}]*\z/uD', $childrenNote);
+	$requestBlank = $requestNote === null ? 1 : preg_match('/\A[\s\p{Z}\x{FEFF}]*\z/uD', $requestNote);
+	if ($childrenBlank === false || $requestBlank === false) {
+		return false;
+	}
+	$childrenNote = $childrenBlank === 1 ? null : $childrenNote;
+	$requestNote = $requestBlank === 1 ? null : $requestNote;
+	$sections = [];
+	if ($childrenNote !== null) {
+		$sections[] = ($language === 'en' ? '[Children of Elementary School Age or Younger]' : '[小学生以下のお子様]') . "\n" . $childrenNote;
+	}
+	if ($requestNote !== null) {
+		$sections[] = ($language === 'en' ? '[Requests / Allergies]' : '[ご要望・アレルギー等]') . "\n" . $requestNote;
+	}
+	$customerNote = empty($sections) === true ? null : implode("\n\n", $sections);
+	if ($customerNote !== null && strlen($customerNote) > 65535) {
+		return false;
+	}
+	return [
+		'customer_children_note' => $childrenNote,
+		'customer_request_note' => $requestNote,
+		'customer_note' => $customerNote,
+	];
+}
+
+/**
  * 定休日曜日配列を正規化
  *  異常値は予約受付安全性を優先して全曜日定休日扱いにする
  */
@@ -119,9 +158,9 @@ function isAllowedReservationStatusTransition($from, $to)
  * 店舗の予約受付利用可否を判定
  *  DB取得は各database helperへ委譲する
  */
-function isReservationEnabledForShop($shopId)
+function isReservationEnabledForShop($shopId, $language = 'ja')
 {
-	if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1) {
+	if ($shopId === null || is_numeric($shopId) === false || (int)$shopId < 1 || !in_array($language, ['ja', 'en'], true)) {
 		return false;
 	}
 	$shopId = (int)$shopId;
@@ -130,6 +169,7 @@ function isReservationEnabledForShop($shopId)
 		function_exists('getReservationShopForOccupancy') === false ||
 		function_exists('getShopReservationSettings') === false ||
 		function_exists('countActiveFoodMenusForReservation') === false ||
+		function_exists('getActiveEnglishFoodMenuCountForReservation') === false ||
 		function_exists('countActiveNormalSeatsForReservation') === false
 	) {
 		return false;
@@ -151,12 +191,18 @@ function isReservationEnabledForShop($shopId)
 	}
 
 	$settings = getShopReservationSettings($shopId);
-	if (empty($settings) === true || (int)($settings['reservation_enabled'] ?? 0) !== 1) {
+	$enabledField = $language === 'en' ? 'reservation_enabled_en' : 'reservation_enabled';
+	if (empty($settings) === true || (int)($settings[$enabledField] ?? 0) !== 1) {
 		return false;
 	}
 
-	if ((int)($settings['menu_selection_type'] ?? 0) === 2 && countActiveFoodMenusForReservation($shopId) < 1) {
-		return false;
+	if ((int)($settings['menu_selection_type'] ?? 0) === 2) {
+		$menuCount = $language === 'en'
+			? getActiveEnglishFoodMenuCountForReservation($shopId)
+			: countActiveFoodMenusForReservation($shopId);
+		if ($menuCount === false || $menuCount < 1) {
+			return false;
+		}
 	}
 
 	if (countActiveNormalSeatsForReservation($shopId) < 1) {
@@ -164,6 +210,32 @@ function isReservationEnabledForShop($shopId)
 	}
 
 	return true;
+}
+
+/**
+ * 日英いずれかの実効受付可否を判定
+ *  共通の店舗一覧と空席JSONの生成候補に使用する
+ */
+function isReservationEnabledForShopAnyLanguage($shopId)
+{
+	return isReservationEnabledForShop($shopId, 'ja') || isReservationEnabledForShop($shopId, 'en');
+}
+
+/**
+ * 管理画面の新規予約へ適用する言語を決定
+ *  両方ONなら日本語を優先し、設定不正または両方OFFならnullを返す
+ */
+function resolveManagementReservationLanguage($settings)
+{
+	if (is_array($settings) === false) {
+		return null;
+	}
+	$enabledJa = normalizeReservationRegistrationInteger($settings['reservation_enabled'] ?? null, 0, 1);
+	$enabledEn = normalizeReservationRegistrationInteger($settings['reservation_enabled_en'] ?? null, 0, 1);
+	if ($enabledJa === null || $enabledEn === null) {
+		return null;
+	}
+	return $enabledJa === 1 ? 'ja' : ($enabledEn === 1 ? 'en' : null);
 }
 
 /**
@@ -964,7 +1036,8 @@ function executeReservationRegistration($shopId = null, $reservationData = [], $
 	$reservationDate = $reservationData['reservation_date'] ?? null;
 	$partySize = normalizeReservationRegistrationInteger($reservationData['party_size'] ?? null, 1, 4);
 	$reservationRoute = normalizeReservationRegistrationInteger($reservationData['reservation_route'] ?? null, 1, 3);
-	if ($shopId === null || isReservationDateString($reservationDate) === false || $partySize === null || $reservationRoute === null) {
+	$reservationLanguage = $reservationData['reservation_site_language'] ?? 'ja';
+	if ($shopId === null || isReservationDateString($reservationDate) === false || $partySize === null || $reservationRoute === null || !in_array($reservationLanguage, ['ja', 'en'], true)) {
 		return makeReservationRegistrationResult(false, null, 'invalid_input');
 	}
 	foreach (['customer_name', 'customer_kana', 'customer_tel'] as $requiredKey) {
@@ -990,6 +1063,17 @@ function executeReservationRegistration($shopId = null, $reservationData = [], $
 		return makeReservationRegistrationResult(false, null, 'invalid_input');
 	}
 	$reservationData['customer_nationality_code'] = $nationalityCode;
+	$childrenNotePresent = array_key_exists('customer_children_note', $reservationData);
+	$requestNotePresent = array_key_exists('customer_request_note', $reservationData);
+	if ($childrenNotePresent === false || $requestNotePresent === false) {
+		return makeReservationRegistrationResult(false, null, 'invalid_input');
+	}
+	$noteLanguage = $reservationRoute === 1 ? $reservationLanguage : 'ja';
+	$notes = buildReservationCustomerNotes($reservationData['customer_children_note'], $reservationData['customer_request_note'], $noteLanguage);
+	if ($notes === false || array_key_exists('customer_note', $reservationData) === false || $reservationData['customer_note'] !== $notes['customer_note']) {
+		return makeReservationRegistrationResult(false, null, 'invalid_input');
+	}
+	$reservationData = array_merge($reservationData, $notes);
 	foreach (['getShopReservationSettings', 'checkAndAssignSeat', 'replaceReservationSeats', 'insertReservation', 'insertReservationSeats', 'insertReservationMenus'] as $requiredFunction) {
 		if (function_exists($requiredFunction) === false) {
 			return makeReservationRegistrationResult(false, null, 'invalid_input');
@@ -1020,7 +1104,7 @@ function executeReservationRegistration($shopId = null, $reservationData = [], $
 			return makeReservationRegistrationResult(false, null, 'menu_read_failed');
 		}
 	}
-	$menuSnapshotResult = buildReservationMenuSnapshotRowsForRegistration($shopId, $menuSelectionResult['menu_slots'], $menuRowsById, foodMenuTodayJst());
+	$menuSnapshotResult = buildReservationMenuSnapshotRowsForRegistration($shopId, $menuSelectionResult['menu_slots'], $menuRowsById, foodMenuTodayJst(), $reservationLanguage);
 	if (($menuSnapshotResult['success'] ?? false) !== true) {
 		return makeReservationRegistrationResult(false, null, 'invalid_menu');
 	}
@@ -1124,10 +1208,10 @@ function normalizeReservationMenuSelectionsForRegistration($partySize, $menuSele
  * 予約登録用メニューsnapshot行を生成
  *  最新master行から保存用の名前、価格、税込フラグを作る
  */
-function buildReservationMenuSnapshotRowsForRegistration($shopId, $menuSlots, $menuRowsById, $periodBasisDate = null)
+function buildReservationMenuSnapshotRowsForRegistration($shopId, $menuSlots, $menuRowsById, $periodBasisDate = null, $language = 'ja')
 {
 	$shopId = normalizeReservationRegistrationInteger($shopId, 1, null);
-	if ($shopId === null || isReservationRegistrationListArray($menuSlots) === false || is_array($menuRowsById) === false) {
+	if ($shopId === null || isReservationRegistrationListArray($menuSlots) === false || is_array($menuRowsById) === false || !in_array($language, ['ja', 'en'], true)) {
 		return makeReservationMenuSnapshotResult(false, [], 'invalid_menu');
 	}
 	$periodBasisDate = $periodBasisDate === null ? foodMenuTodayJst() : $periodBasisDate;
@@ -1147,10 +1231,11 @@ function buildReservationMenuSnapshotRowsForRegistration($shopId, $menuSlots, $m
 
 		$menuRow = $menuRowsById[$menuId];
 		$menuShopId = normalizeReservationRegistrationInteger($menuRow['shop_id'] ?? null, 1, null);
-		$menuName = $menuRow['menu_name'] ?? null;
-		$price = normalizeReservationRegistrationInteger($menuRow['price'] ?? null, 0, null);
+		$menuNameJa = $menuRow['menu_name'] ?? null;
+		$menuName = $language === 'en' ? ($menuRow['menu_name_en'] ?? null) : $menuNameJa;
+		$price = normalizeReservationRegistrationInteger($language === 'en' ? ($menuRow['price_en'] ?? null) : ($menuRow['price'] ?? null), 0, null);
 		$taxIncluded = normalizeReservationRegistrationInteger($menuRow['tax_included'] ?? null, 0, 1);
-		if ($menuShopId !== $shopId || is_string($menuName) === false || $price === null || $taxIncluded === null || isFoodMenuAvailableForReservationRegistration($menuRow, $periodBasisDate) === false) {
+		if ($menuShopId !== $shopId || is_string($menuNameJa) === false || is_string($menuName) === false || trim($menuName) === '' || $price === null || $taxIncluded === null || isFoodMenuAvailableForReservationRegistration($menuRow, $periodBasisDate) === false || ($language === 'en' && isFoodMenuEnglishReadyForReservation($menuRow) === false)) {
 			return makeReservationMenuSnapshotResult(false, [], 'invalid_menu');
 		}
 
@@ -1158,6 +1243,7 @@ function buildReservationMenuSnapshotRowsForRegistration($shopId, $menuSlots, $m
 			'guest_no' => $index + 1,
 			'menu_id' => $menuId,
 			'menu_name' => $menuName,
+			'menu_name_ja' => $menuNameJa,
 			'price' => $price,
 			'tax_included' => $taxIncluded,
 		];

@@ -79,11 +79,15 @@ if (empty($shopDetailsData) || $shopDetailsData === null) {
     'main_image_path' => '',
     'image_path_1' => '',
     'image_title_1' => '',
+    'image_title_1_en' => '',
     'image_path_2' => '',
     'image_title_2' => '',
+    'image_title_2_en' => '',
     'image_path_3' => '',
     'image_title_3' => '',
+    'image_title_3_en' => '',
     'map_url' => '',
+    'map_url_en' => '',
     'map_link_url' => '',
   );
 }
@@ -265,6 +269,12 @@ print <<<HTML
                     <textarea name="form02" class="required-item" required>{$shopDetailsDataHtml['map_url']}</textarea>
                   </dd>
                 </div>
+                <div class="box-map">
+                  <dt class="required">地図URL(英語)</dt>
+                  <dd>
+                    <textarea name="form02_en" class="required-item" required>{$shopDetailsDataHtml['map_url_en']}</textarea>
+                  </dd>
+                </div>
                 <div>
                   <dt class="required">地図URL<span>（リンク用）</span></dt>
                   <dd>
@@ -279,10 +289,13 @@ print <<<HTML
             <input type="hidden" name="main_image_path" value="{$shopDetailsDataHtml['main_image_path']}">
             <input type="hidden" name="image_path_1" value="{$shopDetailsDataHtml['image_path_1']}">
             <input type="hidden" name="image_title_1" value="{$shopDetailsDataHtml['image_title_1']}">
+            <input type="hidden" name="image_title_1_en" value="{$shopDetailsDataHtml['image_title_1_en']}">
             <input type="hidden" name="image_path_2" value="{$shopDetailsDataHtml['image_path_2']}">
             <input type="hidden" name="image_title_2" value="{$shopDetailsDataHtml['image_title_2']}">
+            <input type="hidden" name="image_title_2_en" value="{$shopDetailsDataHtml['image_title_2_en']}">
             <input type="hidden" name="image_path_3" value="{$shopDetailsDataHtml['image_path_3']}">
             <input type="hidden" name="image_title_3" value="{$shopDetailsDataHtml['image_title_3']}">
+            <input type="hidden" name="image_title_3_en" value="{$shopDetailsDataHtml['image_title_3_en']}">
             <input type="hidden" name="noUpDateKey" value="{$noUpDateKey}">
             <div class="box-btn">
               <button type="button" class="btn-return" onclick="history.back()">戻る</button>
@@ -342,7 +355,7 @@ print <<<HTML
     <script src="../assets/js/common.js" defer></script>
     <script src="../assets/js/modal.js" defer></script>
     <script src="../assets/js/form.js" defer></script>
-    <script src="./assets/js/client01_01_02.js" defer></script>
+    <script src="./assets/js/client01_01_02.js?2026101301-title-en" defer></script>
   </body>
 </html>
 

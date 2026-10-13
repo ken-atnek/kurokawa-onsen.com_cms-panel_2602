@@ -85,12 +85,15 @@
       reservationRoute: form.querySelector('input[name="reservationRoute"]:checked')?.value ?? "",
       reservationPerson: partySize === null ? "" : String(partySize),
       customerName: getValue(form, '[name="customerName"]'),
-      customerKana: getValue(form, '[name="customerKana"]'),
+      customerKana: form.dataset.reservationSiteLanguage === "en"
+        ? getValue(form, '[name="customerName"]')
+        : getValue(form, '[name="customerKana"]'),
       customerTel: getValue(form, '[name="customerTel"]'),
       customerEmail: getValue(form, '[name="customerEmail"]'),
       customerNationalityCode: getValue(form, '[name="customerNationalityCode"]'),
       reservationMenu: menuValues,
       accommodationName: getValue(form, '[name="accommodationName"]'),
+      childrenNote: getValue(form, '[name="childrenNote"]'),
       reservationNote: getValue(form, '[name="reservationNote"]'),
       shopMemo: getValue(form, '[name="shopMemo"]'),
     };
@@ -223,6 +226,7 @@
       });
     }
     formData.append("accommodationName", values.state.accommodationName);
+    formData.append("childrenNote", values.state.childrenNote);
     formData.append("reservationNote", values.state.reservationNote);
     formData.append("shopMemo", values.state.shopMemo);
     return formData;

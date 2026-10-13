@@ -103,7 +103,7 @@ function isReservationDetailEditPostSyntaxValid($post)
 		'noUpDateKey', 'csrfToken', 'reservationId', 'detailEditVersion',
 		'reservationRoute', 'reservationPerson', 'customerName', 'customerKana',
 		'customerTel', 'customerEmail', 'customerNationalityCode',
-		'reservationMenu', 'accommodationName', 'reservationNote', 'shopMemo',
+		'reservationMenu', 'accommodationName', 'childrenNote', 'reservationNote', 'shopMemo',
 	];
 	$requiredScalarKeys = array_values(array_diff($allowedKeys, ['reservationMenu']));
 	if (is_array($post) === false) {
@@ -159,7 +159,7 @@ function isReservationDetailEditPostSyntaxValid($post)
 		return false;
 	}
 
-	$optionalFields = ['customerEmail', 'accommodationName', 'reservationNote', 'shopMemo'];
+	$optionalFields = ['customerEmail', 'accommodationName', 'childrenNote', 'reservationNote', 'shopMemo'];
 	$optionalValues = [];
 	foreach ($optionalFields as $key) {
 		$optionalValues[$key] = normalizeReservationDetailEditOptionalString($post[$key]);
@@ -169,7 +169,8 @@ function isReservationDetailEditPostSyntaxValid($post)
 	}
 	$email = $optionalValues['customerEmail'];
 	$accommodationName = $optionalValues['accommodationName'];
-	$customerNote = $optionalValues['reservationNote'];
+	$childrenNote = $optionalValues['childrenNote'];
+	$requestNote = $optionalValues['reservationNote'];
 	$shopMemo = $optionalValues['shopMemo'];
 	if ($email !== null && (reservationDetailEditStringLength($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false)) {
 		return false;
@@ -185,7 +186,7 @@ function isReservationDetailEditPostSyntaxValid($post)
 	if ($accommodationName !== null && reservationDetailEditStringLength($accommodationName) > 100) {
 		return false;
 	}
-	if (($customerNote !== null && strlen($customerNote) > 65535) || ($shopMemo !== null && strlen($shopMemo) > 65535)) {
+	if (($childrenNote !== null && strlen($childrenNote) > 65535) || ($requestNote !== null && strlen($requestNote) > 65535) || ($shopMemo !== null && strlen($shopMemo) > 65535)) {
 		return false;
 	}
 	return true;
@@ -205,7 +206,8 @@ function normalizeReservationDetailEditPost($post)
 	$routeMap = ['web' => 1, 'tel' => 2, 'other' => 3];
 	$email = normalizeReservationDetailEditOptionalString($post['customerEmail']);
 	$accommodationName = normalizeReservationDetailEditOptionalString($post['accommodationName']);
-	$customerNote = normalizeReservationDetailEditOptionalString($post['reservationNote']);
+	$childrenNote = normalizeReservationDetailEditOptionalString($post['childrenNote']);
+	$requestNote = normalizeReservationDetailEditOptionalString($post['reservationNote']);
 	$shopMemo = normalizeReservationDetailEditOptionalString($post['shopMemo']);
 	$customerName = normalizeReservationCustomerIdentityValue($post['customerName']);
 	$customerKana = normalizeReservationCustomerIdentityValue($post['customerKana']);
@@ -235,7 +237,9 @@ function normalizeReservationDetailEditPost($post)
 			'customer_email' => $email,
 			'customer_nationality_code' => $post['customerNationalityCode'] === '' ? null : $post['customerNationalityCode'],
 			'accommodation_name' => $accommodationName,
-			'customer_note' => $customerNote,
+			'customer_note' => null,
+			'customer_children_note' => $childrenNote,
+			'customer_request_note' => $requestNote,
 			'shop_memo' => $shopMemo,
 		],
 	];
@@ -325,6 +329,7 @@ function normalizeReservationDetailEditMenuRows($menuRows, $reservationId, $part
 		$menuPrice = normalizeReservationDetailEditInteger($row['menu_price_snapshot'] ?? null, 0, null);
 		$taxIncluded = normalizeReservationDetailEditInteger($row['tax_included_snapshot'] ?? null, 0, 1);
 		$menuName = $row['menu_name_snapshot'] ?? null;
+		$menuNameJa = $row['menu_name_snapshot_ja'] ?? null;
 		if (
 			$rowReservationId !== $reservationId ||
 			$guestNo === null ||
@@ -333,6 +338,7 @@ function normalizeReservationDetailEditMenuRows($menuRows, $reservationId, $part
 			$taxIncluded === null ||
 			is_string($menuName) === false ||
 			reservationDetailEditBlankResult($menuName) !== false ||
+			($menuNameJa !== null && is_string($menuNameJa) === false) ||
 			isset($guestNos[$guestNo]) === true
 		) {
 			return false;
@@ -343,6 +349,7 @@ function normalizeReservationDetailEditMenuRows($menuRows, $reservationId, $part
 			'guest_no' => $guestNo,
 			'menu_id' => $menuId,
 			'menu_name_snapshot' => $menuName,
+			'menu_name_snapshot_ja' => $menuNameJa,
 			'menu_price_snapshot' => $menuPrice,
 			'tax_included_snapshot' => $taxIncluded,
 		];
@@ -365,15 +372,16 @@ function buildReservationDetailEditCanonicalState($reservation, $menuRows, $menu
 	$reservationId = normalizeReservationDetailEditInteger($reservation['id'] ?? null, 1, null);
 	$shopId = normalizeReservationDetailEditInteger($reservation['shop_id'] ?? null, 1, null);
 	$reservationRoute = normalizeReservationDetailEditInteger($reservation['reservation_route'] ?? null, 1, 3);
+	$reservationLanguage = $reservation['reservation_site_language'] ?? null;
 	$partySize = normalizeReservationDetailEditInteger($reservation['party_size'] ?? null, 1, 4);
 	$status = normalizeReservationDetailEditInteger($reservation['status'] ?? null, 1, 4);
 	$menuSelectionType = normalizeReservationDetailEditInteger($menuSelectionType, 0, 2);
-	if ($reservationId === null || $shopId === null || $reservationRoute === null || $partySize === null || $status === null || $menuSelectionType === null) {
+	if ($reservationId === null || $shopId === null || $reservationRoute === null || !in_array($reservationLanguage, ['ja', 'en'], true) || $partySize === null || $status === null || $menuSelectionType === null) {
 		return false;
 	}
 
 	$requiredStrings = ['customer_name', 'customer_kana', 'customer_tel'];
-	$nullableStrings = ['customer_email', 'accommodation_name', 'customer_note', 'shop_memo'];
+	$nullableStrings = ['customer_email', 'accommodation_name', 'customer_note', 'customer_children_note', 'customer_request_note', 'shop_memo'];
 	foreach ($requiredStrings as $key) {
 		if (array_key_exists($key, $reservation) === false || reservationDetailEditStringLength($reservation[$key]) === null) {
 			return false;
@@ -419,6 +427,7 @@ function buildReservationDetailEditCanonicalState($reservation, $menuRows, $menu
 			'guest_no' => $row['guest_no'],
 			'menu_id' => $row['menu_id'],
 			'menu_name_snapshot' => $row['menu_name_snapshot'],
+			'menu_name_snapshot_ja' => $row['menu_name_snapshot_ja'],
 			'menu_price_snapshot' => $row['menu_price_snapshot'],
 			'tax_included_snapshot' => $row['tax_included_snapshot'],
 		];
@@ -429,6 +438,7 @@ function buildReservationDetailEditCanonicalState($reservation, $menuRows, $menu
 			'id' => $reservationId,
 			'shop_id' => $shopId,
 			'reservation_route' => $reservationRoute,
+			'reservation_site_language' => $reservationLanguage,
 			'party_size' => $partySize,
 			'customer_name' => $reservation['customer_name'],
 			'customer_kana' => $reservation['customer_kana'],
@@ -437,6 +447,8 @@ function buildReservationDetailEditCanonicalState($reservation, $menuRows, $menu
 			'customer_nationality_code' => $nationalityCode,
 			'accommodation_name' => $reservation['accommodation_name'],
 			'customer_note' => $reservation['customer_note'],
+			'customer_children_note' => $reservation['customer_children_note'],
+			'customer_request_note' => $reservation['customer_request_note'],
 			'shop_memo' => $reservation['shop_memo'],
 			'status' => $status,
 			'cancelled_at' => $cancelledAt,
@@ -471,7 +483,7 @@ function buildReservationDetailEditReservationChanges($freshReservation, $reques
 	$allowedColumns = [
 		'reservation_route', 'party_size', 'customer_name', 'customer_kana',
 		'customer_tel', 'customer_email', 'customer_nationality_code',
-		'accommodation_name', 'customer_note', 'shop_memo',
+		'accommodation_name', 'customer_note', 'customer_children_note', 'customer_request_note', 'shop_memo',
 	];
 	if (is_array($freshReservation) === false || is_array($requestedReservationData) === false || array_keys($requestedReservationData) !== $allowedColumns) {
 		return false;

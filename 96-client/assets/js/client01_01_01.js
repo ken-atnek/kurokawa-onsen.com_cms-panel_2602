@@ -428,6 +428,7 @@ async function deleteFile_for_checkPage(el, action, type, shopId, folderId, fold
     sFd.append("folderId", folderId);
     sFd.append("folderName", folderName);
     sFd.append("photoName", photoName);
+    sFd.append("photoName_en", document.querySelector("input[name='photoName_en']")?.value ?? "");
     sFd.append("noUpDateKey", noUpDateKey);
     //プレビューでの削除時もアップロードドラフト領域を特定して掃除できるようにする
     sFd.append("up_image_area[]", "photo_image");
@@ -504,6 +505,17 @@ async function editPhotoDetail(el, action, type, shopId, folderId, folderName, p
     }
 }
 /**
+ * 任意の英語画像タイトルの文字種と長さを確認
+ */
+function validateEnglishPhotoTitle(form) {
+    const titleEn = form.querySelector("input[name='photoName_en']")?.value ?? "";
+    if (/[^\x20-\x7E¥–]/u.test(titleEn) || Array.from(titleEn).length > 255) {
+        showModalMessage("画像タイトル(英語)に使用できない文字が含まれています。");
+        return false;
+    }
+    return true;
+}
+/**
  * 写真登録
  *
  */
@@ -511,6 +523,7 @@ async function sendSubmit() {
     if (isAlbumSubmitting) return;
     //送信用フォーム生成
     let addPhoto = document.querySelector("form[name='addPhoto']");
+    if (!validateEnglishPhotoTitle(addPhoto)) return;
     const submitButton = addPhoto.querySelector(".btn_submit");
     let sFd = new FormData(addPhoto);
     isAlbumSubmitting = true;
@@ -535,6 +548,7 @@ async function sendSubmit() {
             document.getElementById("block02").remove();
             document.querySelector(".block_inner h2").insertAdjacentHTML("afterend", list["tag"]);
             document.querySelector("input[name='photoName']").value = "";
+            document.querySelector("input[name='photoName_en']").value = "";
             //再度写真登録ファンクション生成
             restartPhotoFunction();
         }
@@ -570,6 +584,7 @@ async function checkSubmit() {
     }
     //送信用フォーム生成
     let addPhoto = document.querySelector("form[name='addPhoto']");
+    if (!validateEnglishPhotoTitle(addPhoto)) return false;
     const submitButton = addPhoto.querySelector(".btn_submit");
     let sFd = new FormData(addPhoto);
     isAlbumSubmitting = true;

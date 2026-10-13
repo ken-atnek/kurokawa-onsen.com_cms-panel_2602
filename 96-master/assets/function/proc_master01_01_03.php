@@ -68,10 +68,13 @@ $shopId = isset($_POST['shopId']) ? $_POST['shopId'] : null;
 for ($slot = 1; $slot <= $recommendedItemMax; $slot++) {
   #商品タイトル
   ${"title" . $slot} = isset($_POST['item']['recommended'][$slot]['title']) ? $_POST['item']['recommended'][$slot]['title'] : null;
+  ${"titleEn" . $slot} = $_POST['item']['recommended'][$slot]['title_en'] ?? null;
   #価格
   ${"price" . $slot} = isset($_POST['item']['recommended'][$slot]['price']) ? $_POST['item']['recommended'][$slot]['price'] : null;
+  ${"priceEn" . $slot} = $_POST['item']['recommended'][$slot]['price_en'] ?? null;
   #商品説明
   ${"description" . $slot} = isset($_POST['item']['recommended'][$slot]['description']) ? $_POST['item']['recommended'][$slot]['description'] : null;
+  ${"descriptionEn" . $slot} = $_POST['item']['recommended'][$slot]['description_en'] ?? null;
   #画像パス
   ${"imagePath" . $slot} = isset($_POST["image_path{$slot}"]) ? $_POST["image_path{$slot}"] : null;
 }
@@ -276,6 +279,26 @@ HTML;
       if ($requiredImagePath === '') {
         $validationErrors[] = 'メイン写真は必須です。';
       }
+      for ($slot = 1; $slot <= $recommendedItemMax; $slot++) {
+        $titleEn = ${"titleEn" . $slot};
+        $priceEn = ${"priceEn" . $slot};
+        $descriptionEn = ${"descriptionEn" . $slot};
+        if (!is_string($titleEn) || mb_strlen($titleEn, 'UTF-8') > 255 || preg_match('/\A[\x20-\x7E\x{00A5}\x{2013}]*\z/uD', $titleEn) !== 1 ||
+            !is_string($descriptionEn) || strlen($descriptionEn) > 65535 || preg_match('/\A[\x20-\x7E\x{00A5}\x{2013}\r\n]*\z/uD', $descriptionEn) !== 1) {
+          $validationErrors[] = '英語のタイトル・説明に使用できない文字が含まれています。';
+          continue;
+        }
+        if (!is_string($priceEn) || ($priceEn !== '' && (preg_match('/\A(?:0|[1-9][0-9]*)\z/D', $priceEn) !== 1 || (float)$priceEn > 4294967295))) {
+          $validationErrors[] = '英語価格は半角数字の整数で入力してください。';
+        }
+        if (trim($titleEn) === '' && trim($descriptionEn) !== '') {
+          $validationErrors[] = '英語のタイトルは必須です。';
+        } elseif (trim($titleEn) === '' && $priceEn !== '') {
+          $validationErrors[] = '英語のタイトルは必須です。';
+        } elseif (trim($titleEn) !== '' && trim($descriptionEn) === '') {
+          $validationErrors[] = '英語の商品説明は必須です。';
+        }
+      }
       #バリデーションエラーがあれば処理中断
       if (!empty($validationErrors)) {
         $makeTag['status'] = 'error';
@@ -335,20 +358,29 @@ HTML;
             } else {
               for ($slot = 1; $slot <= $recommendedItemMax; $slot++) {
                 $titleRaw = isset(${"title" . $slot}) ? trim((string)${"title" . $slot}) : '';
+                $titleEnRaw = trim((string)${"titleEn" . $slot});
                 $descRaw = isset(${"description" . $slot}) ? trim((string)${"description" . $slot}) : '';
+                $descEnRaw = trim((string)${"descriptionEn" . $slot});
                 $imageRaw = isset(${"imagePath" . $slot}) ? trim((string)${"imagePath" . $slot}) : '';
                 $priceRaw = isset(${"price" . $slot}) ? trim((string)${"price" . $slot}) : '';
+                $priceEnRaw = ${"priceEn" . $slot};
                 $titleVal = ($titleRaw === '') ? null : $titleRaw;
+                $titleEnVal = $titleEnRaw === '' ? null : $titleEnRaw;
                 $descVal = ($descRaw === '') ? null : $descRaw;
+                $descEnVal = $descEnRaw === '' ? null : $descEnRaw;
                 $imageVal = ($imageRaw === '') ? null : $imageRaw;
                 $priceVal = ($priceRaw === '') ? null : (int)$priceRaw;
+                $priceEnVal = $priceEnRaw === '' ? null : (int)$priceEnRaw;
                 $ins = array();
                 $ins['shop_id'] = array(':shop_id', $shopId, 1);
                 $ins['item_type'] = array(':item_type', 'recommended', 0);
                 $ins['slot'] = array(':slot', $slot, 1);
                 $ins['title'] = array(':title', $titleVal, ($titleVal === null ? 2 : 0));
+                $ins['title_en'] = array(':title_en', $titleEnVal, ($titleEnVal === null ? 2 : 0));
                 $ins['description'] = array(':description', $descVal, ($descVal === null ? 2 : 0));
+                $ins['description_en'] = array(':description_en', $descEnVal, ($descEnVal === null ? 2 : 0));
                 $ins['price_yen'] = array(':price_yen', $priceVal, ($priceVal === null ? 2 : 1));
+                $ins['price_yen_en'] = array(':price_yen_en', $priceEnVal, ($priceEnVal === null ? 2 : 1));
                 $ins['image_path'] = array(':image_path', $imageVal, ($imageVal === null ? 2 : 0));
                 $ins['is_active'] = array(':is_active', 1, 1);
                 $insFlg = SQL_Process($DB_CONNECT, 'shop_items', $ins, array(), 1, 2);

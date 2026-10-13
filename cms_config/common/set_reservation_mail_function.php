@@ -27,6 +27,7 @@ function buildReservationMailDateLabels($reservationDate)
 	return [
 		'subject' => $date->format('Y/m/d'),
 		'body' => $date->format('Y年m月d日'),
+		'body_en' => $date->format('F j, Y'),
 	];
 }
 
@@ -125,6 +126,41 @@ function buildReservationMailMenuLines($menuSummary)
 }
 
 /**
+ * 英語Web予約の予約者向け食事メニュー・料金行を生成
+ */
+function buildReservationMailMenuLinesEn($menuSummary)
+{
+	if (is_array($menuSummary) === false || ($menuSummary['is_seat_only'] ?? null) === true) {
+		return [];
+	}
+
+	$lines = ['■ Meal Menu', ''];
+	foreach ($menuSummary['groups'] as $group) {
+		$count = $group['count'];
+		$lines[] = '- ' . $group['name'] . ': ' . $count . ' ' . ($count === 1 ? 'guest' : 'guests');
+	}
+	if ($menuSummary['unselected_count'] > 0) {
+		$count = $menuSummary['unselected_count'];
+		$lines[] = '- No menu selected: ' . $count . ' ' . ($count === 1 ? 'guest' : 'guests');
+	}
+	$lines[] = '';
+	$lines[] = '■ Selected Menu Charges';
+	$lines[] = '';
+	$lines[] = '* Prices shown include service charges and consumption tax.';
+	$lines[] = '* The amounts below are for the meal menus selected when the reservation was made.';
+	$lines[] = '* Additional orders are not included.';
+	$lines[] = '';
+	foreach ($menuSummary['groups'] as $group) {
+		$count = $group['count'];
+		$lines[] = $group['name'];
+		$lines[] = '¥' . number_format($group['price']) . ' × ' . $count . ' ' . ($count === 1 ? 'guest' : 'guests') . ' = ¥' . number_format($group['price'] * $count);
+		$lines[] = '';
+	}
+	$lines[] = 'Total for Selected Menus: ¥' . number_format($menuSummary['total']);
+	return $lines;
+}
+
+/**
  * NULLまたは空文字の備考を「なし」へ変換
  */
 function buildReservationMailMemoText($value)
@@ -212,6 +248,54 @@ function buildReservationCreatedMailMessages($context)
 		'',
 		'────────────────────',
 	]);
+	$customerSubject = '【黒川温泉観光協会】ご予約確認メール（ご予約日：' . $dateLabels['subject'] . '）';
+	if (($reservation['reservation_site_language'] ?? 'ja') === 'en') {
+		$englishShopName = trim((string)($shop['shop_name_en'] ?? ''));
+		if ($englishShopName === '') {
+			$englishShopName = $shop['shop_name'];
+		}
+		$englishMenuLines = buildReservationMailMenuLinesEn($menuSummary);
+		$customerLines = [
+			'Dear ' . $customerName . ',',
+			'',
+			'Thank you for using the Kurokawa Onsen Tourism Association website.',
+			'',
+			'Your reservation has been confirmed as follows.',
+			'Please review the details below.',
+			'',
+			'',
+			'■ Reservation Details',
+			'',
+			'Reservation Number: ' . $reservation['id'],
+			'Reservation Date: ' . $dateLabels['body_en'],
+			'Restaurant: ' . $englishShopName,
+			'',
+			'Name: ' . $customerName,
+			'Phone Number: ' . $reservation['customer_tel'],
+			'Email Address: ' . $reservation['customer_email'],
+			'Number of Guests: ' . number_format($reservation['party_size']),
+		];
+		if (empty($englishMenuLines) === false) {
+			$customerLines[] = '';
+			$customerLines = array_merge($customerLines, $englishMenuLines);
+		}
+		$customerLines = array_merge($customerLines, [
+			'',
+			'■ Notes',
+			'',
+			($reservation['customer_note'] ?? null) === null || $reservation['customer_note'] === '' ? 'None' : $customerNote,
+			'',
+			'',
+			'────────────────────',
+			'',
+			'Kurokawa Onsen Tourism Association',
+			'Becchin-kan, 6595-3 Kurokawa Onsen, Manganji, Minamioguni-machi, Aso-gun, Kumamoto 869-2402, Japan',
+			'TEL: 0967-48-8130',
+			'',
+			'────────────────────',
+		]);
+		$customerSubject = '[Kurokawa Onsen Tourism Association] Reservation Confirmation (Date: ' . $dateLabels['subject'] . ')';
+	}
 
 	$internalLines = [
 		'黒川温泉観光協会ホームページより、新しいご予約が入りました。',
@@ -262,7 +346,7 @@ function buildReservationCreatedMailMessages($context)
 
 	return [
 		'customer' => [
-			'subject' => '【黒川温泉観光協会】ご予約確認メール（ご予約日：' . $dateLabels['subject'] . '）',
+			'subject' => $customerSubject,
 			'body' => implode("\n", $customerLines) . "\n",
 		],
 		'internal' => [
@@ -413,6 +497,7 @@ function sendReservationCreatedNotificationMails($shopId, $reservationId)
 	$fromName = is_string($DEFINE_MAIL_SENDER_NAME ?? null) && $DEFINE_MAIL_SENDER_NAME !== ''
 		? $DEFINE_MAIL_SENDER_NAME
 		: '黒川温泉観光協会';
+	$isEnglishWebReservation = ($reservation['reservation_site_language'] ?? 'ja') === 'en';
 	$senderIsValid = filter_var($fromEmail, FILTER_VALIDATE_EMAIL) !== false;
 	$allLogsSucceeded = true;
 
@@ -436,13 +521,16 @@ function sendReservationCreatedNotificationMails($shopId, $reservationId)
 			$lastError = 'mail_function_unavailable';
 		} else {
 			try {
+				$recipientFromName = $isEnglishWebReservation && in_array($recipient['type'], [1, 4], true)
+					? 'Kurokawa Onsen Tourism Association'
+					: $fromName;
 				$mailResult = sendMail_Common(
 					$recipientAddress,
 					$recipient['name'],
 					$recipient['message']['subject'],
 					$recipient['message']['body'],
 					$fromEmail,
-					$fromName,
+					$recipientFromName,
 					[]
 				);
 				if ($mailResult === true) {

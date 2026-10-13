@@ -205,6 +205,7 @@ function insertReservation($shopId = null, $reservationData = [])
 		$reservationDate = $reservationData['reservation_date'] ?? null;
 		$partySize = $reservationData['party_size'] ?? null;
 		$reservationRoute = $reservationData['reservation_route'] ?? null;
+		$reservationLanguage = $reservationData['reservation_site_language'] ?? 'ja';
 		$status = array_key_exists('status', $reservationData) === true ? $reservationData['status'] : 1;
 
 		if (isReservationDbDateStringForReservations($reservationDate) === false) {
@@ -214,6 +215,9 @@ function insertReservation($shopId = null, $reservationData = [])
 			return false;
 		}
 		if (is_numeric($reservationRoute) === false || is_numeric($status) === false) {
+			return false;
+		}
+		if (!in_array($reservationLanguage, ['ja', 'en'], true)) {
 			return false;
 		}
 		$status = (int)$status;
@@ -238,6 +242,11 @@ function insertReservation($shopId = null, $reservationData = [])
 		$customerEmail = array_key_exists('customer_email', $reservationData) ? $reservationData['customer_email'] : null;
 		$accommodationName = array_key_exists('accommodation_name', $reservationData) ? $reservationData['accommodation_name'] : null;
 		$customerNote = array_key_exists('customer_note', $reservationData) ? $reservationData['customer_note'] : null;
+		$customerChildrenNote = array_key_exists('customer_children_note', $reservationData) ? $reservationData['customer_children_note'] : null;
+		$customerRequestNote = array_key_exists('customer_request_note', $reservationData) ? $reservationData['customer_request_note'] : null;
+		if (($customerChildrenNote !== null && is_string($customerChildrenNote) === false) || ($customerRequestNote !== null && is_string($customerRequestNote) === false)) {
+			return false;
+		}
 		$shopMemo = array_key_exists('shop_memo', $reservationData) ? $reservationData['shop_memo'] : null;
 		$cancelledAt = array_key_exists('cancelled_at', $reservationData) ? $reservationData['cancelled_at'] : null;
 
@@ -260,8 +269,11 @@ function insertReservation($shopId = null, $reservationData = [])
 					customer_email,
 					accommodation_name,
 					customer_note,
+					customer_children_note,
+					customer_request_note,
 					shop_memo,
 					reservation_route,
+					reservation_site_language,
 					status,
 					cancelled_at
 				)
@@ -276,8 +288,11 @@ function insertReservation($shopId = null, $reservationData = [])
 				:customer_email,
 				:accommodation_name,
 				:customer_note,
+				:customer_children_note,
+				:customer_request_note,
 				:shop_memo,
 				:reservation_route,
+				:reservation_site_language,
 				:status,
 				:cancelled_at
 			)
@@ -294,8 +309,11 @@ function insertReservation($shopId = null, $reservationData = [])
 		$newStmt->bindValue(':customer_email', $customerEmail, $customerEmail === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$newStmt->bindValue(':accommodation_name', $accommodationName, $accommodationName === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$newStmt->bindValue(':customer_note', $customerNote, $customerNote === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+		$newStmt->bindValue(':customer_children_note', $customerChildrenNote, $customerChildrenNote === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+		$newStmt->bindValue(':customer_request_note', $customerRequestNote, $customerRequestNote === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$newStmt->bindValue(':shop_memo', $shopMemo, $shopMemo === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$newStmt->bindValue(':reservation_route', (int)$reservationRoute, PDO::PARAM_INT);
+		$newStmt->bindValue(':reservation_site_language', $reservationLanguage, PDO::PARAM_STR);
 		$newStmt->bindValue(':status', $status, PDO::PARAM_INT);
 		$newStmt->bindValue(':cancelled_at', $cancelledAt, $cancelledAt === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		$result = $newStmt->execute();
@@ -454,6 +472,7 @@ function insertReservationMenus($reservationId = null, $shopId = null, $menuRows
 			$guestNo = $row['guest_no'] ?? null;
 			$menuId = $row['menu_id'] ?? null;
 			$menuName = array_key_exists('menu_name', $row) ? $row['menu_name'] : ($row['menu_name_snapshot'] ?? null);
+			$menuNameJa = array_key_exists('menu_name_ja', $row) ? $row['menu_name_ja'] : ($row['menu_name_snapshot_ja'] ?? $menuName);
 			$menuPrice = array_key_exists('price', $row) ? $row['price'] : ($row['menu_price_snapshot'] ?? null);
 			$taxIncluded = array_key_exists('tax_included', $row) ? $row['tax_included'] : ($row['tax_included_snapshot'] ?? 1);
 
@@ -465,6 +484,8 @@ function insertReservationMenus($reservationId = null, $shopId = null, $menuRows
 				(int)$menuId < 1 ||
 				is_string($menuName) === false ||
 				$menuName === '' ||
+				is_string($menuNameJa) === false ||
+				$menuNameJa === '' ||
 				is_numeric($menuPrice) === false ||
 				(int)$menuPrice < 0 ||
 				is_numeric($taxIncluded) === false ||
@@ -481,6 +502,7 @@ function insertReservationMenus($reservationId = null, $shopId = null, $menuRows
 				'guest_no' => $guestNo,
 				'menu_id' => $menuId,
 				'menu_name_snapshot' => $menuName,
+				'menu_name_snapshot_ja' => $menuNameJa,
 				'menu_price_snapshot' => (int)$menuPrice,
 				'tax_included_snapshot' => (int)$taxIncluded === 1 ? 1 : 0,
 			];
@@ -502,6 +524,7 @@ function insertReservationMenus($reservationId = null, $shopId = null, $menuRows
 					guest_no,
 					menu_id,
 					menu_name_snapshot,
+					menu_name_snapshot_ja,
 					menu_price_snapshot,
 					tax_included_snapshot
 				)
@@ -510,6 +533,7 @@ function insertReservationMenus($reservationId = null, $shopId = null, $menuRows
 				:guest_no,
 				:menu_id,
 				:menu_name_snapshot,
+				:menu_name_snapshot_ja,
 				:menu_price_snapshot,
 				:tax_included_snapshot
 			)
@@ -521,6 +545,7 @@ function insertReservationMenus($reservationId = null, $shopId = null, $menuRows
 			$newStmt->bindValue(':guest_no', $row['guest_no'], PDO::PARAM_INT);
 			$newStmt->bindValue(':menu_id', $row['menu_id'], PDO::PARAM_INT);
 			$newStmt->bindValue(':menu_name_snapshot', $row['menu_name_snapshot'], PDO::PARAM_STR);
+			$newStmt->bindValue(':menu_name_snapshot_ja', $row['menu_name_snapshot_ja'], PDO::PARAM_STR);
 			$newStmt->bindValue(':menu_price_snapshot', $row['menu_price_snapshot'], PDO::PARAM_INT);
 			$newStmt->bindValue(':tax_included_snapshot', $row['tax_included_snapshot'], PDO::PARAM_INT);
 			if ($newStmt->execute() !== true) {
@@ -955,6 +980,7 @@ function getReservationDetailEditForWrite($shopId = null, $reservationId = null)
 				id,
 				shop_id,
 				reservation_route,
+				reservation_site_language,
 				reservation_date,
 				party_size,
 				customer_name,
@@ -964,6 +990,8 @@ function getReservationDetailEditForWrite($shopId = null, $reservationId = null)
 				customer_email,
 				accommodation_name,
 				customer_note,
+				customer_children_note,
+				customer_request_note,
 				shop_memo,
 				status,
 				cancelled_at
@@ -990,8 +1018,8 @@ function getReservationDetailEditForWrite($shopId = null, $reservationId = null)
 		$reservation['party_size'] = normalizeReservationDbIntegerForReservations($reservation['party_size'] ?? null, 1, 4);
 		$reservation['status'] = normalizeReservationDbIntegerForReservations($reservation['status'] ?? null, 1, 4);
 		$requiredStrings = ['customer_name', 'customer_kana', 'customer_tel'];
-		$nullableStrings = ['customer_nationality_code', 'customer_email', 'accommodation_name', 'customer_note', 'shop_memo'];
-		if ($reservation['id'] !== $reservationId || $reservation['shop_id'] !== $shopId || $reservation['reservation_route'] === null || isReservationDbDateStringForReservations($reservation['reservation_date'] ?? null) === false || $reservation['party_size'] === null || $reservation['status'] === null) {
+		$nullableStrings = ['customer_nationality_code', 'customer_email', 'accommodation_name', 'customer_note', 'customer_children_note', 'customer_request_note', 'shop_memo'];
+		if ($reservation['id'] !== $reservationId || $reservation['shop_id'] !== $shopId || $reservation['reservation_route'] === null || !in_array($reservation['reservation_site_language'] ?? null, ['ja', 'en'], true) || isReservationDbDateStringForReservations($reservation['reservation_date'] ?? null) === false || $reservation['party_size'] === null || $reservation['status'] === null) {
 			return false;
 		}
 		foreach ($requiredStrings as $column) {
@@ -1034,6 +1062,7 @@ function getReservationDetailEditMenuRowsForWrite($shopId = null, $reservationId
 				rm.guest_no,
 				rm.menu_id,
 				rm.menu_name_snapshot,
+				rm.menu_name_snapshot_ja,
 				rm.menu_price_snapshot,
 				rm.tax_included_snapshot
 			FROM
@@ -1127,6 +1156,8 @@ function updateReservationDetailFields($shopId = null, $reservationId = null, $c
 			'customer_email' => 'nullable_string',
 			'accommodation_name' => 'nullable_string',
 			'customer_note' => 'nullable_string',
+			'customer_children_note' => 'nullable_string',
+			'customer_request_note' => 'nullable_string',
 			'shop_memo' => 'nullable_string',
 		];
 		$setClauses = [];
@@ -1203,6 +1234,7 @@ function updateReservationMenusForDetailEdit($shopId = null, $reservationId = nu
 			SET
 				rm.menu_id = :menu_id,
 				rm.menu_name_snapshot = :menu_name_snapshot,
+				rm.menu_name_snapshot_ja = :menu_name_snapshot_ja,
 				rm.menu_price_snapshot = :menu_price_snapshot,
 				rm.tax_included_snapshot = :tax_included_snapshot
 			WHERE
@@ -1220,15 +1252,17 @@ function updateReservationMenusForDetailEdit($shopId = null, $reservationId = nu
 			$guestNo = normalizeReservationDbIntegerForReservations($row['guest_no'] ?? null, 1, 4);
 			$menuId = normalizeReservationDbIntegerForReservations($row['menu_id'] ?? null, 1, null);
 			$menuName = $row['menu_name'] ?? null;
+			$menuNameJa = $row['menu_name_ja'] ?? null;
 			$menuPrice = normalizeReservationDbIntegerForReservations($row['price'] ?? null, 0, null);
 			$taxIncluded = normalizeReservationDbIntegerForReservations($row['tax_included'] ?? null, 0, 1);
-			if ($guestNo === null || $menuId === null || is_string($menuName) === false || $menuName === '' || $menuPrice === null || $taxIncluded === null || isset($guestNos[$guestNo]) === true) {
+			if ($guestNo === null || $menuId === null || is_string($menuName) === false || $menuName === '' || is_string($menuNameJa) === false || $menuNameJa === '' || $menuPrice === null || $taxIncluded === null || isset($guestNos[$guestNo]) === true) {
 				$newStmt->closeCursor();
 				return false;
 			}
 			$guestNos[$guestNo] = true;
 			$newStmt->bindValue(':menu_id', $menuId, PDO::PARAM_INT);
 			$newStmt->bindValue(':menu_name_snapshot', $menuName, PDO::PARAM_STR);
+			$newStmt->bindValue(':menu_name_snapshot_ja', $menuNameJa, PDO::PARAM_STR);
 			$newStmt->bindValue(':menu_price_snapshot', $menuPrice, PDO::PARAM_INT);
 			$newStmt->bindValue(':tax_included_snapshot', $taxIncluded, PDO::PARAM_INT);
 			$newStmt->bindValue(':reservation_id', $reservationId, PDO::PARAM_INT);

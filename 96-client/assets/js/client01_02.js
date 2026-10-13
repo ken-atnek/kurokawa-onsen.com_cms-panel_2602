@@ -7,6 +7,76 @@ const requestURL = "./assets/function/proc_client01_02.php";
 let isSending = false;
 
 /**
+ * 店舗基本情報の入力エラーを既存モーダルで表示する
+ *  送信前の営業時間・英語文言検証に使用する
+ */
+function showShopInputError(message) {
+    const modal = document.getElementById("modalBlock");
+    modal.querySelector(".box-title p").textContent = "入力エラー";
+    modal.querySelector(".box-details p").textContent = message;
+    const buttons = modal.querySelector(".box-btn");
+    buttons.querySelectorAll("button").forEach((button) => button.remove());
+    buttons.insertAdjacentHTML("beforeend", '<button type="button" class="btn-cancel" onclick="closeModal();">閉じる</button>');
+    modal.querySelector(".box-title button").setAttribute("onclick", "closeModal()");
+    modal.classList.add("is-active");
+    document.documentElement.style.overflow = "hidden";
+}
+
+/**
+ * 共通営業時間の入力ペアと英語表示文・住所の文字種を検証する
+ *  英語住所1と営業時間の不足を送信前に拒否する
+ */
+function validateShopEnglishInputs(form) {
+    for (const [field, label] of [["form04_01_en", "住所1 (英語)"], ["form04_02_en", "住所2 (英語)"], ["form04_03_en", "住所3 (英語)"]]) {
+        const value = form.elements.namedItem(field)?.value ?? "";
+        if (field === "form04_01_en" && value.trim() === "") {
+            showShopInputError("住所1 (英語)は必須です。");
+            return false;
+        }
+        if (value.length > 255) {
+            showShopInputError(`${label}は255文字以内で入力してください。`);
+            return false;
+        }
+        if (/[^\x20-\x7E¥–]/u.test(value)) {
+            showShopInputError(`${label}に使用できない文字が含まれています。`);
+            return false;
+        }
+    }
+    for (const prefix of ["form08_01", "form08_02"]) {
+        const value = (suffix) => form.querySelector(`input[data-selectbox-hidden][name="${prefix}_${suffix}"]`)?.value ?? "";
+        const openHour = value("open_hour");
+        const openMinute = value("open_minute");
+        const closeHour = value("close_hour");
+        const closeMinute = value("close_minute");
+        const openComplete = openHour !== "" && openMinute !== "";
+        const closeComplete = closeHour !== "" && closeMinute !== "";
+        if ((openHour !== "" || openMinute !== "") && !openComplete || closeComplete && !openComplete) {
+            showShopInputError("OPEN時間が入力されていません。");
+            return false;
+        }
+        if ((closeHour !== "" || closeMinute !== "") && !closeComplete || openComplete && !closeComplete) {
+            showShopInputError("CLOSE時間が入力されていません。");
+            return false;
+        }
+        const note = form.elements.namedItem(`${prefix}_note_en`)?.value ?? "";
+        if (/[^\x20-\x7E¥–]/u.test(note) || new TextEncoder().encode(note).length > 65535) {
+            showShopInputError("英語備考に使用できない文字が含まれています。");
+            return false;
+        }
+        if (note.trim() !== "" && !openComplete) {
+            showShopInputError("英語の営業時間が未入力です。");
+            return false;
+        }
+    }
+    const holiday = form.elements.namedItem("form09_en")?.value ?? "";
+    if (/[^\x20-\x7E¥–\r\n]/u.test(holiday) || new TextEncoder().encode(holiday).length > 65535) {
+        showShopInputError("英語の店休日に使用できない文字が含まれています。");
+        return false;
+    }
+    return true;
+}
+
+/**
  * 送信
  *
  */
@@ -14,6 +84,7 @@ async function sendInput() {
     if (isSending) return;
     //.validationForm を指定した form 要素が存在すれば
     if (!validationForm) return;
+    if (!validateShopEnglishInputs(validationForm)) return;
     //HTMLのrequired等を最優先でチェック（radio等のグループも含む）
     if (!validationForm.checkValidity()) {
         validationForm.reportValidity();

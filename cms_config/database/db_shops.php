@@ -131,11 +131,11 @@ function getShops_FindById($shopId = null)
 			$strSQL = "
 				SELECT 
 					shop_id, eccube_sale_type_id, is_public,shop_type, shop_name, shop_name_kana, shop_name_en, 
-					postal_code, address1, address2, address3, tel, fax, email, is_email_public, website_url, 
-					lunch_open_time, lunch_close_time, lunch_note, 
-					dinner_open_time, dinner_close_time, dinner_note, 
+					postal_code, address1, address2, address3, address1_en, address2_en, address3_en, tel, fax, email, is_email_public, website_url,
+					lunch_open_time, lunch_close_time, lunch_note, lunch_note_en,
+					dinner_open_time, dinner_close_time, dinner_note, dinner_note_en,
 					business_hours_types, 
-					regular_holiday_display, closed_weekdays, sort_order, is_active, created_at 
+					regular_holiday_display, regular_holiday_display_en, closed_weekdays, sort_order, is_active, created_at
 				FROM 
 					shops 
 				WHERE 
@@ -262,7 +262,7 @@ function getReservationShopForOccupancy($shopId = null)
 
 /**
  * 予約メール用店舗情報取得
- *  予約成立後の通知に必要な店舗名と店舗メールアドレスだけを返す
+ *  予約成立後の通知に必要な日英店舗名と店舗メールアドレスだけを返す
  */
 function getReservationMailShop($shopId = null)
 {
@@ -277,6 +277,7 @@ function getReservationMailShop($shopId = null)
 			SELECT
 				shop_id,
 				shop_name,
+				shop_name_en,
 				email
 			FROM
 				shops

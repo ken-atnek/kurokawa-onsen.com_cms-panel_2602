@@ -282,6 +282,14 @@
                             margin-right: 0.5rem;
                         }
                     }
+                    &.lang_en {
+                        dd {
+                            input {
+                                margin-right: unset;
+                                margin-left: 0.5em;
+                            }
+                        }
+                    }
                 }
                 &.box-image {
                     dd {
